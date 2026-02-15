@@ -14,6 +14,19 @@ import java.util.Map;
 @RestControllerAdvice
 public class GeneralExceptionAdvice {
 
+    private static boolean isRateLimitOrQuotaExceeded(Throwable e) {
+        for (Throwable c = e; c != null; c = c.getCause()) {
+            String msg = c.getMessage();
+            if (msg == null) continue;
+            String lower = msg.toLowerCase();
+            if (lower.contains("429") || lower.contains("quota") || lower.contains("rate limit")
+                    || lower.contains("rate_limit") || lower.contains("too many requests")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // 애플리케이션에서 발생하는 커스텀 예외를 처리
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<ApiResponse<Void>> handException(GeneralException ex){
@@ -21,9 +34,15 @@ public class GeneralExceptionAdvice {
                 .body(ApiResponse.onFailure(ex.getErrorReason().getCode(),ex.getErrorReason().getMessage(), null));
     }
 
-    // 그 외의 정의되지 않은 모든 예외 처리
+    // AI API 429(한도 초과) 등 — 메시지/원인 체인에 429·quota·rate limit 포함 시
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> handleException(Exception ex) {
+        if (isRateLimitOrQuotaExceeded(ex)) {
+            BaseErrorCode code = GeneralErrorCode.TOO_MANY_REQUESTS;
+            return ResponseEntity
+                    .status(code.getReasonHttpStatus().getHttpStatus())
+                    .body(ApiResponse.onFailure(code.getReason().getCode(), code.getReason().getMessage(), null));
+        }
         BaseErrorCode code = GeneralErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity
                 .status(code.getReasonHttpStatus().getHttpStatus())
