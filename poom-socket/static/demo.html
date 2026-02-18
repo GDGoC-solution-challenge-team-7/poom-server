@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poom 음성 비서 시연</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 480px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+    }
+    h1 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+    .sub { color: #888; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .card {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #startBtn {
+      background: #0f3460;
+      color: #fff;
+    }
+    #startBtn:hover { background: #1a4a7a; }
+    #startBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+    #stopBtn {
+      background: #e94560;
+      color: #fff;
+      display: none;
+    }
+    #stopBtn:hover { background: #ff6b6b; }
+    .status {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      min-height: 2.5rem;
+    }
+    .status.idle { background: #0f3460; color: #aaccff; }
+    .status.connected { background: #0d5c2e; color: #a8e6a0; }
+    .status.error { background: #5c0d0d; color: #ffaaaa; }
+    .hint {
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 1rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎤 Poom 음성 비서 시연</h1>
+  <p class="sub">마이크를 켜고 말하면 AI가 음성으로 답합니다.</p>
+
+  <div class="card">
+    <button id="startBtn">마이크 켜고 연결</button>
+    <button id="stopBtn">연결 끊기</button>
+    <div id="status" class="status idle">연결 대기 중 (위 버튼 클릭)</div>
+  </div>
+
+  <p class="hint">
+    • 브라우저에서 마이크 권한을 허용해 주세요.<br>
+    • 연결 후 말하시면 잠시 뒤 음성으로 답변이 나옵니다.<br>
+    • 같은 PC에서 소켓 서버(8765)가 떠 있어야 합니다.
+  </p>
+
+  <script>
+    (function () {
+      const startBtn = document.getElementById('startBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const statusEl = document.getElementById('status');
+
+      function setStatus(msg, state) {
+        statusEl.textContent = msg;
+        statusEl.className = 'status ' + (state || 'idle');
+      }
+
+      let ws = null;
+      let audioContext = null;
+      let stream = null;
+      let processor = null;
+      let source = null;
+      let nextPlayTime = 0;
+      const SEND_RATE = 16000;
+      const PLAY_RATE = 24000;
+
+      // 48k -> 16k: low pass filtering 1/3 샘플만 사용 (알리아싱/노이즈 감소) 
+      function downSample48kTo16k(float32) {
+        const out = [];
+        const n = float32.length;
+        for (let i = 0; i < n; i += 3) {
+          var a = float32[i];
+          var b = (i + 1 < n) ? float32[i + 1] : 0;
+          var c = (i + 2 < n) ? float32[i + 2] : 0;
+          out.push((a + b + c) / 3);
+        }
+        return out;
+      }
+
+      function floatTo16BitPCM(float32Array) {
+        const buffer = new ArrayBuffer(float32Array.length * 2);
+        const view = new DataView(buffer);
+        for (let i = 0; i < float32Array.length; i++) {
+          const s = Math.max(-1, Math.min(1, float32Array[i]));
+          view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+        return buffer;
+      }
+
+      async function start() {
+        setStatus('마이크 권한 요청 중…', 'idle');
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 48000 } });
+        } catch (e) {
+          setStatus('마이크 권한이 필요합니다: ' + e.message, 'error');
+          return;
+        }
+
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = protocol + '//' + location.host + '/ws';
+        setStatus('WebSocket 연결 중…', 'idle');
+
+        try {
+          ws = new WebSocket(wsUrl);
+        } catch (e) {
+          setStatus('WebSocket 연결 실패: ' + e.message, 'error');
+          return;
+        }
+
+        ws.binaryType = 'arraybuffer';
+        ws.onopen = () => {
+          setStatus('연결됨. 말해 보세요.', 'connected');
+          startBtn.style.display = 'none';
+          stopBtn.style.display = 'block';
+          nextPlayTime = 0;
+          startSendingAudio();
+        };
+        ws.onclose = () => {
+          setStatus('연결이 끊어졌습니다.', 'idle');
+          stop();
+        };
+        ws.onerror = () => setStatus('연결 오류 발생.', 'error');
+
+        ws.onmessage = (ev) => {
+          if (ev.data instanceof ArrayBuffer && ev.data.byteLength > 0 && audioContext) {
+            const buffer = ev.data;
+            const view = new Int16Array(buffer);
+            const float32 = new Float32Array(view.length);
+            for (let i = 0; i < view.length; i++) float32[i] = view[i] / (view[i] < 0 ? 0x8000 : 0x7FFF);
+            const ab = audioContext.createBuffer(1, float32.length, PLAY_RATE);
+            ab.getChannelData(0).set(float32);
+            const node = audioContext.createBufferSource();
+            node.buffer = ab;
+            node.connect(audioContext.destination);
+            var duration = float32.length / PLAY_RATE;
+            var when = Math.max(audioContext.currentTime, nextPlayTime);
+            node.start(when);
+            nextPlayTime = when + duration;
+          }
+        };
+      }
+
+      function startSendingAudio() {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        source = audioContext.createMediaStreamSource(stream);
+        const bufferSize = 2048;
+        processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+        processor.onaudioprocess = (e) => {
+          if (!ws || ws.readyState !== WebSocket.OPEN) return;
+          const input = e.inputBuffer.getChannelData(0);
+          const down = downSample48kTo16k(input);
+          const pcm = floatTo16BitPCM(down);
+          ws.send(pcm);
+        };
+        source.connect(processor);
+        var silentGain = audioContext.createGain();
+        silentGain.gain.value = 0;
+        processor.connect(silentGain);
+        silentGain.connect(audioContext.destination);
+      }
+
+      function stop() {
+        if (processor && source) {
+          try { source.disconnect(); processor.disconnect(); } catch (_) {}
+        }
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        if (ws) { ws.close(); ws = null; }
+        if (audioContext) audioContext.close();
+        startBtn.style.display = 'block';
+        stopBtn.style.display = 'none';
+      }
+
+      startBtn.onclick = start;
+      stopBtn.onclick = stop;
+    })();
+  </script>
+</body>
+</html>
