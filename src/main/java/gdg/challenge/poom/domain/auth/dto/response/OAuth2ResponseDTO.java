@@ -7,6 +7,7 @@ public record OAuth2ResponseDTO (){
 
     @Builder
     public record Login(
+            String name,
             String email,
             Long socialId,
             boolean isFirst,

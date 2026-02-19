@@ -49,14 +49,14 @@ public class AuthCommandService {
             CustomUserDetails customUserDetails = new CustomUserDetails(memberOptional.get());
             AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
             // response 형식에 맞춰서 주기
-            return OAuthConverter.toLogin(userInfo.email(), false, social.getId(), loginToken.accessToken(), loginToken.refreshToken());
+            return OAuthConverter.toLogin(userInfo.name(), userInfo.email(), false, social.getId(), loginToken.accessToken(), loginToken.refreshToken());
         }
         // 회원가입이 안 된 경우
         else {
             Social social = socialOptional.orElseGet(() ->
                     socialRepository.save(OAuthConverter.toSocial(userInfo))
             );
-            return OAuthConverter.toLogin(userInfo.email(), true, social.getId(), null, null);
+            return OAuthConverter.toLogin(userInfo.name(), userInfo.email(), true, social.getId(), null, null);
         }
     }
 

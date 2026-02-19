@@ -33,9 +33,10 @@ public class OAuthConverter {
     }
 
 
-    public static OAuth2ResponseDTO.Login toLogin(String email, boolean isFirst, Long socialId,
+    public static OAuth2ResponseDTO.Login toLogin(String name,String email, boolean isFirst, Long socialId,
                                                   String accessToken, String refreshToken) {
         return OAuth2ResponseDTO.Login.builder()
+                .name(name)
                 .email(email)
                 .socialId(socialId)
                 .isFirst(isFirst)
