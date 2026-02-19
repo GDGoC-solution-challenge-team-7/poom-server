@@ -1,4 +1,4 @@
-package gdg.challenge.poom.config;
+package gdg.challenge.poom.global.config;
 
 import com.google.genai.Client;
 import org.springframework.context.annotation.Bean;

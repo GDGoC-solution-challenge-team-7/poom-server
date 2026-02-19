@@ -37,6 +37,12 @@ jwt:
     access-token: 3600000
     refresh-token: 10000000
 
+# 음성 비서: 시연용 WebSocket 서버 연결 정보 (Pipecat/FastAPI 등 별도 운영 시 URL 설정)
+voice:
+  enabled: true
+  websocket-url: ${VOICE_WS_URL:ws://localhost:8765/ws}
+  description: "Gemini Live 기반 실시간 음성 비서 (STS). 모바일 앱에서 이 URL로 WebSocket 연결."
+
 cors:
   urls:
     - http://localhost:8080
@@ -51,6 +57,10 @@ cors:
     - DELETE
 
 ---
+# local 프로필: VOICE_WS_URL 환경변수로 음성 서버 URL 오버라이드 가능
+voice:
+  websocket-url: ${VOICE_WS_URL:ws://localhost:8765/ws}
+
 spring:
   config:
     activate:
