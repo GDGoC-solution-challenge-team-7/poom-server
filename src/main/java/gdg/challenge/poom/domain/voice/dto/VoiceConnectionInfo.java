@@ -1,4 +1,4 @@
-package gdg.challenge.poom.voice.dto;
+package gdg.challenge.poom.domain.voice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

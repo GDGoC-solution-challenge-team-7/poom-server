@@ -1,4 +1,4 @@
-package gdg.challenge.poom.chat.service;
+package gdg.challenge.poom.domain.chat.service;
 
 import gdg.challenge.poom.global.error.code.status.GeneralErrorCode;
 import gdg.challenge.poom.global.error.exception.GeneralException;

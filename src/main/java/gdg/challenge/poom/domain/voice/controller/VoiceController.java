@@ -1,8 +1,8 @@
-package gdg.challenge.poom.voice.controller;
+package gdg.challenge.poom.domain.voice.controller;
 
 import gdg.challenge.poom.global.error.ApiResponse;
-import gdg.challenge.poom.voice.dto.VoiceConnectionInfo;
-import gdg.challenge.poom.voice.service.VoiceService;
+import gdg.challenge.poom.domain.voice.dto.VoiceConnectionInfo;
+import gdg.challenge.poom.domain.voice.service.VoiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

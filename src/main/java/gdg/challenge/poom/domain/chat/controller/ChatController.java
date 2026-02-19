@@ -1,8 +1,8 @@
-package gdg.challenge.poom.chat.controller;
+package gdg.challenge.poom.domain.chat.controller;
 
-import gdg.challenge.poom.chat.dto.ChatRequest;
-import gdg.challenge.poom.chat.dto.ChatResponse;
-import gdg.challenge.poom.chat.service.ChatService;
+import gdg.challenge.poom.domain.chat.dto.ChatRequest;
+import gdg.challenge.poom.domain.chat.dto.ChatResponse;
+import gdg.challenge.poom.domain.chat.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

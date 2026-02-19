@@ -1,7 +1,7 @@
-package gdg.challenge.poom.voice.service;
+package gdg.challenge.poom.domain.voice.service;
 
 import gdg.challenge.poom.global.data.VoiceConfigData;
-import gdg.challenge.poom.voice.dto.VoiceConnectionInfo;
+import gdg.challenge.poom.domain.voice.dto.VoiceConnectionInfo;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
