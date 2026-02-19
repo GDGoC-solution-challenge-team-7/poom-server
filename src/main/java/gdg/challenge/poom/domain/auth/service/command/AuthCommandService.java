@@ -53,15 +53,10 @@ public class AuthCommandService {
         }
         // 회원가입이 안 된 경우
         else {
-            Member member = memberRepository.save(AuthConverter.toMember(userInfo));
             Social social = socialOptional.orElseGet(() ->
-                    socialRepository.save(OAuthConverter.toSocial(userInfo, member))
+                    socialRepository.save(OAuthConverter.toSocial(userInfo))
             );
-
-            CustomUserDetails customUserDetails = new CustomUserDetails(member);
-            AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
-
-            return OAuthConverter.toLogin(userInfo.email(), true, social.getId(), loginToken.accessToken(), loginToken.refreshToken());
+            return OAuthConverter.toLogin(userInfo.email(), true, social.getId(), null, null);
         }
     }
 

@@ -18,6 +18,7 @@ public record OAuth2ResponseDTO (){
 
     @Builder
     public record GetUserInfo(
+            String name,
             String email,
             String providerId,
             SocialType socialType

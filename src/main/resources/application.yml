@@ -74,6 +74,7 @@ spring:
             redirect-uri: ${GOOGLE_REDIRECT_URI}
             scope:
               - email
+              - profile
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
@@ -100,3 +101,7 @@ jwt:
   time:
     access-token: 3600000
     refresh-token: 10000000
+
+logging:
+  level:
+    org.springframework.security: TRACE

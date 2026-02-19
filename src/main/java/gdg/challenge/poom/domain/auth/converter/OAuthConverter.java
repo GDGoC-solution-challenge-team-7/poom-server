@@ -10,6 +10,7 @@ public class OAuthConverter {
 
     public static OAuth2ResponseDTO.GetUserInfo toGetUserInfo(GoogleOAuth2ResponseDTO.UserInfo google){
         return OAuth2ResponseDTO.GetUserInfo.builder()
+                .name(google.name())
                 .email(google.email())
                 .providerId(google.id())
                 .socialType(SocialType.GOOGLE)
@@ -23,6 +24,14 @@ public class OAuthConverter {
                 .member(member)
                 .build();
     }
+
+    public static Social toSocial(OAuth2ResponseDTO.GetUserInfo userInfo){
+        return Social.builder()
+                .socialType(userInfo.socialType())
+                .providerId(userInfo.providerId())
+                .build();
+    }
+
 
     public static OAuth2ResponseDTO.Login toLogin(String email, boolean isFirst, Long socialId,
                                                   String accessToken, String refreshToken) {

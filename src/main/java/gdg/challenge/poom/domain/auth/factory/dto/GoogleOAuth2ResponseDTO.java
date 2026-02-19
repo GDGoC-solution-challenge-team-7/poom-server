@@ -15,7 +15,11 @@ public record GoogleOAuth2ResponseDTO() {
             String id,
             String email,
             Boolean verified_email,
-            String picture
+            String picture,
+            String name,
+            String given_name,
+            String family_name,
+            String locale
     ) {
     }
 }

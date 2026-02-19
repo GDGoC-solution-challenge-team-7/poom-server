@@ -22,8 +22,6 @@ public class OAuth2ConfigData {
         private String clientId;
         private String clientSecret;
         private String redirectUri;
-        private String authorizationGrantType;
-        private String clientAuthenticationMethod;
         private List<String> scope;
     }
 
@@ -33,7 +31,6 @@ public class OAuth2ConfigData {
         private String authorizationUri;
         private String tokenUri;
         private String userInfoUri;
-        private String userNameAttribute;
     }
 }
 

@@ -22,7 +22,7 @@ public class AuthController {
     private final AuthCommandService authCommandService;
 
     @Operation(summary = "구글 소셜 로그인 API", description = "구글 소셜 로그인하는 API")
-    @PostMapping("/oauth2/callback")
+    @GetMapping("/callback")
     public ApiResponse<OAuth2ResponseDTO.Login> signUp(HttpServletRequest request, HttpServletResponse response,
                                                        @RequestParam String code){
         OAuth2ResponseDTO.Login login = authCommandService.loginWithOAuth(request, response, code);

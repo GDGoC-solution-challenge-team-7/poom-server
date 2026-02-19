@@ -6,6 +6,7 @@ import gdg.challenge.poom.global.data.OAuth2ConfigData;
 import gdg.challenge.poom.global.error.code.status.OAuthErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.OAuthException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @RequiredArgsConstructor
+@Slf4j
 public abstract class AbstractOAuth2UserLoader implements OAuth2UserLoader {
 
     private final OAuth2ConfigData oAuth2ConfigData;
@@ -31,6 +33,7 @@ public abstract class AbstractOAuth2UserLoader implements OAuth2UserLoader {
             return getUserInfo(token);
         }
         catch (Exception e) {
+            e.printStackTrace();
             throw new OAuthException(OAuthErrorCode.FAIL_TO_GET_USER_INFO);
         }
     }
