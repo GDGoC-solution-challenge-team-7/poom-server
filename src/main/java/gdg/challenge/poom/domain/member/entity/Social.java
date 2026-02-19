@@ -1,7 +1,7 @@
 package gdg.challenge.poom.domain.member.entity;
 
-import gdg.challenge.poom.domain.member.entity.enums.Role;
 import gdg.challenge.poom.domain.member.entity.enums.SocialType;
+import gdg.challenge.poom.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,25 +12,18 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "member")
-public class Member {
-
+public class Social extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Column(name = "social_type", nullable = false)
+    private SocialType socialType;
 
-    private String email;
+    @Column(name = "provider_id")
+    private String providerId;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
-
-    private String phoneNumber;
-
-    private Integer age;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 }

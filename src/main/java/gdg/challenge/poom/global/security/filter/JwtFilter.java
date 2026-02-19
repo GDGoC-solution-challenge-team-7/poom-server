@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @RequiredArgsConstructor
+@Slf4j
 public class Jwtfilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -26,18 +28,22 @@ public class Jwtfilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        log.info("[JWT] {} {}", request.getMethod(), request.getRequestURI());
         String token = resolveToken(request);
-        if (token != null){
-            Long memberId = jwtUtil.getMemberId(token);
-            Member member = memberQueryService.findById(memberId);
-            CustomUserDetails customUserDetails = new CustomUserDetails(member);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (!StringUtils.hasText(token)) {
             filterChain.doFilter(request, response);
-        } else {
-            filterChain.doFilter(request, response);
+            return;
         }
+
+
+        Long memberId = jwtUtil.getMemberId(token);
+        Member member = memberQueryService.findById(memberId);
+        CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        filterChain.doFilter(request, response);
     }
 
     private String resolveToken(HttpServletRequest request) {

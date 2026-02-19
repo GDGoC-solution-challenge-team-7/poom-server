@@ -1,11 +1,14 @@
 package gdg.challenge.poom.global.util;
 
 import gdg.challenge.poom.global.data.JwtConfigData;
+import gdg.challenge.poom.global.security.constants.AuthenticationConstants;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -78,6 +81,12 @@ public class JwtUtil {
                 .parseSignedClaims(token);
     }
 
-
+    public static String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AuthenticationConstants.AUTH_HEADER);
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(AuthenticationConstants.TOKEN_PREFIX)) {
+            return bearerToken.substring(AuthenticationConstants.TOKEN_PREFIX.length());
+        }
+        return null;
+    }
 
 }
