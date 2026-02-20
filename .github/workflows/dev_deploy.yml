@@ -97,5 +97,4 @@ jobs:
               -d \
               -p 8080:8080 \
               --env-file /home/ubuntu/secrets/.env \
-              -e SPRING_PROFILES_ACTIVE=develop \
               ${{ env.DOCKER_IMAGE_NAME }}
