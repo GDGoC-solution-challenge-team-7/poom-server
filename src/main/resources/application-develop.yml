@@ -6,7 +6,7 @@ voice:
 spring:
   config:
     activate:
-      on-profile: local
+      on-profile: develop
   datasource:
     url: ${DEV_DB_URL}
     username: ${DEV_DB_USERNAME}
