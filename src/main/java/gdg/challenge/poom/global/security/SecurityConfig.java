@@ -2,7 +2,7 @@ package gdg.challenge.poom.global.security;
 
 import gdg.challenge.poom.domain.member.service.MemberQueryService;
 import gdg.challenge.poom.global.data.CorsConfigData;
-import gdg.challenge.poom.global.security.filter.Jwtfilter;
+import gdg.challenge.poom.global.security.filter.JwtFilter;
 import gdg.challenge.poom.global.util.JwtUtil;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
@@ -79,6 +79,6 @@ public class SecurityConfig {
 
     @Bean
     Filter jwtFilter() {
-        return new Jwtfilter(jwtUtil, memberQueryService);
+        return new JwtFilter(jwtUtil, memberQueryService);
     }
 }
