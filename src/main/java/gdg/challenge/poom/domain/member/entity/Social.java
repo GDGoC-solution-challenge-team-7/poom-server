@@ -26,4 +26,8 @@ public class Social extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    public void addMember(Member member){
+        this.member = member;
+    }
 }
