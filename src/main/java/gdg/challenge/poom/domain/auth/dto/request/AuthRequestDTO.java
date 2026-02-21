@@ -1,18 +1,30 @@
 package gdg.challenge.poom.domain.auth.dto.request;
 
 import gdg.challenge.poom.domain.member.entity.Gender;
+import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
+import gdg.challenge.poom.domain.member.entity.enums.UserType;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
 public record AuthRequestDTO() {
 
     public record SignUp(
+            @NotNull
             String email,
-            String username,
-            String password,
+            @NotNull
+            LocalDate birthDate,
+            @NotNull
             Gender gender,
-            String phoneNumber,
-            LocalDate birth,
-            Long socialId
+//            String phoneNumber,
+//            Integer Age,
+            @NotNull
+            Long socialId,
+            @NotNull
+            UserType userType,
+            LocalDate childBirthDueDate,
+            LocalDate childBirthDate,
+            BirthRelationship birthRelationship,
+            String expertiseFile
     ){}
 }

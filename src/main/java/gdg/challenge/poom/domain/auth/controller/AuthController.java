@@ -1,5 +1,6 @@
 package gdg.challenge.poom.domain.auth.controller;
 
+import gdg.challenge.poom.domain.auth.dto.request.AuthRequestDTO;
 import gdg.challenge.poom.domain.auth.dto.response.AuthResponseDTO;
 import gdg.challenge.poom.domain.auth.dto.response.OAuth2ResponseDTO;
 import gdg.challenge.poom.domain.auth.service.command.AuthCommandService;
@@ -27,6 +28,13 @@ public class AuthController {
                                                        @RequestParam String code){
         OAuth2ResponseDTO.Login login = authCommandService.loginWithOAuth(request, response, code);
         return ApiResponse.onSuccess(login);
+    }
+
+    @Operation(summary = "회원가입 API", description = "회원가입하는 API")
+    @PostMapping("/sign-up")
+    public ApiResponse<Void> signUp(AuthRequestDTO.SignUp request){
+        authCommandService.signUp(request);
+        return ApiResponse.onSuccess(null);
     }
 
     @Operation(summary = "Access Token 재발급 API", description = "토큰 재발급 API")
