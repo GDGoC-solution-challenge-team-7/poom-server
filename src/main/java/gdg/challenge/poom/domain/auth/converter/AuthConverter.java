@@ -16,8 +16,10 @@ public class AuthConverter {
 
     public static Member toMember(AuthRequestDTO.SignUp dto){
         return Member.builder()
+                .name(dto.name())
                 .email(dto.email())
                 .birthDate(dto.birthDate())
+                .gender(dto.gender())
                 .userType(dto.userType())
                 .childBirthDate(dto.childBirthDate())
                 .childBirthDueDate(dto.childBirthDueDate())

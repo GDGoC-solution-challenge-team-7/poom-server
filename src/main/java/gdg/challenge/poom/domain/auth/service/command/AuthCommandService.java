@@ -61,6 +61,8 @@ public class AuthCommandService {
     }
 
     public void signUp(AuthRequestDTO.SignUp request){
+        validateSignUp(request);
+
         Social social = socialRepository.findById(request.socialId())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.SOCIAL_NOT_FOUND));
         Member member = memberRepository.save(AuthConverter.toMember(request));
@@ -81,6 +83,12 @@ public class AuthCommandService {
 
     private Long getMemberId(String token){
         return tokenQueryService.getMemberId(token);
+    }
+
+    private void validateSignUp(AuthRequestDTO.SignUp request){
+        if (memberRepository.existsByEmail(request.email())){
+            throw new MemberException(MemberErrorCode.ALREADY_EXIST_EMAIL);
+        }
     }
 
     // 로그아웃
