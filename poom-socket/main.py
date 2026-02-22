@@ -74,6 +74,42 @@ class VoiceLogObserver(BaseObserver):
         pass
 
 
+class VoiceTextWebSocketObserver(BaseObserver):
+    """사용자/비서 텍스트를 WebSocket JSON으로 클라이언트에 전송. (오디오는 FastAPIWebsocketTransport가 처리.)"""
+
+    def __init__(self, websocket: WebSocket, **kwargs):
+        super().__init__(**kwargs)
+        self._websocket = websocket
+        self._ai_text_buffer: list[str] = []
+
+    async def _send_text(self, user_text: str | None, ai_text: str | None):
+        try:
+            await self._websocket.send_json({
+                "user_text": user_text,
+                "ai_text": ai_text,
+            })
+        except Exception as e:
+            logger.debug("VoiceTextWebSocketObserver send_json skipped: %s", e)
+
+    async def on_process_frame(self, data: FrameProcessed):
+        frame = data.frame
+        if isinstance(frame, TranscriptionFrame) and getattr(frame, "text", None):
+            text = (frame.text or "").strip()
+            if text:
+                await self._send_text(user_text=text, ai_text=None)
+        elif isinstance(frame, LLMTextFrame) and getattr(frame, "text", None):
+            self._ai_text_buffer.append(frame.text)
+        elif isinstance(frame, LLMFullResponseEndFrame):
+            if self._ai_text_buffer:
+                full = "".join(self._ai_text_buffer).strip()
+                if full:
+                    await self._send_text(user_text=None, ai_text=full)
+            self._ai_text_buffer = []
+
+    async def on_push_frame(self, data: FramePushed):
+        pass
+
+
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
@@ -202,7 +238,10 @@ async def voice_websocket(websocket: WebSocket):
             pipeline,
             params=pipeline_params,
             enable_rtvi=False,
-            observers=[VoiceLogObserver()],
+            observers=[
+                VoiceLogObserver(),
+                VoiceTextWebSocketObserver(websocket),
+            ],
         )
         runner = PipelineRunner(handle_sigint=False)
         await runner.run(task)
