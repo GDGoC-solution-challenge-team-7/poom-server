@@ -32,7 +32,7 @@ public class AuthController {
 
     @Operation(summary = "회원가입 API", description = "회원가입하는 API")
     @PostMapping("/sign-up")
-    public ApiResponse<Void> signUp(AuthRequestDTO.SignUp request){
+    public ApiResponse<Void> signUp(@RequestBody AuthRequestDTO.SignUp request){
         authCommandService.signUp(request);
         return ApiResponse.onSuccess(null);
     }
