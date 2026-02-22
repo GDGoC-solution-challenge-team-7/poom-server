@@ -17,6 +17,7 @@ public class Social extends BaseEntity {
     private Long id;
 
     @Column(name = "social_type", nullable = false)
+    @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
     @Column(name = "provider_id")

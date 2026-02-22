@@ -11,6 +11,8 @@ public record AuthRequestDTO() {
 
     public record SignUp(
             @NotNull
+            String name,
+            @NotNull
             String email,
             @NotNull
             LocalDate birthDate,
