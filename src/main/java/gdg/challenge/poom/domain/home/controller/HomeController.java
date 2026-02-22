@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/api/v1/home")
 public class HomeController {
 
     @Operation(summary = "출산 디데이 조회 API", description = "회원가입하는 API")

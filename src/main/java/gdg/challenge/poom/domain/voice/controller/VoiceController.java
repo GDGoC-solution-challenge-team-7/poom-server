@@ -4,6 +4,7 @@ import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.domain.voice.dto.VoiceConnectionInfo;
 import gdg.challenge.poom.domain.voice.service.VoiceService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
  * 시연을 위해 WebSocket 연결 정보를 REST로 제공합니다.
  */
 @RestController
-@RequestMapping("/api/voice")
+@RequestMapping("/api/v1/voice")
 @RequiredArgsConstructor
+@Tag(name = "음성 API")
 public class VoiceController {
 
     private final VoiceService voiceService;

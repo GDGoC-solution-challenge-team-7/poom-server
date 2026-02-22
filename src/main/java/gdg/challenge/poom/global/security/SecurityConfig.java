@@ -30,7 +30,9 @@ public class SecurityConfig {
 
     private String[] allowUrl = {
             API_PREFIX + "/auth/**",
-            API_PREFIX + "/auth/callback**",
+            API_PREFIX + "/voice/**",
+            API_PREFIX + "/chat/**",
+
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/v3/api-docs/**",
@@ -38,8 +40,7 @@ public class SecurityConfig {
             "/oauth2/authorization/**",
             "/login/oauth2/**",
 
-            "/auth/google/callback/**",
-            API_PREFIX + "/auth/google/callback/**",
+            "/auth/google/callback/**"
     };
 
 
@@ -47,10 +48,7 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/oauth2/**").permitAll()
-                        .requestMatchers("/login/oauth2/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(allowUrl).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
