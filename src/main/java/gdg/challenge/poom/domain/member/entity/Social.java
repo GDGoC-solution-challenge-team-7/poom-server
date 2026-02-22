@@ -7,11 +7,10 @@ import lombok.*;
 
 @Builder
 @Getter
-@Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "member")
+@Table(name = "social")
 public class Social extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
