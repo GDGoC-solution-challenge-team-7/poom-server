@@ -1,0 +1,71 @@
+# 소켓 서버(poom-socket) Docker 빌드 및 푸시
+# - 이 레포가 poom-socket 단일 레포일 때: 그대로 사용 (context: .)
+# - 메인 서버(poom-server) 레포 하위에 poom-socket이 있을 때:
+#   이 파일을 poom-server/.github/workflows/ 로 복사한 뒤
+#   build 단계에서 context: ./poom-socket, file: ./poom-socket/Dockerfile 로 변경
+
+name: Poom Socket - Build & Push
+
+on:
+  push:
+    branches: [develop, main]
+    paths:
+      - 'poom-socket/**'
+      - 'Dockerfile'
+      - 'main.py'
+      - 'requirements.txt'
+      - 'serializers.py'
+      - '.github/workflows/poom-socket-ci.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Docker context path
+        id: context
+        run: |
+          if [ -f poom-socket/Dockerfile ]; then
+            echo "context=poom-socket" >> $GITHUB_OUTPUT
+            echo "dockerfile=poom-socket/Dockerfile" >> $GITHUB_OUTPUT
+          else
+            echo "context=." >> $GITHUB_OUTPUT
+            echo "dockerfile=Dockerfile" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/poom-socket
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ steps.context.outputs.context }}
+          file: ${{ steps.context.outputs.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
