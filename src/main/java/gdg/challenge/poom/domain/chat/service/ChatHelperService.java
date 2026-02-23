@@ -3,21 +3,23 @@ package gdg.challenge.poom.domain.chat.service;
 import gdg.challenge.poom.domain.chat.converter.ChatConverter;
 import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
+import gdg.challenge.poom.domain.chat.entity.ChatRoom;
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
+import gdg.challenge.poom.domain.chat.service.command.ChatCommandService;
 import gdg.challenge.poom.global.error.code.status.GeneralErrorCode;
 import gdg.challenge.poom.global.error.exception.GeneralException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.content.Media;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,12 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
+@RequiredArgsConstructor
+@Transactional
 @Service
 public class ChatHelperService {
 
-    private static final Logger log = LoggerFactory.getLogger(ChatHelperService.class);
-    private static final int IMAGE_FETCH_CONNECT_TIMEOUT_MS = 5_000;
-    private static final int IMAGE_FETCH_READ_TIMEOUT_MS = 15_000;
     private static final long IMAGE_MAX_BYTES = 10 * 1024 * 1024; // 10MB
 
     /** style -> 시스템 프롬프트 파일 경로 (prompts/ 하위) */
@@ -40,21 +42,12 @@ public class ChatHelperService {
             "solution", "prompts/poom-system-solution.txt"
     );
 
-    private static final String DEFAULT_STYLE = "empathy"; // 기본 AI 응답 스타일
+    private static final String DEFAULT_STYLE = CharacterType.EMPATHY.toString(); // 기본 AI 응답 스타일
 
     private final ChatClient poomChatClient;
     private final RestTemplate imageFetchRestTemplate;
+    private final ChatCommandService chatCommandService;
     private final Map<String, String> promptCache = new ConcurrentHashMap<>();
-
-    public ChatHelperService(
-            @Qualifier("poomChatClient") ChatClient poomChatClient,
-            RestTemplateBuilder restTemplateBuilder) {
-        this.poomChatClient = poomChatClient;
-        this.imageFetchRestTemplate = restTemplateBuilder
-                .connectTimeout(java.time.Duration.ofMillis(IMAGE_FETCH_CONNECT_TIMEOUT_MS))
-                .readTimeout(java.time.Duration.ofMillis(IMAGE_FETCH_READ_TIMEOUT_MS))
-                .build();
-    }
 
     /**
      * 사용자 메시지와 스타일에 따라 AI 응답을 반환합니다.
@@ -62,17 +55,17 @@ public class ChatHelperService {
      *
      *  imageUrl 선택. 이미지 URL (http/https, S3 presigned URL 등)
      */
-    public ChatResponseDTO.ReplyMessage chat(ChatRequestDTO.ChatMessageRequest request) {
+    public ChatResponseDTO.ReplyMessage chat(Long memberId, ChatRequestDTO.ChatMessageRequest request) {
 
         // TODO: 사용자가 처음에 입력한 채팅을 기준으로 제목 생성
         String title = "";
 
-        // TODO: 채팅방 생성, 처음
-//        ChatConverter.toChatRoom()
+        // 처음 입력한 채팅 시작
+        ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, title, request);
 
-
-        
         // TODO: 채팅 메시지 저장
+
+
 
         if (request.message() == null || request.message().isBlank()) {
             String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
@@ -94,6 +87,7 @@ public class ChatHelperService {
 
         String reply = chatWithPrompt(request.message(), request.characterType().toString(), imageBytes, mime);
         // TODO: 채팅 메시지 저장
+
         return ChatConverter.toReplyMessage(reply);
     }
 
