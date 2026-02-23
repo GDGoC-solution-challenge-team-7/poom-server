@@ -31,7 +31,7 @@ public class ChatController {
         return ApiResponse.onSuccess(chatHelperService.chat(request));
     }
 
-    @Operation(summary = "채팅 리스트 조회 API", description = "참여한 채팅 리스트 조회 API")
+    @Operation(summary = "채팅방 리스트 조회 API", description = "참여한 채팅 리스트 조회 API")
     @GetMapping("/chat")
     public ApiResponse<List<ChatResponseDTO.ChatPreview>> getChatRoomList(
             @AuthenticationPrincipal CustomUserDetails customUserDetails
@@ -69,4 +69,12 @@ public class ChatController {
         return ApiResponse.onSuccess(chatRoomSettings);
     }
 
+    @Operation(summary = "채팅방 삭제 API", description = "해당 채팅방을 삭제하는 API")
+    @DeleteMapping("/chat/{chatRoomId}")
+    public ApiResponse<ChatResponseDTO.ChatRoomInfo> deleteChatRoom(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long chatRoomId
+    ){
+        return ApiResponse.onSuccess(null);
+    }
 }

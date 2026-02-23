@@ -10,7 +10,7 @@ public record ChatRequestDTO() {
      */
     public record ChatMessageRequest(
             String message,
-            String style,
+            CharacterType characterType,
             String imageUrl
     ){}
 

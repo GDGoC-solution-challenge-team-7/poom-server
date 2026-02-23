@@ -26,4 +26,11 @@ public class ChatCommandService {
         chatRoom.setChatRoomSetting(request.characterType(), request.chatMode());
         return ChatConverter.toChatRoomSetting(chatRoom);
     }
+
+    public void deleteChatRoom(Long chatRoomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
+
+
+    }
 }

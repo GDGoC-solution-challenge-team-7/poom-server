@@ -64,9 +64,19 @@ public class ChatHelperService {
      */
     public ChatResponseDTO.ReplyMessage chat(ChatRequestDTO.ChatMessageRequest request) {
 
+        // TODO: 사용자가 처음에 입력한 채팅을 기준으로 제목 생성
+        String title = "";
+
+        // TODO: 채팅방 생성, 처음
+//        ChatConverter.toChatRoom()
+
+
+        
+        // TODO: 채팅 메시지 저장
 
         if (request.message() == null || request.message().isBlank()) {
             String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
+            // TODO: 채팅 메시지 저장
             return ChatConverter.toReplyMessage(reply);
         }
         byte[] imageBytes = null;
@@ -82,7 +92,8 @@ public class ChatHelperService {
             }
         }
 
-        String reply = chatWithPrompt(request.message(), request.style(), imageBytes, mime);
+        String reply = chatWithPrompt(request.message(), request.characterType().toString(), imageBytes, mime);
+        // TODO: 채팅 메시지 저장
         return ChatConverter.toReplyMessage(reply);
     }
 
