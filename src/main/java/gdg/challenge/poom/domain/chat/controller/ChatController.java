@@ -69,4 +69,12 @@ public class ChatController {
         return ApiResponse.onSuccess(chatRoomSettings);
     }
 
+    @Operation(summary = "채팅방 삭제 API", description = "해당 채팅방을 삭제하는 API")
+    @DeleteMapping("/chat/{chatRoomId}")
+    public ApiResponse<ChatResponseDTO.ChatRoomInfo> deleteChatRoom(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long chatRoomId
+    ){
+        return ApiResponse.onSuccess(null);
+    }
 }
