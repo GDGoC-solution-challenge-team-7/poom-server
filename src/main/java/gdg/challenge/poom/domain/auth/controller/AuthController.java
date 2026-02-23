@@ -38,9 +38,9 @@ public class AuthController {
 
     @Operation(summary = "회원가입 API", description = "회원가입하는 API")
     @PostMapping("/sign-up")
-    public ApiResponse<Void> signUp(@RequestBody AuthRequestDTO.SignUp request){
-        authCommandService.signUp(request);
-        return ApiResponse.onSuccess(null);
+    public ApiResponse<AuthResponseDTO.TokenResult> signUp(@RequestBody AuthRequestDTO.SignUp request){
+        AuthResponseDTO.TokenResult tokenResult = authCommandService.signUp(request);
+        return ApiResponse.onSuccess(tokenResult);
     }
 
     @Operation(summary = "Access Token 재발급 API", description = "토큰 재발급 API")
