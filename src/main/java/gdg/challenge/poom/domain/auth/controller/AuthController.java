@@ -4,19 +4,22 @@ import gdg.challenge.poom.domain.auth.dto.request.AuthRequestDTO;
 import gdg.challenge.poom.domain.auth.dto.response.AuthResponseDTO;
 import gdg.challenge.poom.domain.auth.dto.response.OAuth2ResponseDTO;
 import gdg.challenge.poom.domain.auth.service.command.AuthCommandService;
-import gdg.challenge.poom.domain.auth.service.query.TokenQueryService;
 import gdg.challenge.poom.global.error.ApiResponse;
-import gdg.challenge.poom.global.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
+@Slf4j
 @Tag(name = "인증 API")
 public class AuthController {
 
@@ -26,7 +29,10 @@ public class AuthController {
     @GetMapping("/callback")
     public ApiResponse<OAuth2ResponseDTO.Login> signUp(HttpServletRequest request, HttpServletResponse response,
                                                        @RequestParam String code){
-        OAuth2ResponseDTO.Login login = authCommandService.loginWithOAuth(request, response, code);
+        String decodedCode = URLDecoder.decode(code, StandardCharsets.UTF_8);
+        log.info("code(raw)='{}' len={}", code, code.length());
+        log.info("code(decoded)='{}'", decodedCode);
+        OAuth2ResponseDTO.Login login = authCommandService.loginWithOAuth(request, response, decodedCode);
         return ApiResponse.onSuccess(login);
     }
 
