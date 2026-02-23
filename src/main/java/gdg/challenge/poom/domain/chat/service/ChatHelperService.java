@@ -5,6 +5,8 @@ import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
+import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
+import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.domain.chat.service.command.ChatCommandService;
 import gdg.challenge.poom.global.error.code.status.GeneralErrorCode;
 import gdg.challenge.poom.global.error.exception.GeneralException;
@@ -57,19 +59,19 @@ public class ChatHelperService {
      */
     public ChatResponseDTO.ReplyMessage chat(Long memberId, ChatRequestDTO.ChatMessageRequest request) {
 
-        // TODO: 사용자가 처음에 입력한 채팅을 기준으로 제목 생성
+        // TODO: 사용자가 처음에 입력한 채팅을 기준으로 제목 생성 -> 영빈님 구현
         String title = "";
 
         // 처음 입력한 채팅 시작
         ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, title, request);
 
         // TODO: 채팅 메시지 저장
-
-
+        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), null, chatRoom);
 
         if (request.message() == null || request.message().isBlank()) {
             String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
             // TODO: 채팅 메시지 저장
+            chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, null, chatRoom);
             return ChatConverter.toReplyMessage(reply);
         }
         byte[] imageBytes = null;
@@ -87,7 +89,7 @@ public class ChatHelperService {
 
         String reply = chatWithPrompt(request.message(), request.characterType().toString(), imageBytes, mime);
         // TODO: 채팅 메시지 저장
-
+        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, null, chatRoom);
         return ChatConverter.toReplyMessage(reply);
     }
 

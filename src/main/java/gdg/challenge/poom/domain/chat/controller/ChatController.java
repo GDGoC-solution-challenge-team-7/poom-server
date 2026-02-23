@@ -27,8 +27,11 @@ public class ChatController {
 
     @Operation(summary = "채팅 메시지 전송", description = "육아에 지친 산모들을 위한 AI 챗봇. style로 공감/해결 선택. 이미지는 imageUrl(S3 등)으로 전달 시 멀티모달 분석.")
     @PostMapping("/chat")
-    public ApiResponse<ChatResponseDTO.ReplyMessage> chat(@RequestBody ChatRequestDTO.ChatMessageRequest request) {
-        return ApiResponse.onSuccess(chatHelperService.chat(request));
+    public ApiResponse<ChatResponseDTO.ReplyMessage> chat(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody ChatRequestDTO.ChatMessageRequest request
+    ) {
+        return ApiResponse.onSuccess(chatHelperService.chat(customUserDetails.getMemberId(), request));
     }
 
     @Operation(summary = "채팅방 리스트 조회 API", description = "참여한 채팅 리스트 조회 API")

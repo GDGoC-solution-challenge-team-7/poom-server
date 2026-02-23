@@ -5,6 +5,8 @@ import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
 import gdg.challenge.poom.domain.chat.entity.ChatMessage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
+import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
+import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.domain.member.entity.Member;
 
 import java.util.List;
@@ -24,7 +26,7 @@ public class ChatConverter {
                 .build();
     }
 
-    public static ChatResponseDTO.ChatMessage toChatMessage(ChatMessage chatMessage) {
+    public static ChatResponseDTO.ChatMessage toChatMessageDTO(ChatMessage chatMessage) {
         return ChatResponseDTO.ChatMessage.builder()
                 .content(chatMessage.getContent())
                 .senderType(chatMessage.getSenderType())
@@ -35,7 +37,7 @@ public class ChatConverter {
     public static ChatResponseDTO.ChatRoomInfo toChatRoomMessage(ChatRoom chatRoom, List<ChatMessage> chatMessages) {
 
         List<ChatResponseDTO.ChatMessage> chatMessageList = chatMessages.stream()
-                .map(ChatConverter::toChatMessage)
+                .map(ChatConverter::toChatMessageDTO)
                 .toList();
 
         return ChatResponseDTO.ChatRoomInfo.builder()
@@ -57,6 +59,20 @@ public class ChatConverter {
                 .title(title)
                 .chatMode(ChatMode.TEXT)
                 .characterType(request.characterType())
+                .member(member)
+                .build();
+    }
+
+    public static ChatMessage toChatMessage(
+            SenderType senderType, MessageType messageType,
+            String content, String mediaUrl, ChatRoom chatRoom
+    ){
+        return ChatMessage.builder()
+                .senderType(senderType)
+                .messageType(messageType)
+                .content(content)
+                .mediaUrl(mediaUrl)
+                .chatRoom(chatRoom)
                 .build();
     }
 }
