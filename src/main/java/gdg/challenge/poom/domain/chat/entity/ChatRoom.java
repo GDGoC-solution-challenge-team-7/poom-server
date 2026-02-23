@@ -27,7 +27,7 @@ public class ChatRoom extends BaseEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ChatMode ChatMode;
+    private ChatMode chatMode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -35,6 +35,6 @@ public class ChatRoom extends BaseEntity {
 
     public void setChatRoomSetting(CharacterType characterType, ChatMode chatMode) {
         this.characterType = characterType;
-        this.ChatMode = chatMode;
+        this.chatMode = chatMode;
     }
 }
