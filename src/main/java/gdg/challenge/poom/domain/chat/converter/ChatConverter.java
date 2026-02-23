@@ -1,10 +1,11 @@
 package gdg.challenge.poom.domain.chat.converter;
 
-import com.google.genai.Chat;
 import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
 import gdg.challenge.poom.domain.chat.entity.ChatMessage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
+import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
+import gdg.challenge.poom.domain.member.entity.Member;
 
 import java.util.List;
 
@@ -48,6 +49,14 @@ public class ChatConverter {
         return ChatResponseDTO.ChatRoomSetting.builder()
                 .characterType(chatRoom.getCharacterType())
                 .chatMode(chatRoom.getChatMode())
+                .build();
+    }
+
+    public static ChatRoom toChatRoom(Member member, String title, ChatRequestDTO.ChatMessageRequest request){
+        return ChatRoom.builder()
+                .title(title)
+                .chatMode(ChatMode.TEXT)
+                .characterType(request.characterType())
                 .build();
     }
 }
