@@ -41,31 +41,63 @@ from pipecat.frames.frames import (
 from pipecat.observers.base_observer import BaseObserver, FrameProcessed, FramePushed
 
 
+def _append_ai_chunk_with_overlap_dedup(buffer: list[str], new_chunk: str) -> None:
+    """버퍼 끝과 새 청크 앞이 겹치면 겹친 부분을 빼고 이어붙임. 스트리밍 중복 문장 완화."""
+    if not new_chunk:
+        return
+    current = "".join(buffer)
+    overlap = 0
+    for i in range(1, min(len(new_chunk), len(current)) + 1):
+        if current[-i:] == new_chunk[:i]:
+            overlap = i
+    to_append = new_chunk[overlap:]
+    if to_append:
+        buffer.append(to_append)
+
+
+def _dedupe_ai_text_full(text: str) -> str:
+    """최종 AI 텍스트에서 뒤쪽에 반복된 구간(앞에 이미 나온 부분)을 제거."""
+    text = (text or "").strip()
+    if not text or len(text) < 20:
+        return text
+    # 뒤에서부터 가장 긴 '이미 앞에 등장한 접미사'를 찾아 잘라냄 (한 번만 적용)
+    n = len(text)
+    for length in range(n // 2, 9, -1):  # 최소 10자 이상인 구간만 (짧은 반복은 유지)
+        tail = text[-length:]
+        if tail in text[:-length]:
+            return text[:-length].strip()
+    return text
+
+
 class VoiceLogObserver(BaseObserver):
     """서버 터미널에 사용자 발화(user_text)·AI 응답(ai_text) 로그 출력."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._ai_text_buffer = []
+        self._last_user_text: str | None = None
 
     def _log_user(self, text: str):
         msg = (text or "").strip() or "(empty)"
-        # 단일 문자열로 전달해 loguru 등에서 % 포맷 재적용 시 %s가 그대로 나오는 현상 방지
+        if msg == self._last_user_text:
+            return
+        self._last_user_text = msg
         logger.info("[voice] user_text: " + msg)
 
     def _log_ai(self):
         if self._ai_text_buffer:
-            full = "".join(self._ai_text_buffer).strip()
+            full = _dedupe_ai_text_full("".join(self._ai_text_buffer))
             if full:
                 logger.info("[voice] ai_text: " + full)
         self._ai_text_buffer = []
+        self._last_user_text = None
 
     async def on_process_frame(self, data: FrameProcessed):
         frame = data.frame
         if isinstance(frame, TranscriptionFrame) and getattr(frame, "text", None):
             self._log_user(frame.text)
         elif isinstance(frame, LLMTextFrame) and getattr(frame, "text", None):
-            self._ai_text_buffer.append(frame.text)
+            _append_ai_chunk_with_overlap_dedup(self._ai_text_buffer, frame.text or "")
         elif isinstance(frame, LLMFullResponseEndFrame):
             self._log_ai()
 
@@ -81,6 +113,7 @@ class VoiceTextWebSocketObserver(BaseObserver):
         super().__init__(**kwargs)
         self._websocket = websocket
         self._ai_text_buffer: list[str] = []
+        self._last_user_text: str | None = None
 
     async def _send_text(self, user_text: str | None, ai_text: str | None):
         try:
@@ -95,16 +128,18 @@ class VoiceTextWebSocketObserver(BaseObserver):
         frame = data.frame
         if isinstance(frame, TranscriptionFrame) and getattr(frame, "text", None):
             text = (frame.text or "").strip()
-            if text:
+            if text and text != self._last_user_text:
+                self._last_user_text = text
                 await self._send_text(user_text=text, ai_text=None)
         elif isinstance(frame, LLMTextFrame) and getattr(frame, "text", None):
-            self._ai_text_buffer.append(frame.text)
+            _append_ai_chunk_with_overlap_dedup(self._ai_text_buffer, frame.text or "")
         elif isinstance(frame, LLMFullResponseEndFrame):
             if self._ai_text_buffer:
-                full = "".join(self._ai_text_buffer).strip()
+                full = _dedupe_ai_text_full("".join(self._ai_text_buffer))
                 if full:
                     await self._send_text(user_text=None, ai_text=full)
             self._ai_text_buffer = []
+            self._last_user_text = None
 
     async def on_push_frame(self, data: FramePushed):
         pass
@@ -213,7 +248,7 @@ async def voice_websocket(websocket: WebSocket):
         llm = GeminiLiveLLMService(
             api_key=GOOGLE_API_KEY,
             model="models/gemini-2.5-flash-native-audio-preview-12-2025",
-            voice_id="Puck", # 목소리 설정: Callirrhoe, Achernar .. 등
+            voice_id="Leda", # 목소리 설정: Callirrhoe, Achernar .. 등
             system_instruction=SYSTEM_INSTRUCTION,
             params=InputParams(
                 temperature=0.7,
