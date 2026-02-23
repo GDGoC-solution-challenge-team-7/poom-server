@@ -3,6 +3,7 @@ package gdg.challenge.poom.domain.member.entity;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.Role;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
+import gdg.challenge.poom.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "member")
-public class Member {
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
