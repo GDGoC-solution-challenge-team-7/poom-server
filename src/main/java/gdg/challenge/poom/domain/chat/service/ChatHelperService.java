@@ -1,5 +1,8 @@
 package gdg.challenge.poom.domain.chat.service;
 
+import gdg.challenge.poom.domain.chat.converter.ChatConverter;
+import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
+import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
 import gdg.challenge.poom.global.error.code.status.GeneralErrorCode;
 import gdg.challenge.poom.global.error.exception.GeneralException;
 import org.slf4j.Logger;
@@ -24,9 +27,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class ChatService {
+public class ChatHelperService {
 
-    private static final Logger log = LoggerFactory.getLogger(ChatService.class);
+    private static final Logger log = LoggerFactory.getLogger(ChatHelperService.class);
     private static final int IMAGE_FETCH_CONNECT_TIMEOUT_MS = 5_000;
     private static final int IMAGE_FETCH_READ_TIMEOUT_MS = 15_000;
     private static final long IMAGE_MAX_BYTES = 10 * 1024 * 1024; // 10MB
@@ -43,7 +46,7 @@ public class ChatService {
     private final RestTemplate imageFetchRestTemplate;
     private final Map<String, String> promptCache = new ConcurrentHashMap<>();
 
-    public ChatService(
+    public ChatHelperService(
             @Qualifier("poomChatClient") ChatClient poomChatClient,
             RestTemplateBuilder restTemplateBuilder) {
         this.poomChatClient = poomChatClient;
@@ -57,17 +60,20 @@ public class ChatService {
      * 사용자 메시지와 스타일에 따라 AI 응답을 반환합니다.
      * imageUrl이 있으면 해당 URL에서 이미지를 가져옵니다.
      *
-     * @param imageUrl 선택. 이미지 URL (http/https, S3 presigned URL 등)
+     *  imageUrl 선택. 이미지 URL (http/https, S3 presigned URL 등)
      */
-    public String chat(String userMessage, String style, String imageUrl) {
-        if (userMessage == null || userMessage.isBlank()) {
-            return "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
+    public ChatResponseDTO.ReplyMessage chat(ChatRequestDTO.ChatMessageRequest request) {
+
+
+        if (request.message() == null || request.message().isBlank()) {
+            String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
+            return ChatConverter.toReplyMessage(reply);
         }
         byte[] imageBytes = null;
         String mime = "image/jpeg";
 
-        if (imageUrl != null && !imageUrl.isBlank()) {
-            var fetched = fetchImageFromUrl(imageUrl.strip());
+        if (request.imageUrl() != null && !request.imageUrl().isBlank()) {
+            var fetched = fetchImageFromUrl(request.imageUrl().strip());
             if (fetched != null) {
                 imageBytes = fetched.bytes();
                 if (fetched.mimeType() != null) {
@@ -76,7 +82,8 @@ public class ChatService {
             }
         }
 
-        return chatWithPrompt(userMessage, style, imageBytes, mime);
+        String reply = chatWithPrompt(request.message(), request.style(), imageBytes, mime);
+        return ChatConverter.toReplyMessage(reply);
     }
 
     /**
