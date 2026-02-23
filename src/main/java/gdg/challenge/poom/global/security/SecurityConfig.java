@@ -8,7 +8,6 @@ import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -40,7 +39,9 @@ public class SecurityConfig {
             "/oauth2/authorization/**",
             "/login/oauth2/**",
 
-            "/auth/google/callback/**"
+            "/auth/google/callback/**",
+            "favicon.ico",
+            "/error"
     };
 
 
@@ -55,7 +56,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .oauth2Login(Customizer.withDefaults())
+//                .oauth2Login(Customizer.withDefaults())
                 .cors( cors -> cors.configurationSource(corsConfigurationSource()))
                 ;
 
