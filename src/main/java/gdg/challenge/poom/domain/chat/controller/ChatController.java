@@ -31,7 +31,7 @@ public class ChatController {
         return ApiResponse.onSuccess(chatHelperService.chat(request));
     }
 
-    @Operation(summary = "채팅 리스트 조회 API", description = "참여한 채팅 리스트 조회 API")
+    @Operation(summary = "채팅방 리스트 조회 API", description = "참여한 채팅 리스트 조회 API")
     @GetMapping("/chat")
     public ApiResponse<List<ChatResponseDTO.ChatPreview>> getChatRoomList(
             @AuthenticationPrincipal CustomUserDetails customUserDetails
