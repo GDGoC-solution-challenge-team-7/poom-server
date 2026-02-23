@@ -56,7 +56,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-//                .oauth2Login(Customizer.withDefaults())
                 .cors( cors -> cors.configurationSource(corsConfigurationSource()))
                 ;
 

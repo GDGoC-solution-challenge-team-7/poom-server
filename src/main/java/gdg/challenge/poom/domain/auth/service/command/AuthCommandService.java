@@ -60,13 +60,15 @@ public class AuthCommandService {
         }
     }
 
-    public void signUp(AuthRequestDTO.SignUp request){
+    public AuthResponseDTO.TokenResult signUp(AuthRequestDTO.SignUp request){
         validateSignUp(request);
 
         Social social = socialRepository.findById(request.socialId())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.SOCIAL_NOT_FOUND));
         Member member = memberRepository.save(AuthConverter.toMember(request));
         social.addMember(member);
+        CustomUserDetails customUserDetails = new CustomUserDetails(member);
+        return tokenCommandService.createLoginToken(customUserDetails);
     }
 
     public AuthResponseDTO.AccessTokenResult reissue(HttpServletRequest request, HttpServletResponse response){
