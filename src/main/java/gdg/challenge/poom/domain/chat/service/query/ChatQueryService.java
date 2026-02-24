@@ -13,6 +13,7 @@ import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.ChatException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,14 +38,16 @@ public class ChatQueryService {
                 .toList();
     }
 
-    public ChatResponseDTO.ChatRoomInfo getChatMessage(Long memberId, Long chatRoomId, Pageable pageable){
+    public ChatResponseDTO.ChatRoomInfo getChatMessage(Long memberId, Long chatRoomId){
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        PageRequest pageRequest = PageRequest.of(0, 30);
 
         if (!chatRoom.getMember().getId().equals(memberId)) {
             throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
         }
-        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtDesc(chatRoom, pageable);
+        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtDesc(chatRoom, pageRequest);
         return  ChatConverter.toChatRoomMessage(chatRoom, chatMessages);
     }
 

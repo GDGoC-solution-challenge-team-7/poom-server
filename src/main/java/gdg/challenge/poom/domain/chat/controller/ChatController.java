@@ -53,10 +53,10 @@ public class ChatController {
     @GetMapping("/chat/{chatRoomId}")
     public ApiResponse<ChatResponseDTO.ChatRoomInfo> getChatMessageList(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PathVariable Long chatRoomId,
-            @PageableDefault(page = 0, size = 30) Pageable pageable
+            @PathVariable Long chatRoomId
+//            @PageableDefault(page = 0, size = 30) Pageable pageable
     ){
-        ChatResponseDTO.ChatRoomInfo chatRoomInfo = chatQueryService.getChatMessage(customUserDetails.getMemberId(), chatRoomId, pageable);
+        ChatResponseDTO.ChatRoomInfo chatRoomInfo = chatQueryService.getChatMessage(customUserDetails.getMemberId(), chatRoomId);
         return ApiResponse.onSuccess(chatRoomInfo);
     }
 
