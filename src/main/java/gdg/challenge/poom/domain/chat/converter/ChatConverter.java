@@ -20,9 +20,10 @@ public class ChatConverter {
                 .build();
     }
 
-    public static ChatResponseDTO.ReplyMessage toReplyMessage(String reply){
+    public static ChatResponseDTO.ReplyMessage toReplyMessage(String reply, Long chatRoomId){
         return ChatResponseDTO.ReplyMessage.builder()
                 .reply(reply)
+                .createRoomId(chatRoomId)
                 .build();
     }
 

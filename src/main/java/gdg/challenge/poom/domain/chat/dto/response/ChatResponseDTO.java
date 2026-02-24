@@ -12,7 +12,10 @@ import java.util.List;
 public record ChatResponseDTO() {
 
     @Builder
-    public record ReplyMessage(String reply){}
+    public record ReplyMessage(
+            String reply,
+            Long createRoomId
+    ){}
 
     @Builder
     public record ChatPreview(
