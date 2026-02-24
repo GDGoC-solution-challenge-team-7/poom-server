@@ -1,5 +1,6 @@
 package gdg.challenge.poom.domain.member.entity;
 
+import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.Role;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
@@ -56,5 +57,17 @@ public class Member extends BaseEntity {
     private BirthRelationship birthRelationship;
 
     private String expertiseFile;
+
+    public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
+        this.name = request.name();
+        this.email = request.email();
+        this.birthDate = request.birthDate();
+        this.gender = request.gender();
+        this.userType = request.userType();
+        this.childBirthDueDate = request.childBirthDueDate();
+        this.childBirthDate = request.childBirthDate();
+        this.birthRelationship = request.birthRelationship();
+        this.expertiseFile = request.expertiseFile();
+    }
 
 }
