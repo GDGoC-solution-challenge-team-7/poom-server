@@ -15,6 +15,7 @@ public class ChatConverter {
 
     public static ChatResponseDTO.ChatPreview toChatPreview(ChatRoom chatRoom) {
         return ChatResponseDTO.ChatPreview.builder()
+                .chatRoomId(chatRoom.getId())
                 .title(chatRoom.getTitle())
                 .updatedAt(chatRoom.getUpdatedAt().toLocalDate())
                 .build();

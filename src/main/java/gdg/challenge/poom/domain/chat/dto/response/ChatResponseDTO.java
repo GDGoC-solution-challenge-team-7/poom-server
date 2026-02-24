@@ -19,6 +19,7 @@ public record ChatResponseDTO() {
 
     @Builder
     public record ChatPreview(
+            Long chatRoomId,
             String title,
             LocalDate updatedAt
     ){}
