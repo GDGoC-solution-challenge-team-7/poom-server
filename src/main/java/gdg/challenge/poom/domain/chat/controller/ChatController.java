@@ -30,7 +30,7 @@ public class ChatController {
 
     @Operation(summary = "채팅 메시지 전송 및 저장",
             description = "육아에 지친 산모들을 위한 AI 챗봇. style로 공감/해결 선택. 이미지는 imageUrl(S3 등)으로 전달 시 멀티모달 분석. " +
-                    "첫 채팅 시, 제목 요약 및 채팅방 생성"
+                    "첫 채팅 시, chatRoomId null로 요청, 제목 요약 및 채팅방 생성"
     )
     @PostMapping("/chat")
     public ApiResponse<ChatResponseDTO.ReplyMessage> chat(
