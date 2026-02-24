@@ -20,7 +20,7 @@ public class MemberQueryService {
 
     public Member findById(Long memberId){
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("TODO"));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
     public MemberResponseDTO.MemberInfo getMemberInfo(Long memberId){

@@ -1,6 +1,8 @@
 package gdg.challenge.poom.global.config;
 
 import com.google.genai.Client;
+import gdg.challenge.poom.global.data.GenAiConfigData;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.support.RetryTemplate;
@@ -13,9 +15,10 @@ import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
  * (Autoconfig는 project-id/location 시 ADC를 요구하므로 제외하고, API 키 전용 Client를 등록)
  */
 @Configuration
+@RequiredArgsConstructor
 public class GenAiApiKeyConfig {
 
-    private static final String GEMINI_API_KEY = "AIzaSyBRrtW5ZTpighSVJUi_8IPKExKp11Pi2ts";
+    private final GenAiConfigData genAiConfigData;
 
     /**
      * 재시도 없음(1회만 시도). ChatClient·모델 모두 이 빈을 쓰면 메시지 1번 = API 1번.
@@ -30,7 +33,7 @@ public class GenAiApiKeyConfig {
     @Bean
     public Client genAiClient() {
         return Client.builder()
-                .apiKey(GEMINI_API_KEY)
+                .apiKey(genAiConfigData.getApiKey())
                 .build();
     }
 

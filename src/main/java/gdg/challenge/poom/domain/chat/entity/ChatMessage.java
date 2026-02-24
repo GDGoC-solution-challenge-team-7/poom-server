@@ -1,6 +1,7 @@
 package gdg.challenge.poom.domain.chat.entity;
 
 
+import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -20,10 +21,17 @@ public class ChatMessage extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private SenderType senderType;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MessageType messageType;
+
+    @Column(nullable = false)
     private String content;
+
+    private String mediaUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")

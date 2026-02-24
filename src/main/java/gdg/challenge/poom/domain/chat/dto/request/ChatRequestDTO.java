@@ -6,9 +6,10 @@ import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 public record ChatRequestDTO() {
 
     /**
-     * style: empathy(기본), solution. 이미지: imageUrl(S3 등 http/https URL).
+     * characterType: empathy(기본), solution. 이미지: imageUrl(S3 등 http/https URL).
      */
     public record ChatMessageRequest(
+            Long chatRoomId,
             String message,
             CharacterType characterType,
             String imageUrl

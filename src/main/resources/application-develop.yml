@@ -32,6 +32,10 @@ spring:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://www.googleapis.com/userinfo/v2/me
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
 
 cors:
   urls:
