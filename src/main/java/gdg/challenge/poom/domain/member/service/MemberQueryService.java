@@ -1,6 +1,5 @@
 package gdg.challenge.poom.domain.member.service;
 
-import gdg.challenge.poom.domain.member.controller.MemberController;
 import gdg.challenge.poom.domain.member.converter.MemberConverter;
 import gdg.challenge.poom.domain.member.dto.response.MemberResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Member;

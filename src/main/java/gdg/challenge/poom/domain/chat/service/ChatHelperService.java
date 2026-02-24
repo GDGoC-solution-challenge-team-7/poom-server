@@ -60,7 +60,7 @@ public class ChatHelperService {
     public ChatResponseDTO.ReplyMessage chat(Long memberId, ChatRequestDTO.ChatMessageRequest request) {
 
         // TODO: 사용자가 처음에 입력한 채팅을 기준으로 제목 생성 -> 영빈님 구현
-        String title = "";
+        String title = "그냥 더미데이터";
 
         // 처음 입력한 채팅 시작
         ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, title, request);
