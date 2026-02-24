@@ -33,10 +33,14 @@ public class ChatCommandService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        ChatRoom chatRoom = chatRoomRepository.findById(request.chatRoomId())
-                .orElseGet(() -> chatRoomRepository.save(ChatConverter.toChatRoom(member, title, request)));
-
-        return chatRoom;
+        if (request.chatRoomId() == null) {
+            return chatRoomRepository.save(
+                    ChatConverter.toChatRoom(member, title, request)
+            );
+        } else {
+            return chatRoomRepository.findById(request.chatRoomId())
+                    .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
+        }
     }
 
     public ChatMessage createChatMessage(

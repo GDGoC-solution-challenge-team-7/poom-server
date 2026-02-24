@@ -10,9 +10,12 @@ import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -25,7 +28,10 @@ public class ChatController {
     private final ChatQueryService chatQueryService;
     private final ChatCommandService chatCommandService;
 
-    @Operation(summary = "채팅 메시지 전송", description = "육아에 지친 산모들을 위한 AI 챗봇. style로 공감/해결 선택. 이미지는 imageUrl(S3 등)으로 전달 시 멀티모달 분석.")
+    @Operation(summary = "채팅 메시지 전송 및 저장",
+            description = "육아에 지친 산모들을 위한 AI 챗봇. style로 공감/해결 선택. 이미지는 imageUrl(S3 등)으로 전달 시 멀티모달 분석. " +
+                    "첫 채팅 시, 제목 요약 및 채팅방 생성"
+    )
     @PostMapping("/chat")
     public ApiResponse<ChatResponseDTO.ReplyMessage> chat(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
@@ -47,9 +53,10 @@ public class ChatController {
     @GetMapping("/chat/{chatRoomId}")
     public ApiResponse<ChatResponseDTO.ChatRoomInfo> getChatMessageList(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PathVariable Long chatRoomId
+            @PathVariable Long chatRoomId,
+            @PageableDefault(page = 0, size = 30) Pageable pageable
     ){
-        ChatResponseDTO.ChatRoomInfo chatRoomInfo = chatQueryService.getChatMessage(customUserDetails.getMemberId(), chatRoomId);
+        ChatResponseDTO.ChatRoomInfo chatRoomInfo = chatQueryService.getChatMessage(customUserDetails.getMemberId(), chatRoomId, pageable);
         return ApiResponse.onSuccess(chatRoomInfo);
     }
 
