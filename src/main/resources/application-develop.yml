@@ -1,5 +1,6 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
+  address: 0.0.0.0
 # local 프로필: VOICE_WS_URL 환경변수로 음성 서버 URL 오버라이드 가능
 voice:
   websocket-url: ${VOICE_WS_URL:ws://localhost:8765/ws}
