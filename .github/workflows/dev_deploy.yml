@@ -38,8 +38,8 @@ jobs:
       - name: Auth to Google Cloud (WIF)
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secretOVIDER }}
-          service_account: ${{ secs.GCP_WORKLOAD_IDENTITY_PRrets.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
