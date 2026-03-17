@@ -12,6 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 # websocket 관련 의존성
@@ -167,6 +168,9 @@ app = FastAPI(
     version="0.1.0",
     description="음성 비서 WebSocket 서버. **데이터 흐름·메시지 형식**은 `GET /api/voice/ws-spec` 응답 또는 `docs/WebSocket_데이터_형식.md` 참고.",
 )
+_static_dir = Path(__file__).parent / "static"
+if _static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
 # ---------- WebSocket 프로토콜 스펙 ----------
 
@@ -254,6 +258,7 @@ async def voice_websocket(websocket: WebSocket):
                 temperature=0.7,
                 max_tokens=2048,
                 language=Language.KO_KR,
+                # silence_duration_ms: 말 끝으로 인정하기까지 침묵(ms). 노이즈/에코 억제는 프론트에서 처리 권장.
                 vad=GeminiVADParams(silence_duration_ms=500),
                 context_window_compression=ContextWindowCompressionParams(enabled=True),
             ),

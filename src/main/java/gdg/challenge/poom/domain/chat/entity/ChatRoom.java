@@ -21,6 +21,12 @@ public class ChatRoom extends BaseEntity {
 
     private String title;
 
+    /**
+     * LLM이 첫 응답에서 내려주는 <chat_title>...</chat_title> 구간의 요약 제목.
+     * 실제 답변 텍스트에서 파싱해 저장한다.
+     */
+    private String chatTitle;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CharacterType characterType;
@@ -36,5 +42,9 @@ public class ChatRoom extends BaseEntity {
     public void setChatRoomSetting(CharacterType characterType, ChatMode chatMode) {
         this.characterType = characterType;
         this.chatMode = chatMode;
+    }
+
+    public void updateChatTitle(String chatTitle) {
+        this.chatTitle = chatTitle;
     }
 }

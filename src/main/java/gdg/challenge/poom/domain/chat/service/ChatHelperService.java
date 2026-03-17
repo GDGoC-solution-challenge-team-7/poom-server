@@ -87,10 +87,19 @@ public class ChatHelperService {
             }
         }
 
-        String reply = chatWithPrompt(request.message(), request.characterType().toString(), imageBytes, mime);
+        String rawReply = chatWithPrompt(request.message(), request.characterType().toString(), imageBytes, mime);
+
+        // <chat_title>...</chat_title> 구간을 파싱해 ChatRoom에 저장하고,
+        // 사용자에게 보여줄 답변 문자열에서는 해당 토큰을 제거한다.
+        ChatTitleParseResult parsed = extractChatTitle(rawReply);
+        if (parsed.chatTitle() != null && !parsed.chatTitle().isBlank()) {
+            chatRoom.updateChatTitle(parsed.chatTitle().trim());
+        }
+
+        String visibleReply = parsed.cleanedContent();
         // TODO: 채팅 메시지 저장
-        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, null, chatRoom);
-        return ChatConverter.toReplyMessage(reply, chatRoom.getId());
+        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, visibleReply, null, chatRoom);
+        return ChatConverter.toReplyMessage(visibleReply, chatRoom.getId());
     }
 
     /**
@@ -127,6 +136,39 @@ public class ChatHelperService {
     }
 
     private record ImageFetchResult(byte[] bytes, String mimeType) {}
+
+    /**
+     * LLM 응답에서 <chat_title>...</chat_title> 형태의 요약 제목을 추출한다.
+     * - chatTitle: 태그 안쪽의 내용 (앞뒤 공백 제거)
+     * - cleanedContent: 원본 응답에서 해당 태그 블록을 제거한 문자열
+     */
+    private ChatTitleParseResult extractChatTitle(String content) {
+        if (content == null || content.isBlank()) {
+            return new ChatTitleParseResult(null, content);
+        }
+
+        String startTag = "<chat_title>";
+        String endTag = "</chat_title>";
+
+        int startIdx = content.indexOf(startTag);
+        int endIdx = content.indexOf(endTag);
+
+        if (startIdx < 0 || endIdx < 0 || endIdx <= startIdx) {
+            return new ChatTitleParseResult(null, content);
+        }
+
+        int titleStart = startIdx + startTag.length();
+        String title = content.substring(titleStart, endIdx).trim();
+
+        // 태그 블록 전체를 제거한 본문 문자열 구성
+        String before = content.substring(0, startIdx);
+        String after = content.substring(endIdx + endTag.length());
+        String cleaned = (before + after).trim();
+
+        return new ChatTitleParseResult(title, cleaned.isEmpty() ? content : cleaned);
+    }
+
+    private record ChatTitleParseResult(String chatTitle, String cleanedContent) {}
 
     private String chatWithPrompt(String userMessage, String style, byte[] imageBytes, String imageMimeType) {
         String resolvedStyle = (style == null || style.isBlank()) ? DEFAULT_STYLE : style.trim().toLowerCase();
