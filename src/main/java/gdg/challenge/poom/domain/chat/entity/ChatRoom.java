@@ -19,8 +19,6 @@ public class ChatRoom extends BaseEntity {
     @Column(name = "chat_room_id")
     private Long id;
 
-    private String title;
-
     /**
      * LLM이 첫 응답에서 내려주는 <chat_title>...</chat_title> 구간의 요약 제목.
      * 실제 답변 텍스트에서 파싱해 저장한다.

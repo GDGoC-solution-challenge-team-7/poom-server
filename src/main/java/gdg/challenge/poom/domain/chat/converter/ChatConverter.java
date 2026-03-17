@@ -16,7 +16,7 @@ public class ChatConverter {
     public static ChatResponseDTO.ChatPreview toChatPreview(ChatRoom chatRoom) {
         return ChatResponseDTO.ChatPreview.builder()
                 .chatRoomId(chatRoom.getId())
-                .title(chatRoom.getTitle())
+                .title(chatRoom.getChatTitle())
                 .updatedAt(chatRoom.getUpdatedAt().toLocalDate())
                 .build();
     }
@@ -44,7 +44,7 @@ public class ChatConverter {
 
         return ChatResponseDTO.ChatRoomInfo.builder()
                 .chatMessageList(chatMessageList)
-                .title(chatRoom.getTitle())
+                .title(chatRoom.getChatTitle())
                 .updatedAt(chatRoom.getUpdatedAt())
                 .build();
     }
@@ -58,7 +58,7 @@ public class ChatConverter {
 
     public static ChatRoom toChatRoom(Member member, String title, ChatRequestDTO.ChatMessageRequest request){
         return ChatRoom.builder()
-                .title(title)
+                .chatTitle(title)
                 .chatMode(ChatMode.TEXT)
                 .characterType(request.characterType())
                 .member(member)
