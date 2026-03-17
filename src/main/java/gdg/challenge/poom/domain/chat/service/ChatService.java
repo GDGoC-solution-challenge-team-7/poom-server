@@ -22,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ChatService {
@@ -38,6 +40,15 @@ public class ChatService {
     );
 
     private static final String DEFAULT_STYLE = "empathy"; // 기본 AI 응답 스타일
+
+    /** 처음 대화 시 AI가 응답에 포함하는 채팅방 제목 토큰. 파싱 후 사용자에게는 보이지 않음. */
+    private static final Pattern CHAT_TITLE_PATTERN = Pattern.compile(
+            "<chat_title>\\s*(.*?)\\s*</chat_title>",
+            Pattern.DOTALL
+    );
+
+    /** 채팅 응답 결과: 본문 + (처음 대화 시에만) 채팅방 제목 */
+    public record ChatResult(String reply, String chatTitle) {}
 
     private final ChatClient poomChatClient;
     private final RestTemplate imageFetchRestTemplate;
@@ -56,12 +67,14 @@ public class ChatService {
     /**
      * 사용자 메시지와 스타일에 따라 AI 응답을 반환합니다.
      * imageUrl이 있으면 해당 URL에서 이미지를 가져옵니다.
+     * AI가 포함한 &lt;chat_title&gt; 요약은 파싱되어 chatTitle에 담기며, reply에서는 제거됩니다.
      *
      * @param imageUrl 선택. 이미지 URL (http/https, S3 presigned URL 등)
+     * @return reply(사용자에게 보여줄 본문), chatTitle(&lt;chat_title&gt; 파싱 결과, 없으면 null)
      */
-    public String chat(String userMessage, String style, String imageUrl) {
+    public ChatResult chat(String userMessage, String style, String imageUrl) {
         if (userMessage == null || userMessage.isBlank()) {
-            return "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
+            return new ChatResult("오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.", null);
         }
         byte[] imageBytes = null;
         String mime = "image/jpeg";
@@ -76,7 +89,25 @@ public class ChatService {
             }
         }
 
-        return chatWithPrompt(userMessage, style, imageBytes, mime);
+        String raw = chatWithPrompt(userMessage, style, imageBytes, mime);
+        return parseChatTitle(raw);
+    }
+
+    /**
+     * AI 응답에서 &lt;chat_title&gt;...&lt;/chat_title&gt;을 추출하고, 본문에서는 제거합니다.
+     */
+    private ChatResult parseChatTitle(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return new ChatResult(raw != null ? raw : "", null);
+        }
+        Matcher m = CHAT_TITLE_PATTERN.matcher(raw);
+        if (!m.find()) {
+            return new ChatResult(raw.trim(), null);
+        }
+        String chatTitle = m.group(1).trim();
+        String reply = raw.substring(0, m.start()) + raw.substring(m.end()).trim();
+        reply = reply.replaceAll("\\n{3,}", "\n\n").trim();
+        return new ChatResult(reply, chatTitle);
     }
 
     /**
