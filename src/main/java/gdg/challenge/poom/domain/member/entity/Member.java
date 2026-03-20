@@ -2,6 +2,7 @@ package gdg.challenge.poom.domain.member.entity;
 
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
+import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.Role;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import gdg.challenge.poom.global.common.BaseEntity;
@@ -9,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Builder
 @Getter
@@ -58,6 +60,16 @@ public class Member extends BaseEntity {
 
     private String expertiseFile;
 
+    private String deviceToken;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean pushAlarm = true;
+
+    private LocalTime dailyAlarmTime;
+
+    private Boolean hasGivenBirth;
+
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
         this.name = request.name();
         this.email = request.email();
@@ -68,6 +80,15 @@ public class Member extends BaseEntity {
         this.childBirthDate = request.childBirthDate();
         this.birthRelationship = request.birthRelationship();
         this.expertiseFile = request.expertiseFile();
+    }
+
+    public void updateDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
+
+    public void updateAlarmSetting(Boolean pushAlarm, LocalTime dailyAlarmTime) {
+        this.pushAlarm = pushAlarm;
+        this.dailyAlarmTime = dailyAlarmTime;
     }
 
 }

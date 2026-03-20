@@ -1,6 +1,6 @@
 package gdg.challenge.poom.domain.auth.dto.request;
 
-import gdg.challenge.poom.domain.member.entity.Gender;
+import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import jakarta.validation.constraints.NotNull;
