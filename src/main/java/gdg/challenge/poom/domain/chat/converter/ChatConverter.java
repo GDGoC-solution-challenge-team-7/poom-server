@@ -21,10 +21,11 @@ public class ChatConverter {
                 .build();
     }
 
-    public static ChatResponseDTO.ReplyMessage toReplyMessage(String reply, Long chatRoomId){
+    public static ChatResponseDTO.ReplyMessage toReplyMessage(String reply, Long chatRoomId, String createdRoomTitle){
         return ChatResponseDTO.ReplyMessage.builder()
                 .reply(reply)
                 .createRoomId(chatRoomId)
+                .createdRoomTitle(createdRoomTitle)
                 .build();
     }
 
