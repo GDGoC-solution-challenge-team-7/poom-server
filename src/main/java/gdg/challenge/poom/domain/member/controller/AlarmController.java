@@ -21,6 +21,16 @@ public class AlarmController {
     private final AlarmCommandService alarmCommandService;
     private final AlarmQueryService alarmQueryService;
 
+    @Operation(summary = "알림 테스트용 API by 요시", description = "알림 테스트하기 위해 생성한 API")
+    @PostMapping
+    public ApiResponse<Void> alarm(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody AlarmRequestDTO.SendAlarm request
+    ){
+        alarmCommandService.send(customUserDetails.getMemberId(), request);
+        return ApiResponse.onSuccess(null);
+    }
+
     @Operation(summary = "디바이스 토큰 업데이트 API", description = "디바이스 토큰을 업데이트하는 API")
     @PatchMapping
     public ApiResponse<Void> updateDeviceToken(

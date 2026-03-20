@@ -1,5 +1,7 @@
 package gdg.challenge.poom.domain.member.service;
 
+import gdg.challenge.poom.domain.member.alarm.service.FCMAlarmSender;
+import gdg.challenge.poom.domain.member.converter.AlarmConverter;
 import gdg.challenge.poom.domain.member.dto.request.AlarmRequestDTO;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.repository.AlarmRepository;
@@ -17,6 +19,17 @@ public class AlarmCommandService {
 
     private final MemberRepository memberRepository;
     private final AlarmRepository alarmRepository;
+    private final FCMAlarmSender fcmAlarmSender;
+
+    public void send(Long memberId, AlarmRequestDTO.SendAlarm request) {
+        try {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+            fcmAlarmSender.send(member, request);
+            alarmRepository.save(AlarmConverter.toAlarm(member, request));
+        } catch (Exception e) {}
+    }
 
     public void updateDeviceToken(AlarmRequestDTO.UpdateDeviceToken request, Long memberId){
         Member member = memberRepository.findById(memberId)
@@ -31,4 +44,5 @@ public class AlarmCommandService {
 
         member.updateAlarmSetting(request.pushAlarm(), request.dailyAlarmTime());
     }
+
 }

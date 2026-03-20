@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 @Slf4j
 @Configuration
@@ -32,6 +33,8 @@ public class FcmConfig {
             }
         } catch (IOException e) {
             throw new RuntimeException("FCM 초기화 실패", e);
+        } catch (Exception e){
+            throw e;
         }
     }
 }
