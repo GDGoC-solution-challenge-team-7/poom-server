@@ -72,8 +72,9 @@ public class ChatHelperService {
             String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
             // TODO: 채팅 메시지 저장
             chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, null, chatRoom);
-            return ChatConverter.toReplyMessage(reply, chatRoom.getId());
+            return ChatConverter.toReplyMessage(reply, chatRoom.getId(), title);
         }
+        // 이미지 처리
         byte[] imageBytes = null;
         String mime = "image/jpeg";
 
@@ -99,7 +100,7 @@ public class ChatHelperService {
         String visibleReply = parsed.cleanedContent();
         // TODO: 채팅 메시지 저장
         chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, visibleReply, null, chatRoom);
-        return ChatConverter.toReplyMessage(visibleReply, chatRoom.getId());
+        return ChatConverter.toReplyMessage(visibleReply, chatRoom.getId(), parsed.chatTitle());
     }
 
     /**

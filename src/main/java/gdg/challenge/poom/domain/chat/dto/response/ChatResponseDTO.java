@@ -14,7 +14,8 @@ public record ChatResponseDTO() {
     @Builder
     public record ReplyMessage(
             String reply,
-            Long createRoomId
+            Long createRoomId,
+            String createdRoomTitle
     ){}
 
     @Builder
