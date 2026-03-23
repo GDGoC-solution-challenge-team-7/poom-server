@@ -42,7 +42,13 @@ public class ChatRoom extends BaseEntity {
         this.chatMode = chatMode;
     }
 
-    public void updateChatTitle(String chatTitle) {
-        this.chatTitle = chatTitle;
+    /**
+     * LLM 응답에서 파싱한 요약 제목을 {@link #chatTitle}에 저장한다.
+     */
+    public void updateChatTitle(String parsedTitle) {
+        if (parsedTitle == null || parsedTitle.isBlank()) {
+            return;
+        }
+        this.chatTitle = parsedTitle.trim();
     }
 }

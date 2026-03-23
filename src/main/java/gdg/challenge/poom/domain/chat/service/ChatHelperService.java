@@ -45,6 +45,7 @@ public class ChatHelperService {
     );
 
     private static final String DEFAULT_STYLE = CharacterType.EMPATHY.toString(); // 기본 AI 응답 스타일
+    private static final String PROVISIONAL_TITLE = "새 대화";
 
     private final ChatClient poomChatClient;
     private final RestTemplate imageFetchRestTemplate;
@@ -59,11 +60,11 @@ public class ChatHelperService {
      */
     public ChatResponseDTO.ReplyMessage chat(Long memberId, ChatRequestDTO.ChatMessageRequest request) {
 
-        // TODO: 사용자가 처음에 입력한 채팅을 기준으로 제목 생성 -> 영빈님 구현
-        String title = "Loving yet escaping";
+        // 첫 응답에서 <chat_title> 파싱 후 updateChatTitle 로 반영. 생성 시에는 임시 제목만 둔다.
+        String provisionalTitle = PROVISIONAL_TITLE;
 
         // 처음 입력한 채팅 시작
-        ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, title, request);
+        ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, provisionalTitle, request);
 
         // TODO: 채팅 메시지 저장
         chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), null, chatRoom);
@@ -72,7 +73,7 @@ public class ChatHelperService {
             String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
             // TODO: 채팅 메시지 저장
             chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, null, chatRoom);
-            return ChatConverter.toReplyMessage(reply, chatRoom.getId(), title);
+            return ChatConverter.toReplyMessage(reply, chatRoom.getId(), provisionalTitle);
         }
         // 이미지 처리
         byte[] imageBytes = null;
@@ -93,7 +94,7 @@ public class ChatHelperService {
         // <chat_title>...</chat_title> 구간을 파싱해 ChatRoom에 저장하고,
         // 사용자에게 보여줄 답변 문자열에서는 해당 토큰을 제거한다.
         ChatTitleParseResult parsed = extractChatTitle(rawReply);
-        if (parsed.chatTitle() != null && !parsed.chatTitle().isBlank()) {
+        if (shouldUpdateChatTitle(chatRoom, provisionalTitle, parsed.chatTitle())) {
             chatRoom.updateChatTitle(parsed.chatTitle().trim());
         }
 
@@ -170,6 +171,15 @@ public class ChatHelperService {
     }
 
     private record ChatTitleParseResult(String chatTitle, String cleanedContent) {}
+    
+    // 방의 제목이 없어 "새 대화" 일 때 파싱된 제목을 가져온다.
+    private boolean shouldUpdateChatTitle(ChatRoom chatRoom, String provisionalTitle, String parsedTitle) {
+        if (parsedTitle == null || parsedTitle.isBlank()) {
+            return false;
+        }
+        String currentTitle = chatRoom.getChatTitle();
+        return currentTitle == null || currentTitle.isBlank() || currentTitle.equals(provisionalTitle);
+    }
 
     private String chatWithPrompt(String userMessage, String style, byte[] imageBytes, String imageMimeType) {
         String resolvedStyle = (style == null || style.isBlank()) ? DEFAULT_STYLE : style.trim().toLowerCase();
