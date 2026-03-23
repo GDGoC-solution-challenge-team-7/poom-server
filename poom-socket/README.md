@@ -1,7 +1,27 @@
 # Poom Voice WebSocket Server
 
-FastAPI + Pipecat + Gemini Live(S2S) 기반 실시간 음성 비서 WebSocket 서버입니다.  
-poom-server의 `/api/voice/connection-info`가 반환하는 `webSocketUrl`(기본 `ws://localhost:8765/ws`)에 연결하면 됩니다.
+poom-socket/
+├── main.py                          # 앱 생성 + uvicorn 진입
+├── voice_app/
+│   ├── __init__.py
+│   ├── config.py                    # .env, PROJECT_ROOT, SYSTEM_INSTRUCTION, Gemini 상수
+│   ├── factory.py                   # create_app(): FastAPI, static 마운트, 라우터 등록
+│   ├── serializers/
+│   │   ├── __init__.py
+│   │   └── raw_pcm.py               # RawPCMWebSocketSerializer (기존 serializers.py)
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   ├── health.py                # GET /health
+│   │   ├── pages.py                 # GET /demo, /docs/ws-inspect
+│   │   ├── voice_spec.py            # GET /api/voice/ws-spec
+│   │   └── websocket_voice.py       # WebSocket /ws
+│   └── voice/
+│       ├── __init__.py
+│       ├── text_utils.py            # 스트리밍 텍스트 병합·중복 제거 (순수 함수)
+│       ├── observers.py             # VoiceLogObserver, VoiceTextWebSocketObserver
+│       └── session.py               # run_voice_session() — Pipecat + Gemini 파이프라인
+├── static/ …
+└── docs/ 
 
 ## 설정
 
@@ -9,7 +29,6 @@ poom-server의 `/api/voice/connection-info`가 반환하는 `webSocketUrl`(기�
    ```bash
    python>=3.12
    ```
-
 
    ```bash
    python -m venv .venv
@@ -29,8 +48,7 @@ python main.py
 - **시연 페이지**: 브라우저에서 **http://localhost:8765/demo** 접속 → "마이크 켜고 연결" 클릭 → 마이크 허용 후 말하면 음성으로 답변 
 
 
-## 목소리
-
+## 지원되는 목소리
 
 ```bash
 여성 목소리 voice_id (13개)
