@@ -33,7 +33,7 @@ spring:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
             token-uri: https://oauth2.googleapis.com/token
-            user-info-uri: https://www.googleapis.com/userinfo/v2/me
+            user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
   ai:
     google:
       genai:

@@ -59,11 +59,11 @@ public class ChatHelperService {
      */
     public ChatResponseDTO.ReplyMessage chat(Long memberId, ChatRequestDTO.ChatMessageRequest request) {
 
-        // TODO: 사용자가 처음에 입력한 채팅을 기준으로 제목 생성 -> 영빈님 구현
-        String title = "Loving yet escaping";
+        // 첫 응답에서 <chat_title> 파싱 후 updateChatTitle 로 반영. 생성 시에는 임시 제목만 둔다.
+        String provisionalTitle = "새 대화";
 
         // 처음 입력한 채팅 시작
-        ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, title, request);
+        ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, provisionalTitle, request);
 
         // TODO: 채팅 메시지 저장
         chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), null, chatRoom);

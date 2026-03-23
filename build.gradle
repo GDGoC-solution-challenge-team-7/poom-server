@@ -57,4 +57,8 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	// 테스트 소스가 없으면 :test 스킵. (프로젝트 경로에 한글 등이 있을 때 Gradle 테스트 워커가
+	// test 클래스를 classpath에서 못 찾는 ClassNotFoundException이 나는 환경이 있어,
+	// 통합 테스트는 ASCII 경로 클론 또는 IDE에서 돌리는 편이 안전함.)
+	onlyIf { !sourceSets.test.allSource.isEmpty() }
 }
