@@ -1,30 +1,5 @@
 # Poom Voice WebSocket Server
 
-poom-socket/
-├── main.py                          # 앱 생성 + uvicorn 진입
-├── voice_app/
-│   ├── __init__.py
-│   ├── config.py                    # .env, PROJECT_ROOT, SYSTEM_INSTRUCTION, Gemini 상수
-│   ├── factory.py                   # create_app(): FastAPI, static 마운트, 라우터 등록
-│   ├── spring_chat.py               # 전사 저장(post_voice_transcript, SpringChatSync)
-│   ├── serializers/
-│   │   ├── __init__.py
-│   │   └── raw_pcm.py               # RawPCMWebSocketSerializer (기존 serializers.py)
-│   ├── routers/
-│   │   ├── __init__.py
-│   │   ├── health.py                # GET /health
-│   │   ├── pages.py                 # GET /demo
-│   │   ├── voice_spec.py            # GET /api/voice/ws-spec
-│   │   └── websocket_voice.py       # WebSocket /ws
-│   └── voice/
-│       ├── __init__.py
-│       ├── text_utils.py            # 스트리밍 텍스트 병합·중복 제거 (순수 함수)
-│       ├── observers.py             # VoiceSessionObserver (턴 확정 JSON)
-│       ├── user_turn_coordinator.py # VAD 턴 단위 전사 버퍼·지연 플러시
-│       └── session.py               # run_voice_session() — Pipecat + Gemini 파이프라인
-├── static/ …
-└── docs/ 
-
 ## 설정
 
 1. **가상환경 및 의존성**
