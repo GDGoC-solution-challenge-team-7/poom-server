@@ -8,8 +8,6 @@
 | **AI 음성 (출력)** | 서버 → 클라이언트 **Binary** 메시지 전체 | PCM. JSON 아님. |
 | **AI 답변 텍스트** | 서버 → 클라이언트 **Text** 메시지 안의 **ai_text** | JSON |
 
-- **JSON 형식을 직접 확인**하려면: 브라우저에서 **http://localhost:8765/docs/ws-inspect** 로 접속한 뒤 "연결 후 로그 보기"로 WebSocket을 연결하면, 서버가 보내는 메시지(Binary = ai_voice, Text = user_text/ai_text JSON)가 실시간으로 표시된다.
-
 ---
 
 ## 프론트에 데이터 흐름 보여주기 (Swagger 대신)
@@ -18,9 +16,7 @@
 - 이 서버에서는 다음으로 처리한다.
   1. **GET /api/voice/ws-spec**  
      WebSocket 프로토콜 스펙 + **필드 매핑** + **출력 JSON 예시**를 JSON으로 반환. Swagger UI에서 호출 가능.
-  2. **GET /docs/ws-inspect**  
-     필드 매핑 표 + **수신 메시지 로그**를 보여주는 페이지. 연결 후 오는 Binary/Text(JSON)를 **직접 확인** 가능.
-  3. **마크다운 문서**  
+  2. **마크다운 문서**  
      `docs/WebSocket_데이터_형식.md`, `docs/프론트_음성재생_가이드.md` 에 상세 내용 정리.
 
 ---
