@@ -39,6 +39,13 @@ spring:
       genai:
         api-key: ${GEMINI_API_KEY}
 
+
+  cloud:
+    gcp:
+      project-id: ${PROJECT_ID}
+      storage:
+        bucket: ${BUCKET_NAME}
+
 cors:
   urls:
     - http://localhost:8080
