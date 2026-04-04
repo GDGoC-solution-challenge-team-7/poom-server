@@ -22,7 +22,7 @@ public class GcsService {
     private final GcsConfigData gcsConfigData;
 
     public MemberResponseDTO.SignedUrlResponse generateUploadSignedUrl(Long memberId, MemberRequestDTO.SignedUrlRequest request) {
-        String objectName = "profiles/" + memberId + "/" + UUID.randomUUID() + extractExtension(request.filename());
+        String objectName = memberId + "/" + UUID.randomUUID() + extractExtension(request.filename());
 
         Storage storage = StorageOptions.newBuilder()
                 .setProjectId(gcsConfigData.getProjectId())
