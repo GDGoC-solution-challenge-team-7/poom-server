@@ -2,6 +2,7 @@ package gdg.challenge.poom.domain.member.dto.response;
 
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
+import gdg.challenge.poom.domain.member.entity.enums.Mother;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import lombok.Builder;
 
@@ -16,7 +17,7 @@ public record MemberResponseDTO() {
             LocalDate birthDate,
             Gender gender,
             UserType userType,
-            LocalDate childBirthDueDate,
+            Mother mother,
             LocalDate childBirthDate,
             BirthRelationship birthRelationship,
             String expertiseFile
