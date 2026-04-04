@@ -10,12 +10,9 @@ import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -61,21 +58,21 @@ public class ChatController {
     }
 
     @Operation(summary = "채팅방 설정 변경 API", description = "해당 채팅방의 메시지들을 최신순으로 조회하는 API")
-    @PatchMapping("/chat/{chatRoomId}")
+    @PatchMapping("/chat/settings")
     public ApiResponse<ChatResponseDTO.ChatRoomSetting> changeChatRoomSetting(
-            @RequestBody ChatRequestDTO.ChatRoomSetting chatRoomSetting,
-            @PathVariable Long chatRoomId
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody ChatRequestDTO.ChatRoomSetting chatRoomSetting
     ){
-        ChatResponseDTO.ChatRoomSetting chatRoomSettingResponse = chatCommandService.setChatRoom(chatRoomId, chatRoomSetting);
+        ChatResponseDTO.ChatRoomSetting chatRoomSettingResponse = chatCommandService.setChatRoomSetting(customUserDetails.getMemberId(), chatRoomSetting);
         return ApiResponse.onSuccess(chatRoomSettingResponse);
     }
 
     @Operation(summary = "채팅방 설정 조회 API", description = "해당 채팅방의 메시지들을 최신순으로 조회하는 API")
-    @GetMapping("/chat/{chatRoomId}/settings")
+    @GetMapping("/chat/settings")
     public ApiResponse<ChatResponseDTO.ChatRoomSetting> getChatRoomSetting(
-            @PathVariable Long chatRoomId
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
-        ChatResponseDTO.ChatRoomSetting chatRoomSettings = chatQueryService.getChatRoomSettings(chatRoomId);
+        ChatResponseDTO.ChatRoomSetting chatRoomSettings = chatQueryService.getChatRoomSettings(customUserDetails.getMemberId());
         return ApiResponse.onSuccess(chatRoomSettings);
     }
 

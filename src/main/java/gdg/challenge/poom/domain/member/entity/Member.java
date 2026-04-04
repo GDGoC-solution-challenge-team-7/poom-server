@@ -1,5 +1,7 @@
 package gdg.challenge.poom.domain.member.entity;
 
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
+import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
@@ -70,6 +72,14 @@ public class Member extends BaseEntity {
 
     private Boolean hasGivenBirth;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CharacterType characterType;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ChatMode chatMode;
+
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
         this.name = request.name();
         this.email = request.email();
@@ -89,6 +99,11 @@ public class Member extends BaseEntity {
     public void updateAlarmSetting(Boolean pushAlarm, LocalTime dailyAlarmTime) {
         this.pushAlarm = pushAlarm;
         this.dailyAlarmTime = dailyAlarmTime;
+    }
+
+    public void setChatRoomSetting(CharacterType characterType, ChatMode chatMode) {
+        this.characterType = characterType;
+        this.chatMode = chatMode;
     }
 
 }

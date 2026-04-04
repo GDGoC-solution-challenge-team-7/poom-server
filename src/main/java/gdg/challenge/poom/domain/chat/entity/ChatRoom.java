@@ -25,22 +25,9 @@ public class ChatRoom extends BaseEntity {
      */
     private String chatTitle;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CharacterType characterType;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ChatMode chatMode;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-
-    public void setChatRoomSetting(CharacterType characterType, ChatMode chatMode) {
-        this.characterType = characterType;
-        this.chatMode = chatMode;
-    }
 
     /**
      * LLM 응답에서 파싱한 요약 제목을 {@link #chatTitle}에 저장한다.
