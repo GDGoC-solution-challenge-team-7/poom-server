@@ -50,18 +50,16 @@ public class ChatConverter {
                 .build();
     }
 
-    public static ChatResponseDTO.ChatRoomSetting toChatRoomSetting(ChatRoom chatRoom) {
+    public static ChatResponseDTO.ChatRoomSetting toChatRoomSetting(Member member) {
         return ChatResponseDTO.ChatRoomSetting.builder()
-                .characterType(chatRoom.getCharacterType())
-                .chatMode(chatRoom.getChatMode())
+                .characterType(member.getCharacterType())
+                .chatMode(member.getChatMode())
                 .build();
     }
 
     public static ChatRoom toChatRoom(Member member, String title, ChatRequestDTO.ChatMessageRequest request){
         return ChatRoom.builder()
                 .chatTitle(title)
-                .chatMode(ChatMode.TEXT)
-                .characterType(request.characterType())
                 .member(member)
                 .build();
     }

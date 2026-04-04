@@ -56,8 +56,8 @@ public class VoiceTranscriptService {
             ChatRoom room = chatRoomRepository.save(
                     ChatRoom.builder()
                             .chatTitle(PROVISIONAL_TITLE)
-                            .chatMode(ChatMode.VOICE)
-                            .characterType(request.characterType())
+//                            .chatMode(ChatMode.VOICE)
+//                            .characterType(request.characterType())
                             .member(member)
                             .build()
             );

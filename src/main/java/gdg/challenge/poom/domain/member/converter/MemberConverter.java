@@ -12,7 +12,6 @@ public class MemberConverter {
                 .birthDate(member.getBirthDate())
                 .gender(member.getGender())
                 .userType(member.getUserType())
-                .childBirthDueDate(member.getChildBirthDueDate())
                 .childBirthDate(member.getChildBirthDate())
                 .birthRelationship(member.getBirthRelationship())
                 .expertiseFile(member.getExpertiseFile())

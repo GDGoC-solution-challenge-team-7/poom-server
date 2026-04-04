@@ -4,6 +4,7 @@ import gdg.challenge.poom.domain.home.converter.HomeConverter;
 import gdg.challenge.poom.domain.home.dto.DateType;
 import gdg.challenge.poom.domain.home.dto.HomeResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Member;
+import gdg.challenge.poom.domain.member.entity.enums.Mother;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
@@ -28,29 +29,34 @@ public class HomeService {
         UserType userType = member.getUserType();
         LocalDate today = LocalDate.now();
         long between;
+        Mother mother = null;
 
-        if (userType == UserType.PREGNANT){
-            LocalDate childBirthDueDate = member.getChildBirthDueDate();
+        if (userType == UserType.MOTHER){
+            LocalDate childBirthDueDate = member.getChildBirthDate();
+            if (today.isBefore(childBirthDueDate)) {
+                mother = Mother.PREGNANT;
+            } else {
+                mother = Mother.POSTPARTUM;
+            }
+
             between = ChronoUnit.DAYS.between(today, childBirthDueDate);
-        } else if (userType == UserType.POSTPARTUM){
-            LocalDate childBirthDate = member.getChildBirthDate();
-            between = ChronoUnit.DAYS.between(today, childBirthDate);
         } else {
-            return HomeConverter.toMemberBirthDate(userType, null, null);
+            return HomeConverter.toMemberBirthDate(userType, null,null, null);
         }
-        return calculateDateUnit(userType, between);
+        long absBetween = Math.abs(between);
+        return calculateDateUnit(userType, mother, absBetween);
     }
 
-    private HomeResponseDTO.MemberBirthDate calculateDateUnit(UserType userType, long between){
+    private HomeResponseDTO.MemberBirthDate calculateDateUnit(UserType userType, Mother mother, long between){
         // DateType.DAY
         if (between <= 30) {
-            return HomeConverter.toMemberBirthDate(userType, DateType.DAY, (int) between);
+            return HomeConverter.toMemberBirthDate(userType, mother, DateType.DAY, (int) between);
         }
         // DateType.MONTH
         if (between <= 30 * 12) {
-            return HomeConverter.toMemberBirthDate(userType, DateType.MONTH, (int) (between / 30));
+            return HomeConverter.toMemberBirthDate(userType, mother, DateType.MONTH, (int) (between / 30));
         }
         // DateType.YEAR
-        return HomeConverter.toMemberBirthDate(userType, DateType.YEAR, (int) (between / (30 * 12)));
+        return HomeConverter.toMemberBirthDate(userType, mother, DateType.YEAR, (int) (between / (30 * 12)));
     }
 }

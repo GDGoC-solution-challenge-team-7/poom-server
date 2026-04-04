@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MemberCommandService {
 
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
     public void changeMemberInfo(Long memberId, MemberRequestDTO.ChangeMemberInfo request){
         Member member = memberRepository.findById(memberId)

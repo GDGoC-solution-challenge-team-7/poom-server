@@ -1,5 +1,7 @@
 package gdg.challenge.poom.domain.member.entity;
 
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
+import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
@@ -51,8 +53,6 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private UserType userType;
 
-    private LocalDate childBirthDueDate;
-
     private LocalDate childBirthDate;
 
     @Enumerated(EnumType.STRING)
@@ -66,9 +66,20 @@ public class Member extends BaseEntity {
     @Builder.Default
     private Boolean pushAlarm = true;
 
-    private LocalTime dailyAlarmTime;
+    @Builder.Default
+    private LocalTime dailyAlarmTime = LocalTime.of(9, 0);;
 
     private Boolean hasGivenBirth;
+
+    @Column(nullable = false)
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private CharacterType characterType = CharacterType.EMPATHY;
+
+    @Column(nullable = false)
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private ChatMode chatMode = ChatMode.VOICE;
 
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
         this.name = request.name();
@@ -76,7 +87,6 @@ public class Member extends BaseEntity {
         this.birthDate = request.birthDate();
         this.gender = request.gender();
         this.userType = request.userType();
-        this.childBirthDueDate = request.childBirthDueDate();
         this.childBirthDate = request.childBirthDate();
         this.birthRelationship = request.birthRelationship();
         this.expertiseFile = request.expertiseFile();
@@ -89,6 +99,11 @@ public class Member extends BaseEntity {
     public void updateAlarmSetting(Boolean pushAlarm, LocalTime dailyAlarmTime) {
         this.pushAlarm = pushAlarm;
         this.dailyAlarmTime = dailyAlarmTime;
+    }
+
+    public void setChatRoomSetting(CharacterType characterType, ChatMode chatMode) {
+        this.characterType = characterType;
+        this.chatMode = chatMode;
     }
 
 }

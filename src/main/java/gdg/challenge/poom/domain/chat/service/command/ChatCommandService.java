@@ -51,12 +51,12 @@ public class ChatCommandService {
         return chatMessageRepository.save(chatMessage);
     }
 
-    public ChatResponseDTO.ChatRoomSetting setChatRoom(Long chatRoomId, ChatRequestDTO.ChatRoomSetting request) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
+    public ChatResponseDTO.ChatRoomSetting setChatRoomSetting(Long memberId, ChatRequestDTO.ChatRoomSetting request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        chatRoom.setChatRoomSetting(request.characterType(), request.chatMode());
-        return ChatConverter.toChatRoomSetting(chatRoom);
+        member.setChatRoomSetting(request.characterType(), request.chatMode());
+        return ChatConverter.toChatRoomSetting(member);
     }
 
     public void deleteChatRoom(Long chatRoomId) {

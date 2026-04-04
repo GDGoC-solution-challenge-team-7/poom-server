@@ -14,7 +14,6 @@ import gdg.challenge.poom.global.error.exception.handler.ChatException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,11 +50,11 @@ public class ChatQueryService {
         return  ChatConverter.toChatRoomMessage(chatRoom, chatMessages);
     }
 
-    public ChatResponseDTO.ChatRoomSetting getChatRoomSettings(Long chatRoomId){
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
+    public ChatResponseDTO.ChatRoomSetting getChatRoomSettings(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        return ChatConverter.toChatRoomSetting(chatRoom);
+        return ChatConverter.toChatRoomSetting(member);
     }
 
 }

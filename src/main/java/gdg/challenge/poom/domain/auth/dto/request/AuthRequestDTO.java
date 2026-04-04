@@ -24,9 +24,9 @@ public record AuthRequestDTO() {
             Long socialId,
             @NotNull
             UserType userType,
-            LocalDate childBirthDueDate,
             LocalDate childBirthDate,
             BirthRelationship birthRelationship,
-            String expertiseFile
+            String expertiseFile,
+            Boolean hasGivenBirth
     ){}
 }

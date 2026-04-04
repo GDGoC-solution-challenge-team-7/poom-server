@@ -20,7 +20,6 @@ public record MemberRequestDTO() {
             Gender gender,
             @NotNull
             UserType userType,
-            LocalDate childBirthDueDate,
             LocalDate childBirthDate,
             BirthRelationship birthRelationship,
             String expertiseFile
