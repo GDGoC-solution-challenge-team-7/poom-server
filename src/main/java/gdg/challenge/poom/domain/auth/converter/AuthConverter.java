@@ -22,8 +22,8 @@ public class AuthConverter {
                 .gender(dto.gender())
                 .userType(dto.userType())
                 .childBirthDate(dto.childBirthDate())
-                .childBirthDueDate(dto.childBirthDueDate())
                 .expertiseFile(dto.expertiseFile())
+                .hasGivenBirth(dto.hasGivenBirth())
                 .build();
     }
 

@@ -53,8 +53,6 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private UserType userType;
 
-    private LocalDate childBirthDueDate;
-
     private LocalDate childBirthDate;
 
     @Enumerated(EnumType.STRING)
@@ -74,12 +72,14 @@ public class Member extends BaseEntity {
     private Boolean hasGivenBirth;
 
     @Column(nullable = false)
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    private CharacterType characterType;
+    private CharacterType characterType = CharacterType.EMPATHY;
 
     @Column(nullable = false)
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    private ChatMode chatMode;
+    private ChatMode chatMode = ChatMode.VOICE;
 
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
         this.name = request.name();
@@ -87,7 +87,6 @@ public class Member extends BaseEntity {
         this.birthDate = request.birthDate();
         this.gender = request.gender();
         this.userType = request.userType();
-        this.childBirthDueDate = request.childBirthDueDate();
         this.childBirthDate = request.childBirthDate();
         this.birthRelationship = request.birthRelationship();
         this.expertiseFile = request.expertiseFile();
