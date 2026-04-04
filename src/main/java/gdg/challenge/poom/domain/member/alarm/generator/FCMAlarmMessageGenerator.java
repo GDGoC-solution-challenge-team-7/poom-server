@@ -1,6 +1,8 @@
 package gdg.challenge.poom.domain.member.alarm.generator;
 
 
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import gdg.challenge.poom.domain.member.dto.request.AlarmRequestDTO;
@@ -15,6 +17,13 @@ public class FCMAlarmMessageGenerator {
         return Message.builder()
                 .setNotification(toNotification(request))
                 .setToken(member.getDeviceToken())
+                .setAndroidConfig(AndroidConfig.builder()
+                        .setPriority(AndroidConfig.Priority.HIGH) // 우선순위
+                        .setNotification(AndroidNotification.builder()
+                                .setChannelId("high_importance_channel") // 프론트와 일치시켜야 함
+                                .setSound("default")
+                                .build())
+                        .build())
                 .build();
     }
 
