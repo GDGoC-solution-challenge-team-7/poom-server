@@ -61,4 +61,11 @@ public class AlarmController {
         alarmCommandService.updateAlarmSettings(request, customUserDetails.getMemberId());
         return ApiResponse.onSuccess(null);
     }
+
+    @Operation(summary = "알림 배치 실행 (내부용)", description = "Cloud Scheduler에 의해 주기적으로 호출되는 내부 API")
+    @PostMapping("/dispatch")
+    public ApiResponse<Void> dispatch(){
+        alarmCommandService.dispatchDueAlarms();
+        return ApiResponse.onSuccess(null);
+    }
 }

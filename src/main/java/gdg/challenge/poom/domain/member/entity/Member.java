@@ -12,6 +12,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Builder
@@ -67,7 +68,10 @@ public class Member extends BaseEntity {
     private Boolean pushAlarm = true;
 
     @Builder.Default
-    private LocalTime dailyAlarmTime = LocalTime.of(9, 0);;
+    private LocalTime dailyAlarmTime = LocalTime.of(9, 0);
+
+    private LocalDateTime nextSendAt;
+    private LocalDateTime lastSendAt;
 
     private Boolean hasGivenBirth;
 
@@ -106,4 +110,8 @@ public class Member extends BaseEntity {
         this.chatMode = chatMode;
     }
 
+    public void updateDailyAlarmDateLogic(LocalDateTime nextSendAt, LocalDateTime lastSendAt) {
+        this.nextSendAt = nextSendAt;
+        this.lastSendAt = lastSendAt;
+    }
 }

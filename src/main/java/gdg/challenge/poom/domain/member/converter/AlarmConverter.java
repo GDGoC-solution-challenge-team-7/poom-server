@@ -1,10 +1,13 @@
 package gdg.challenge.poom.domain.member.converter;
 
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.member.dto.request.AlarmRequestDTO;
 import gdg.challenge.poom.domain.member.dto.response.AlarmResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Alarm;
 import gdg.challenge.poom.domain.member.entity.Member;
+import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -31,7 +34,6 @@ public class AlarmConverter {
 
     public static AlarmResponseDTO.Alarm toAlarmItem(Alarm alarm){
         return AlarmResponseDTO.Alarm.builder()
-                .title(alarm.getTitle())
                 .alarmType(alarm.getAlarmType())
                 .description(alarm.getDescription())
                 // TODO: ImageUrl도 같이 보내기 GCS 구현 후
@@ -42,10 +44,23 @@ public class AlarmConverter {
     // 저장하기 위한 Alarm 만들기
     public static Alarm toAlarm(Member member, AlarmRequestDTO.SendAlarm request){
         return Alarm.builder()
-                .title(request.title())
                 .description(request.description())
                 .alarmType(request.alarmType())
                 .member(member)
+                .build();
+    }
+
+    //
+    public static AlarmRequestDTO.SendAlarm toSendAlarm(
+            AlarmType alarmType, String description, String imageUrl,
+            CharacterType characterType, LocalDateTime createdAt
+    ){
+        return AlarmRequestDTO.SendAlarm.builder()
+                .alarmType(alarmType)
+                .description(description)
+                .imageUrl(imageUrl)
+                .characterType(characterType)
+                .createdAt(createdAt)
                 .build();
     }
 
