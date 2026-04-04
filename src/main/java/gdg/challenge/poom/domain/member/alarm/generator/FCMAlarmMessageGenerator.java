@@ -30,7 +30,7 @@ public class FCMAlarmMessageGenerator {
     // 메시지에 넣을 Notification 생성
     public Notification toNotification(AlarmRequestDTO.SendAlarm request){
         return Notification.builder()
-                .setTitle(request.title())
+                .setTitle(request.alarmType().toString())
                 .setBody(request.description())
                 .build();
     }

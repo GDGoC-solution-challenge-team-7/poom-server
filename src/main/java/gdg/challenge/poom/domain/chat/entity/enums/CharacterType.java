@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum CharacterType {
-    EMPATHY("ENFJ"), SOLUTION("INTJ");
+    EMPATHY("ENFJ", "MELO"), SOLUTION("INTJ", "MARSH");
 
     private final String description;
+    private final String name;
 }
