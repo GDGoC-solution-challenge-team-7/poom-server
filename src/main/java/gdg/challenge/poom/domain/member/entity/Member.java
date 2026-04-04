@@ -68,7 +68,8 @@ public class Member extends BaseEntity {
     @Builder.Default
     private Boolean pushAlarm = true;
 
-    private LocalTime dailyAlarmTime;
+    @Builder.Default
+    private LocalTime dailyAlarmTime = LocalTime.of(9, 0);;
 
     private Boolean hasGivenBirth;
 
