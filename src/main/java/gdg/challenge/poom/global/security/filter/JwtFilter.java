@@ -30,14 +30,11 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("[JWT] {} {}", request.getMethod(), request.getRequestURI());
         String token = resolveToken(request);
-
-        if (!StringUtils.hasText(token)) {
+        Long memberId = jwtUtil.getMemberId(token);
+        if (!StringUtils.hasText(token) | memberId == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-
-        Long memberId = jwtUtil.getMemberId(token);
         Member member = memberQueryService.findById(memberId);
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
 
