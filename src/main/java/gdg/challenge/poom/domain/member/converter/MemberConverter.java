@@ -18,4 +18,15 @@ public class MemberConverter {
                 .expertiseFile(member.getExpertiseFile())
                 .build();
     }
+
+    // MemberResponseDTO.SignedUrlResponse
+    public static MemberResponseDTO.SignedUrlResponse toSignedUrlResponse(
+            String objectName, String signedUrl, String publicUrl
+    ){
+        return MemberResponseDTO.SignedUrlResponse.builder()
+                .objectName(objectName)
+                .signedUrl(signedUrl)
+                .publicUrl(publicUrl)
+                .build();
+    }
 }

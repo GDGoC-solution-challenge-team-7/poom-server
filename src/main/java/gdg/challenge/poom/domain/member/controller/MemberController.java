@@ -2,6 +2,7 @@ package gdg.challenge.poom.domain.member.controller;
 
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
 import gdg.challenge.poom.domain.member.dto.response.MemberResponseDTO;
+import gdg.challenge.poom.domain.member.service.GcsService;
 import gdg.challenge.poom.domain.member.service.MemberCommandService;
 import gdg.challenge.poom.domain.member.service.MemberQueryService;
 import gdg.challenge.poom.global.error.ApiResponse;
@@ -20,6 +21,7 @@ public class MemberController {
 
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
+    private final GcsService gcsService;
 
     @Operation(summary = "멤버 정보 조회 API", description = "멤버의 정보를 조회하는 API")
     @GetMapping
@@ -40,5 +42,14 @@ public class MemberController {
         return ApiResponse.onSuccess(null);
     }
 
-
+    @Operation(summary = "이미지 업로드용 Signed URL 발급",
+            description = "해당 API를 호출하여 업로드 URL을 받은 뒤, 해당 URL로 파일 바이너리를 포함한 PUT 요청을 전송하여 업로드를 수행"
+    )
+    @PostMapping("signed-url")
+    public ApiResponse<MemberResponseDTO.SignedUrlResponse> createSignedUrl(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody MemberRequestDTO.SignedUrlRequest request
+    ){
+        return ApiResponse.onSuccess(gcsService.generateUploadSignedUrl(customUserDetails.getMemberId(), request));
+    }
 }

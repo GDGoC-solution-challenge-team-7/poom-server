@@ -21,4 +21,13 @@ public record MemberResponseDTO() {
             BirthRelationship birthRelationship,
             String expertiseFile
     ){}
+
+    // 업로드된 파일 응답
+    @Builder
+    public record SignedUrlResponse(
+            String objectName,
+            String signedUrl,
+            String publicUrl
+    ){ }
+
 }

@@ -25,4 +25,10 @@ public record MemberRequestDTO() {
             BirthRelationship birthRelationship,
             String expertiseFile
     ){ }
+
+    // 파일 업로드 요청
+    public record SignedUrlRequest(
+            String filename,
+            String contentType
+    ){}
 }
