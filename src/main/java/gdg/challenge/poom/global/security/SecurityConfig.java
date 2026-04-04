@@ -41,7 +41,9 @@ public class SecurityConfig {
 
             "/auth/google/callback/**",
             "favicon.ico",
-            "/error"
+            "/error",
+
+            "/api/v1/alarms/dispatch"
     };
 
 
