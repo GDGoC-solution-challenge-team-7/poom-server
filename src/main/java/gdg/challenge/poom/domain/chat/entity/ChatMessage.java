@@ -28,7 +28,8 @@ public class ChatMessage extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private MessageType messageType;
 
-    @Column(nullable = false)
+    /** 음성 봇 전사·긴 답변 등 — VARCHAR(255)면 DB truncation 발생 */
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     private String mediaUrl;

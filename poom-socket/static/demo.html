@@ -210,6 +210,39 @@
       0%, 100% { transform: scaleY(0.35); }
       50% { transform: scaleY(1.1); }
     }
+    .ws-auth label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 0.65rem 0 0.35rem;
+    }
+    .ws-auth label:first-of-type { margin-top: 0; }
+    .ws-auth input, .ws-auth select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+    }
+    .ws-auth .hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0 0;
+      line-height: 1.45;
+    }
+    #wsUrlPreview {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      margin-top: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: #f8f8f8;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-family: ui-monospace, monospace;
+    }
   </style>
 </head>
 <body>
@@ -230,6 +263,23 @@
     </div>
   </div>
 
+  <div class="card ws-auth">
+    <p class="hint" style="margin:0 0 0.75rem;">
+      메인 서버(DB) 전사 동기화를 쓰려면 아래에 access token을 넣고 연결하세요.
+      WebSocket은 <code>ws://호스트/ws?token=…&amp;characterType=EMPATHY</code> 형태로 붙습니다.
+    </p>
+    <label for="wsToken">access token (Bearer와 동일 값)</label>
+    <input type="password" id="wsToken" placeholder="JWT" autocomplete="off" spellcheck="false">
+    <label for="wsCharacterType">characterType</label>
+    <select id="wsCharacterType">
+      <option value="EMPATHY" selected>EMPATHY</option>
+      <option value="SOLUTION">SOLUTION</option>
+    </select>
+    <label for="wsChatRoomId">chatRoomId (선택, 비우면 신규 방)</label>
+    <input type="text" id="wsChatRoomId" placeholder="예: 12" inputmode="numeric" autocomplete="off">
+    <div id="wsUrlPreview" aria-live="polite"></div>
+  </div>
+
   <div class="card">
     <button id="startBtn">마이크 켜고 연결</button>
     <button id="stopBtn">연결 끊기</button>
@@ -242,6 +292,54 @@
       const stopBtn = document.getElementById('stopBtn');
       const statusEl = document.getElementById('status');
       const voiceVisual = document.getElementById('voiceVisual');
+      const wsTokenEl = document.getElementById('wsToken');
+      const wsCharacterTypeEl = document.getElementById('wsCharacterType');
+      const wsChatRoomIdEl = document.getElementById('wsChatRoomId');
+      const wsUrlPreviewEl = document.getElementById('wsUrlPreview');
+
+      function hydrateWsFormFromPageQuery() {
+        var q = new URLSearchParams(location.search);
+        if (q.get('token') && wsTokenEl && !wsTokenEl.value) wsTokenEl.value = q.get('token');
+        if (q.get('access_token') && wsTokenEl && !wsTokenEl.value) wsTokenEl.value = q.get('access_token');
+        if (q.get('characterType') && wsCharacterTypeEl) wsCharacterTypeEl.value = q.get('characterType');
+        if (q.get('chatRoomId') && wsChatRoomIdEl) wsChatRoomIdEl.value = q.get('chatRoomId');
+      }
+
+      hydrateWsFormFromPageQuery();
+
+      /**
+       * ws://호스트/ws?token=…&characterType=…[&chatRoomId=…]
+       */
+      function buildVoiceWebSocketUrl() {
+        var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        var pageQ = new URLSearchParams(location.search);
+        var tok = (wsTokenEl && wsTokenEl.value ? wsTokenEl.value.trim() : '') ||
+          pageQ.get('token') || pageQ.get('access_token') || '';
+        var ct = (wsCharacterTypeEl && wsCharacterTypeEl.value) ? wsCharacterTypeEl.value.trim() : 'EMPATHY';
+        if (ct !== 'EMPATHY' && ct !== 'SOLUTION') ct = 'EMPATHY';
+        var room = (wsChatRoomIdEl && wsChatRoomIdEl.value ? wsChatRoomIdEl.value.trim() : '') ||
+          (pageQ.get('chatRoomId') || '').trim();
+        var wsQ = new URLSearchParams();
+        if (tok) wsQ.set('token', tok);
+        wsQ.set('characterType', ct);
+        if (room) wsQ.set('chatRoomId', room);
+        var qs = wsQ.toString();
+        return protocol + '//' + location.host + '/ws' + (qs ? '?' + qs : '');
+      }
+
+      function updateWsUrlPreview() {
+        if (!wsUrlPreviewEl) return;
+        var u = buildVoiceWebSocketUrl();
+        var redacted = u.replace(/token=([^&]+)/, function (_, v) {
+          return 'token=' + (v ? '(입력됨·' + v.length + '자)' : '');
+        });
+        wsUrlPreviewEl.textContent = '연결 예정 URL: ' + redacted;
+      }
+
+      if (wsTokenEl) wsTokenEl.addEventListener('input', updateWsUrlPreview);
+      if (wsCharacterTypeEl) wsCharacterTypeEl.addEventListener('change', updateWsUrlPreview);
+      if (wsChatRoomIdEl) wsChatRoomIdEl.addEventListener('input', updateWsUrlPreview);
+      updateWsUrlPreview();
 
       function setStatus(msg, state) {
         statusEl.textContent = msg;
@@ -264,17 +362,25 @@
       let voiceStateInterval = null;
       const SEND_RATE = 16000;
       const PLAY_RATE = 24000;
-      var VOLUME_GATE = 0.025;
 
-      // 48k -> 16k: low pass filtering 1/3 샘플만 사용 (알리아싱/노이즈 감소) 
-      function downSample48kTo16k(float32) {
-        const out = [];
-        const n = float32.length;
-        for (let i = 0; i < n; i += 3) {
-          var a = float32[i];
-          var b = (i + 1 < n) ? float32[i + 1] : 0;
-          var c = (i + 2 < n) ? float32[i + 2] : 0;
-          out.push((a + b + c) / 3);
+      /**
+       * 실제 AudioContext 샘플레이트 → 16kHz 선형 보간 리샘플.
+       * (48k만 가정하면 44.1k 등에서 STT 입력이 깨짐)
+       */
+      function resampleTo16kMono(float32, inputSampleRate) {
+        if (inputSampleRate === SEND_RATE) {
+          return float32;
+        }
+        var ratio = inputSampleRate / SEND_RATE;
+        var outLen = Math.max(1, Math.floor(float32.length / ratio));
+        var out = new Float32Array(outLen);
+        for (var i = 0; i < outLen; i++) {
+          var srcPos = i * ratio;
+          var j = Math.floor(srcPos);
+          var f = srcPos - j;
+          var a = float32[j] || 0;
+          var b = (j + 1 < float32.length) ? float32[j + 1] : a;
+          out[i] = a + f * (b - a);
         }
         return out;
       }
@@ -292,14 +398,22 @@
       async function start() {
         setStatus('마이크 권한 요청 중…', 'idle');
         try {
-          stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 48000 } });
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: 1,
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 48000
+            }
+          });
         } catch (e) {
           setStatus('마이크 권한이 필요합니다: ' + e.message, 'error');
           return;
         }
 
-        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = protocol + '//' + location.host + '/ws';
+        const wsUrl = buildVoiceWebSocketUrl();
+        updateWsUrlPreview();
         setStatus('연결 중…', 'idle');
 
         try {
@@ -333,6 +447,8 @@
         ws.onerror = () => setStatus('연결 오류 발생.', 'error');
 
         ws.onmessage = (ev) => {
+          // 서버가 전사/메타데이터용 JSON 텍스트 프레임을 보낼 수 있음 — 시연 페이지는 오디오만 재생.
+          if (typeof ev.data === 'string') return;
           if (ev.data instanceof ArrayBuffer && ev.data.byteLength > 0 && audioContext) {
             const buffer = ev.data;
             const view = new Int16Array(buffer);
@@ -354,22 +470,21 @@
       }
 
       function startSendingAudio() {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
         if (audioContext.state === 'suspended') {
           audioContext.resume();
         }
+        var inRate = audioContext.sampleRate;
         source = audioContext.createMediaStreamSource(stream);
         const bufferSize = 2048;
         processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
         processor.onaudioprocess = (e) => {
           if (!ws || ws.readyState !== WebSocket.OPEN) return;
           const input = e.inputBuffer.getChannelData(0);
-          var sum = 0;
-          for (var i = 0; i < input.length; i++) sum += input[i] * input[i];
-          var rms = Math.sqrt(sum / input.length);
-          if (rms < VOLUME_GATE) return;
-          const down = downSample48kTo16k(input);
-          const pcm = floatTo16BitPCM(down);
+          // 볼륨 게이트로 프레임을 버리면 말 앞부분·작은 목소리가 STT에 전달되지 않음.
+          // VAD/침묵 처리는 서버(Gemini)에 맡긴다.
+          const pcm16k = resampleTo16kMono(input, inRate);
+          const pcm = floatTo16BitPCM(pcm16k);
           ws.send(pcm);
         };
         source.connect(processor);

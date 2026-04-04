@@ -1,40 +1,17 @@
 # Poom Voice WebSocket Server
 
-poom-socket/
-├── main.py                          # 앱 생성 + uvicorn 진입
-├── voice_app/
-│   ├── __init__.py
-│   ├── config.py                    # .env, PROJECT_ROOT, SYSTEM_INSTRUCTION, Gemini 상수
-│   ├── factory.py                   # create_app(): FastAPI, static 마운트, 라우터 등록
-│   ├── serializers/
-│   │   ├── __init__.py
-│   │   └── raw_pcm.py               # RawPCMWebSocketSerializer (기존 serializers.py)
-│   ├── routers/
-│   │   ├── __init__.py
-│   │   ├── health.py                # GET /health
-│   │   ├── pages.py                 # GET /demo, /docs/ws-inspect
-│   │   ├── voice_spec.py            # GET /api/voice/ws-spec
-│   │   └── websocket_voice.py       # WebSocket /ws
-│   └── voice/
-│       ├── __init__.py
-│       ├── text_utils.py            # 스트리밍 텍스트 병합·중복 제거 (순수 함수)
-│       ├── observers.py             # VoiceLogObserver, VoiceTextWebSocketObserver
-│       └── session.py               # run_voice_session() — Pipecat + Gemini 파이프라인
-├── static/ …
-└── docs/ 
-
 ## 설정
 
 1. **가상환경 및 의존성**
-   ```bash
-   python>=3.12
-   ```
+```bash
+python>=3.12
+```
 
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate   # Windows
-   pip install -r requirements.txt
-   ```
+```bash
+python -m venv .venv
+.venv\Scripts\activate   # Windows
+pip install -r requirements.txt
+```
 
 ## 실행
 
@@ -42,10 +19,6 @@ poom-socket/
 .venv\Scripts\activate
 python main.py
 ```
-
-- WebSocket: `ws://localhost:8765/ws`
-- 헬스: `GET http://localhost:8765/health`
-- **시연 페이지**: 브라우저에서 **http://localhost:8765/demo** 접속 → "마이크 켜고 연결" 클릭 → 마이크 허용 후 말하면 음성으로 답변 
 
 
 ## 지원되는 목소리
