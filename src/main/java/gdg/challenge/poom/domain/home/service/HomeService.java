@@ -7,6 +7,7 @@ import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.Mother;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
+import gdg.challenge.poom.domain.util.MemberStatusUtil;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
@@ -32,14 +33,8 @@ public class HomeService {
         Mother mother = null;
 
         if (userType == UserType.MOTHER){
-            LocalDate childBirthDueDate = member.getChildBirthDate();
-            if (today.isBefore(childBirthDueDate)) {
-                mother = Mother.PREGNANT;
-            } else {
-                mother = Mother.POSTPARTUM;
-            }
-
-            between = ChronoUnit.DAYS.between(today, childBirthDueDate);
+            mother = MemberStatusUtil.calcMotherStatus(member);
+            between = ChronoUnit.DAYS.between(today, member.getChildBirthDate());
         } else {
             return HomeConverter.toMemberBirthDate(userType, null,null, null);
         }

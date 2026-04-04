@@ -2,6 +2,7 @@ package gdg.challenge.poom.domain.member.converter;
 
 import gdg.challenge.poom.domain.member.dto.response.MemberResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Member;
+import gdg.challenge.poom.domain.util.MemberStatusUtil;
 
 public class MemberConverter {
 
@@ -12,6 +13,7 @@ public class MemberConverter {
                 .birthDate(member.getBirthDate())
                 .gender(member.getGender())
                 .userType(member.getUserType())
+                .mother(MemberStatusUtil.calcMotherStatus(member))
                 .childBirthDate(member.getChildBirthDate())
                 .birthRelationship(member.getBirthRelationship())
                 .expertiseFile(member.getExpertiseFile())
