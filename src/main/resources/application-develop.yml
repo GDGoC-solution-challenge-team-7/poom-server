@@ -39,6 +39,9 @@ spring:
       genai:
         api-key: ${GEMINI_API_KEY}
 
+  firebase:
+    enabled: true
+    config: ${FIREBASE_CONFIG}
 
   cloud:
     gcp:
@@ -61,10 +64,6 @@ cors:
     - PUT
     - PATCH
     - DELETE
-
-  firebase:
-    enabled: true
-    config: ${FIREBASE_CONFIG}
 
 
 jwt:

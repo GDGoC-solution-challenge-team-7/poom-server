@@ -20,16 +20,11 @@ public class FCMAlarmSender {
     private final FCMAlarmSendUtil fcmAlarmSendUtil;
     private final FCMAlarmMessageGenerator fcmAlarmMessageGenerator;
 
-    public void send(Member member, AlarmRequestDTO.SendAlarm request) throws Exception{
-        try {
-            // 메시지 생성
-            Message message = fcmAlarmMessageGenerator.generate(member, request);
-            // 메시지 전송
-            fcmAlarmSendUtil.send(message);
-        } catch (Exception e) {
-            log.warn("Alarm error", e);
-            throw e;
-        }
+    public void send(Member member, AlarmRequestDTO.SendAlarm request) {
+        // 메시지 생성
+        Message message = fcmAlarmMessageGenerator.generate(member, request);
+        // 메시지 전송
+        fcmAlarmSendUtil.send(message);
     }
 
 }

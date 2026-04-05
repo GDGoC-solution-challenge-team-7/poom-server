@@ -29,13 +29,11 @@ public class AlarmCommandService {
     private static final int BATCH_SIZE = 500;
 
     public void send(Long memberId, AlarmRequestDTO.SendAlarm request) {
-        try {
-            Member member = memberRepository.findById(memberId)
-                    .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-            fcmAlarmSender.send(member, request);
-            alarmRepository.save(AlarmConverter.toAlarm(member, request));
-        } catch (Exception e) {}
+        fcmAlarmSender.send(member, request);
+        alarmRepository.save(AlarmConverter.toAlarm(member, request));
     }
 
     public void updateDeviceToken(AlarmRequestDTO.UpdateDeviceToken request, Long memberId){
