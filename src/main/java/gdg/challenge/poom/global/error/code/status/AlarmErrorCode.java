@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 public enum AlarmErrorCode implements BaseErrorCode {
     FCM_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "FCM_500_1", "알림 전송에 실패했습니다."),
     FCM_INVALID_TOKEN(HttpStatus.BAD_REQUEST, "FCM_400_1", "유효하지 않은 FCM 토큰입니다."),
-    FCM_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "FCM_404_1", "FCM 토큰을 찾을 수 없습니다."),
+    FCM_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "FCM_400_2", "만료되었거나 등록 해제된 FCM 토큰입니다.")
     ;
 
     private final HttpStatus status;
