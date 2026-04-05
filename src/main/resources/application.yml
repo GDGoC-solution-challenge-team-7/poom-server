@@ -36,6 +36,16 @@ spring:
       genai:
         api-key: ${GEMINI_API_KEY}
 
+  firebase:
+    enabled: true
+    config: ${FIREBASE_CONFIG}
+
+  cloud:
+    gcp:
+      project-id: ${PROJECT_ID}
+      storage:
+        bucket: ${BUCKET_NAME}
+
 cors:
   urls:
     - http://localhost:8080
@@ -49,10 +59,6 @@ cors:
     - PUT
     - PATCH
     - DELETE
-
-  firebase:
-    enabled: true
-    config: ${FIREBASE_CONFIG}
 
 
 jwt:
