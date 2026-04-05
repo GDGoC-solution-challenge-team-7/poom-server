@@ -19,7 +19,8 @@ public record GoogleOAuth2ResponseDTO() {
             String name,
             String given_name,
             String family_name,
-            String locale
+            String locale,
+            String hd
     ) {
     }
 }
