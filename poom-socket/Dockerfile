@@ -11,9 +11,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 앱 코드 및 리소스
-COPY main.py serializers.py ./
-COPY SYSTEM_INSTRUCTION* ./
+# 앱 코드 (진입점 main.py → voice_app 패키지)
+COPY main.py ./
+COPY voice_app/ ./voice_app/
 COPY static/ ./static/
 
 # 포트 (main.py와 동일)
