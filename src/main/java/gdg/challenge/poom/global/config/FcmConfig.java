@@ -4,6 +4,8 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import gdg.challenge.poom.global.data.FirebaseConfigData;
+import gdg.challenge.poom.global.error.code.status.AlarmErrorCode;
+import gdg.challenge.poom.global.error.exception.handler.AlarmException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +34,7 @@ public class FcmConfig {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("FCM 초기화 실패", e);
+            throw new AlarmException(AlarmErrorCode.FCM_INIT_FAIL);
         } catch (Exception e){
             throw e;
         }
