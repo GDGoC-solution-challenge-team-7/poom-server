@@ -21,7 +21,7 @@ public record MemberResponseDTO() {
             Mother mother,
             LocalDate childBirthDate,
             BirthRelationship birthRelationship,
-            String expertiseFile,
+            String expertiseFileSignedUrl,
             String profileImageSignedUrl
     ){}
 

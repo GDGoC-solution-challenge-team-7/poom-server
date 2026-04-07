@@ -8,7 +8,9 @@ import java.util.List;
 
 public class MemberConverter {
 
-    public static MemberResponseDTO.MemberInfo toMemberInfo(Member member, String profileImageSignedUrl){
+    public static MemberResponseDTO.MemberInfo toMemberInfo(
+            Member member, String profileImageSignedUrl, String expertiseFile
+    ){
         return MemberResponseDTO.MemberInfo.builder()
                 .name(member.getName())
                 .email(member.getEmail())
@@ -18,7 +20,7 @@ public class MemberConverter {
                 .mother(MemberStatusUtil.calcMotherStatus(member))
                 .childBirthDate(member.getChildBirthDate())
                 .birthRelationship(member.getBirthRelationship())
-                .expertiseFile(member.getExpertiseFile())
+                .expertiseFileSignedUrl(expertiseFile)
                 .profileImageSignedUrl(profileImageSignedUrl)
                 .build();
     }
