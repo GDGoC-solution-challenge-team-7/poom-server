@@ -3,6 +3,8 @@ package gdg.challenge.poom.domain.chat.dto.request;
 import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 
+import java.util.List;
+
 public record ChatRequestDTO() {
 
     /**
@@ -11,7 +13,7 @@ public record ChatRequestDTO() {
     public record ChatMessageRequest(
             Long chatRoomId,
             String message,
-            String imageUrl
+            List<String> imageUrls
     ){}
 
     public record ChatRoomSetting(

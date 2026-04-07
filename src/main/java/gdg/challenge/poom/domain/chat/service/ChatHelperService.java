@@ -3,6 +3,7 @@ package gdg.challenge.poom.domain.chat.service;
 import gdg.challenge.poom.domain.chat.converter.ChatConverter;
 import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
+import gdg.challenge.poom.domain.chat.entity.ChatMessage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
@@ -72,26 +73,30 @@ public class ChatHelperService {
 
         // 처음 입력한 채팅 시작
         ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, provisionalTitle, request);
-        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), null, chatRoom, memberId);
+        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), chatRoom, memberId, request.imageUrls());
 
+        // 사용자가 message(텍스트)를 작성하지 않을 경우
         if (request.message() == null || request.message().isBlank()) {
             String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
-            chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, null, chatRoom, memberId);
+            chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, chatRoom, memberId, null);
             return ChatConverter.toReplyMessage(reply, chatRoom.getId(), provisionalTitle);
         }
         // 이미지 처리
         byte[] imageBytes = null;
         String mime = "image/jpeg";
 
-        if (request.imageUrl() != null && !request.imageUrl().isBlank()) {
-            var fetched = fetchImageFromUrl(request.imageUrl().strip());
-            if (fetched != null) {
-                imageBytes = fetched.bytes();
-                if (fetched.mimeType() != null) {
-                    mime = fetched.mimeType();
-                }
-            }
-        }
+        // TODO: 여러 개의 사진 처리 (AI)
+//        if (request.imageUrl() != null && !request.imageUrl().isBlank()) {
+//            var fetched = fetchImageFromUrl(request.imageUrl().strip());
+//            if (fetched != null) {
+//                imageBytes = fetched.bytes();
+//                if (fetched.mimeType() != null) {
+//                    mime = fetched.mimeType();
+//                }
+//            }
+//        }
+
+
 
         String rawReply = chatWithPrompt(request.message(), member.getCharacterType().toString(), imageBytes, mime);
 
@@ -103,7 +108,7 @@ public class ChatHelperService {
         }
 
         String visibleReply = parsed.cleanedContent();
-        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, visibleReply, null, chatRoom, memberId);
+        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, visibleReply,chatRoom, memberId, null);
         return ChatConverter.toReplyMessage(visibleReply, chatRoom.getId(), parsed.chatTitle());
     }
 

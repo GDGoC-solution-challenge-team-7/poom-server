@@ -9,6 +9,8 @@ import gdg.challenge.poom.domain.member.converter.MemberConverter;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
 import gdg.challenge.poom.domain.member.dto.response.MemberResponseDTO;
 import gdg.challenge.poom.global.data.GcsConfigData;
+import gdg.challenge.poom.global.error.code.status.GcsErrorCode;
+import gdg.challenge.poom.global.error.exception.handler.GcsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ public class GcsService {
 
     // 단건
     public MemberResponseDTO.SignedUrlResponse generateUploadSignedUrl(Long memberId, MemberRequestDTO.SignedUrlRequest request, Storage storage) {
+        validateFileType(request.domain(), request.contentType());
         String objectName = buildObjectName(memberId, request.domain(), request.filename());
 
         BlobInfo blobInfo = BlobInfo.newBuilder(gcsConfigData.getStorage().getBucket(), objectName)
@@ -74,6 +77,21 @@ public class GcsService {
             return "";
         }
         return filename.substring(filename.lastIndexOf("."));
+    }
+
+    private void validateFileType(UploadDomain domain, String contentType) {
+        switch (domain) {
+            case PROFILE_IMAGE, CHAT_IMAGE -> {
+                if (contentType == null || !contentType.startsWith("image/")) {
+                    throw new GcsException(GcsErrorCode.INVALID_IMAGE_FILE);
+                }
+            }
+            case EXPERT_VERIFICATION -> {
+                if (!"application/pdf".equals(contentType)) {
+                    throw new GcsException(GcsErrorCode.INVALID_EXPERT_PDF_FILE);
+                }
+            }
+        }
     }
 
 }

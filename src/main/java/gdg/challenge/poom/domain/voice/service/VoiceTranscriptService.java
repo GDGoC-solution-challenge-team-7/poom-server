@@ -1,7 +1,6 @@
 package gdg.challenge.poom.domain.voice.service;
 
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
-import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.domain.chat.repository.ChatRoomRepository;
@@ -61,13 +60,13 @@ public class VoiceTranscriptService {
                             .member(member)
                             .build()
             );
-            chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, null, room, memberId);
+            chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, room, memberId, null);
             return VoiceTranscriptSaved.builder()
                     .chatRoomId(room.getId())
                     .build();
         }
         ChatRoom room = resolveOwnedRoom(memberId, request.chatRoomId());
-        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, null, room, memberId);
+        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, room, memberId, null);
         return VoiceTranscriptSaved.builder()
                 .chatRoomId(room.getId())
                 .build();
@@ -79,7 +78,7 @@ public class VoiceTranscriptService {
         }
         ChatRoom room = resolveOwnedRoom(memberId, request.chatRoomId());
         String content = request.text().trim();
-        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, content, null, room, memberId);
+        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, content, room, memberId, null);
         return VoiceTranscriptSaved.builder()
                 .chatRoomId(room.getId())
                 .build();

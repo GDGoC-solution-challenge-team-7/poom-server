@@ -5,10 +5,11 @@ import gdg.challenge.poom.domain.chat.converter.ChatConverter;
 import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
 import gdg.challenge.poom.domain.chat.entity.ChatMessage;
+import gdg.challenge.poom.domain.chat.entity.ChatMessageImage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
-import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
+import gdg.challenge.poom.domain.chat.repository.ChatMessageImageRepository;
 import gdg.challenge.poom.domain.chat.repository.ChatMessageRepository;
 import gdg.challenge.poom.domain.chat.repository.ChatRoomRepository;
 import gdg.challenge.poom.domain.member.entity.Member;
@@ -21,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class ChatCommandService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatMessageImageRepository chatMessageImageRepository;
     private final MemberRepository memberRepository;
 
     public ChatRoom createChatRoom(Long memberId, String title, ChatRequestDTO.ChatMessageRequest request){
@@ -46,13 +50,20 @@ public class ChatCommandService {
 
     public ChatMessage createChatMessage(
             SenderType senderType, MessageType messageType,
-            String content, String mediaUrl, ChatRoom chatRoom, Long memberId
+            String content, ChatRoom chatRoom, Long memberId, List<String> imageUrls
      ){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
         ChatMessage chatMessage = ChatConverter.toChatMessage(
-                senderType, messageType, content, mediaUrl, chatRoom, member.getCharacterType()
+                senderType, messageType, content, chatRoom, member.getCharacterType()
         );
+
+        if (imageUrls != null) {
+            chatMessage.changeMessageType(MessageType.TEXT_IMAGE);
+            List<ChatMessageImage> chatMessageImages = ChatConverter.toChatMessageImages(imageUrls, chatMessage);
+            chatMessageImageRepository.saveAll(chatMessageImages);
+        }
         return chatMessageRepository.save(chatMessage);
     }
 
@@ -67,7 +78,6 @@ public class ChatCommandService {
     public void deleteChatRoom(Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
-
 
     }
 }
