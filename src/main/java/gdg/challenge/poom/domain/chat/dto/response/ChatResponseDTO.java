@@ -30,6 +30,7 @@ public record ChatResponseDTO() {
             String content,
             SenderType senderType,
             CharacterType characterType,
+            List<String> chatMessageImageSignedUrl,
             LocalDateTime createdAt
     ){}
 

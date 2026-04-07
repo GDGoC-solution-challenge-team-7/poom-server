@@ -25,7 +25,7 @@ public class GcsService {
 
     private final GcsConfigData gcsConfigData;
 
-    // 단건
+    // 단건 업로드
     public MemberResponseDTO.SignedUrlResponse generateUploadSignedUrl(Long memberId, MemberRequestDTO.SignedUrlRequest request, Storage storage) {
         validateFileType(request.domain(), request.contentType());
         String objectName = buildObjectName(memberId, request.domain(), request.filename());
@@ -45,7 +45,7 @@ public class GcsService {
         return MemberConverter.toSignedUrlResponse(objectName, signedUrl.toString(), publicUrl);
     }
 
-    // 여러 건
+    // 여러 건 업로드
     public MemberResponseDTO.SignedUrlBatchResponse generateUploadSignedUrl(
             Long memberId,
             MemberRequestDTO.SignedUrlBatchRequest request
@@ -59,6 +59,28 @@ public class GcsService {
                 .map(file -> generateUploadSignedUrl(memberId, file, storage))
                 .toList();
         return MemberConverter.toSignedUrlResponse(results);
+    }
+
+    // 다운로드 URL 생성
+    public String generateDownloadSignedUrl(String objectName) {
+        Storage storage = StorageOptions.newBuilder()
+                .setProjectId(gcsConfigData.getProjectId())
+                .build()
+                .getService();
+
+        BlobInfo blobInfo = BlobInfo.newBuilder(
+                gcsConfigData.getStorage().getBucket(),
+                objectName
+        ).build();
+
+        URL signedUrl = storage.signUrl(
+                blobInfo,
+                10, TimeUnit.MINUTES,
+                Storage.SignUrlOption.httpMethod(HttpMethod.GET),
+                Storage.SignUrlOption.withV4Signature()
+        );
+
+        return signedUrl.toString();
     }
 
     private String buildObjectName(Long memberId, UploadDomain domain, String filename) {
