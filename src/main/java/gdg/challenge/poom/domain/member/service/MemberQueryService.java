@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberQueryService {
 
     private final MemberRepository memberRepository;
+    private final GcsService gcsService;
 
     public Member findById(Long memberId){
         return memberRepository.findById(memberId)
@@ -25,7 +26,12 @@ public class MemberQueryService {
     public MemberResponseDTO.MemberInfo getMemberInfo(Long memberId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-        return  MemberConverter.toMemberInfo(member);
+
+        String profileImageSignedUrl = null;
+        if (member.getProfileImage() != null){
+            profileImageSignedUrl = gcsService.generateDownloadSignedUrl(member.getProfileImage());
+        }
+        return  MemberConverter.toMemberInfo(member, profileImageSignedUrl);
     }
 
 }

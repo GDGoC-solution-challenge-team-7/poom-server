@@ -21,7 +21,8 @@ public record MemberResponseDTO() {
             Mother mother,
             LocalDate childBirthDate,
             BirthRelationship birthRelationship,
-            String expertiseFile
+            String expertiseFile,
+            String profileImageSignedUrl
     ){}
 
     // 업로드된 파일 응답
