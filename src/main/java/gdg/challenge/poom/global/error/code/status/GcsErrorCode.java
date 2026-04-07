@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum GcsErrorCode implements BaseErrorCode {
-
+    INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "FILE_400_1", "이미지 파일만 업로드할 수 있습니다."),
+    INVALID_EXPERT_PDF_FILE(HttpStatus.BAD_REQUEST, "FILE_400_2", "전문가 인증 파일은 PDF만 업로드할 수 있습니다.")
     ;
 
     private final HttpStatus status;
