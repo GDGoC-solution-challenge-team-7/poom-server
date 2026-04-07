@@ -1,6 +1,7 @@
 package gdg.challenge.poom.domain.chat.entity;
 
 
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.global.common.BaseEntity;
@@ -37,4 +38,8 @@ public class ChatMessage extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CharacterType characterType;
 }

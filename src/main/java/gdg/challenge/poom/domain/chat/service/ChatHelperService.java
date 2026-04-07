@@ -65,14 +65,11 @@ public class ChatHelperService {
 
         // 처음 입력한 채팅 시작
         ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, provisionalTitle, request);
-
-        // TODO: 채팅 메시지 저장
-        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), null, chatRoom);
+        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), null, chatRoom, memberId);
 
         if (request.message() == null || request.message().isBlank()) {
             String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
-            // TODO: 채팅 메시지 저장
-            chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, null, chatRoom);
+            chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, null, chatRoom, memberId);
             return ChatConverter.toReplyMessage(reply, chatRoom.getId(), provisionalTitle);
         }
         // 이미지 처리
@@ -99,8 +96,7 @@ public class ChatHelperService {
         }
 
         String visibleReply = parsed.cleanedContent();
-        // TODO: 채팅 메시지 저장
-        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, visibleReply, null, chatRoom);
+        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, visibleReply, null, chatRoom, memberId);
         return ChatConverter.toReplyMessage(visibleReply, chatRoom.getId(), parsed.chatTitle());
     }
 

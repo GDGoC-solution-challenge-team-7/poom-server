@@ -6,6 +6,7 @@ import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
 import gdg.challenge.poom.domain.chat.entity.ChatMessage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.domain.chat.repository.ChatMessageRepository;
@@ -45,9 +46,13 @@ public class ChatCommandService {
 
     public ChatMessage createChatMessage(
             SenderType senderType, MessageType messageType,
-            String content, String mediaUrl, ChatRoom chatRoom
+            String content, String mediaUrl, ChatRoom chatRoom, Long memberId
      ){
-        ChatMessage chatMessage = ChatConverter.toChatMessage(senderType, messageType, content, mediaUrl, chatRoom);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        ChatMessage chatMessage = ChatConverter.toChatMessage(
+                senderType, messageType, content, mediaUrl, chatRoom, member.getCharacterType()
+        );
         return chatMessageRepository.save(chatMessage);
     }
 
