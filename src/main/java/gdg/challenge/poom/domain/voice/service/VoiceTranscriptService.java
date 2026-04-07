@@ -61,13 +61,13 @@ public class VoiceTranscriptService {
                             .member(member)
                             .build()
             );
-            chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, null, room);
+            chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, null, room, memberId);
             return VoiceTranscriptSaved.builder()
                     .chatRoomId(room.getId())
                     .build();
         }
         ChatRoom room = resolveOwnedRoom(memberId, request.chatRoomId());
-        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, null, room);
+        chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, null, room, memberId);
         return VoiceTranscriptSaved.builder()
                 .chatRoomId(room.getId())
                 .build();
@@ -79,7 +79,7 @@ public class VoiceTranscriptService {
         }
         ChatRoom room = resolveOwnedRoom(memberId, request.chatRoomId());
         String content = request.text().trim();
-        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, content, null, room);
+        chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, content, null, room, memberId);
         return VoiceTranscriptSaved.builder()
                 .chatRoomId(room.getId())
                 .build();

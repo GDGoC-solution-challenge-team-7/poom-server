@@ -29,6 +29,7 @@ public record ChatResponseDTO() {
     public record ChatMessage(
             String content,
             SenderType senderType,
+            CharacterType characterType,
             LocalDateTime createdAt
     ){}
 

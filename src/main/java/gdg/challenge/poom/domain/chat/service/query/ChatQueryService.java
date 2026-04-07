@@ -47,7 +47,7 @@ public class ChatQueryService {
             throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
         }
         List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtDesc(chatRoom, pageRequest);
-        return  ChatConverter.toChatRoomMessage(chatRoom, chatMessages);
+        return ChatConverter.toChatRoomMessage(chatRoom, chatMessages);
     }
 
     public ChatResponseDTO.ChatRoomSetting getChatRoomSettings(Long memberId){

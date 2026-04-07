@@ -4,6 +4,7 @@ import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
 import gdg.challenge.poom.domain.chat.entity.ChatMessage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
@@ -33,6 +34,7 @@ public class ChatConverter {
         return ChatResponseDTO.ChatMessage.builder()
                 .content(chatMessage.getContent())
                 .senderType(chatMessage.getSenderType())
+                .characterType(chatMessage.getCharacterType())
                 .createdAt(chatMessage.getCreatedAt())
                 .build();
     }
@@ -66,7 +68,7 @@ public class ChatConverter {
 
     public static ChatMessage toChatMessage(
             SenderType senderType, MessageType messageType,
-            String content, String mediaUrl, ChatRoom chatRoom
+            String content, String mediaUrl, ChatRoom chatRoom, CharacterType characterType
     ){
         return ChatMessage.builder()
                 .senderType(senderType)
@@ -74,6 +76,7 @@ public class ChatConverter {
                 .content(content)
                 .mediaUrl(mediaUrl)
                 .chatRoom(chatRoom)
+                .characterType(characterType)
                 .build();
     }
 }
