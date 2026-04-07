@@ -8,8 +8,12 @@ import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.domain.chat.service.command.ChatCommandService;
+import gdg.challenge.poom.domain.member.entity.Member;
+import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.global.error.code.status.GeneralErrorCode;
+import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.GeneralException;
+import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -50,6 +54,7 @@ public class ChatHelperService {
     private final ChatClient poomChatClient;
     private final RestTemplate imageFetchRestTemplate;
     private final ChatCommandService chatCommandService;
+    private final MemberRepository memberRepository;
     private final Map<String, String> promptCache = new ConcurrentHashMap<>();
 
     /**
@@ -59,6 +64,8 @@ public class ChatHelperService {
      *  imageUrl 선택. 이미지 URL (http/https, S3 presigned URL 등)
      */
     public ChatResponseDTO.ReplyMessage chat(Long memberId, ChatRequestDTO.ChatMessageRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         // 첫 응답에서 <chat_title> 파싱 후 updateChatTitle 로 반영. 생성 시에는 임시 제목만 둔다.
         String provisionalTitle = PROVISIONAL_TITLE;
@@ -86,7 +93,7 @@ public class ChatHelperService {
             }
         }
 
-        String rawReply = chatWithPrompt(request.message(), request.characterType().toString(), imageBytes, mime);
+        String rawReply = chatWithPrompt(request.message(), member.getCharacterType().toString(), imageBytes, mime);
 
         // <chat_title>...</chat_title> 구간을 파싱해 ChatRoom에 저장하고,
         // 사용자에게 보여줄 답변 문자열에서는 해당 토큰을 제거한다.

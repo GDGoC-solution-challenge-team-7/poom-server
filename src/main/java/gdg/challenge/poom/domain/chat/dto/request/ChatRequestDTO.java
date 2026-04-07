@@ -11,7 +11,6 @@ public record ChatRequestDTO() {
     public record ChatMessageRequest(
             Long chatRoomId,
             String message,
-            CharacterType characterType,
             String imageUrl
     ){}
 
