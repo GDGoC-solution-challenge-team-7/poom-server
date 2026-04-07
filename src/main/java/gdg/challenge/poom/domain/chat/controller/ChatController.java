@@ -57,7 +57,7 @@ public class ChatController {
         return ApiResponse.onSuccess(chatRoomInfo);
     }
 
-    @Operation(summary = "채팅방 설정 변경 API", description = "디폴트 채팅 설정이 변경되며 전역적으로 설정됩니다")
+    @Operation(summary = "채팅방 설정 변경 API", description = "(EMPATHY|SOLUTION)디폴트 채팅 설정이 변경되며 전역적으로 설정됩니다")
     @PatchMapping("/chat/settings")
     public ApiResponse<ChatResponseDTO.ChatRoomSetting> changeChatRoomSetting(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
@@ -67,7 +67,7 @@ public class ChatController {
         return ApiResponse.onSuccess(chatRoomSettingResponse);
     }
 
-    @Operation(summary = "채팅방 설정 조회 API", description = "해당 채팅방의 메시지들을 최신순으로 조회하는 API")
+    @Operation(summary = "채팅방 설정 조회 API", description = "채팅방 전역 설정을 조회하는 API")
     @GetMapping("/chat/settings")
     public ApiResponse<ChatResponseDTO.ChatRoomSetting> getChatRoomSetting(
             @AuthenticationPrincipal CustomUserDetails customUserDetails
