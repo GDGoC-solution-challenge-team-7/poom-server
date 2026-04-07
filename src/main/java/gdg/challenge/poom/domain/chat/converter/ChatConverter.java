@@ -3,6 +3,7 @@ package gdg.challenge.poom.domain.chat.converter;
 import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
 import gdg.challenge.poom.domain.chat.entity.ChatMessage;
+import gdg.challenge.poom.domain.chat.entity.ChatMessageImage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
@@ -68,15 +69,25 @@ public class ChatConverter {
 
     public static ChatMessage toChatMessage(
             SenderType senderType, MessageType messageType,
-            String content, String mediaUrl, ChatRoom chatRoom, CharacterType characterType
+            String content, ChatRoom chatRoom, CharacterType characterType
     ){
         return ChatMessage.builder()
                 .senderType(senderType)
                 .messageType(messageType)
                 .content(content)
-                .mediaUrl(mediaUrl)
                 .chatRoom(chatRoom)
                 .characterType(characterType)
                 .build();
+    }
+
+    public static List<ChatMessageImage> toChatMessageImages(
+            List<String> imageUrls, ChatMessage chatMessage
+    ){
+        return imageUrls.stream()
+                .map(imageUrl -> ChatMessageImage.builder()
+                        .chatMessage(chatMessage)
+                        .imageUrl(imageUrl).build()
+                )
+                .toList();
     }
 }

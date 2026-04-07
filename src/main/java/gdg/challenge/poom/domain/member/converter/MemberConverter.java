@@ -4,6 +4,8 @@ import gdg.challenge.poom.domain.member.dto.response.MemberResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.util.MemberStatusUtil;
 
+import java.util.List;
+
 public class MemberConverter {
 
     public static MemberResponseDTO.MemberInfo toMemberInfo(Member member){
@@ -28,6 +30,15 @@ public class MemberConverter {
                 .objectName(objectName)
                 .signedUrl(signedUrl)
                 .publicUrl(publicUrl)
+                .build();
+    }
+
+    // MemberResponseDTO.SignedUrlBatchResponse
+    public static MemberResponseDTO.SignedUrlBatchResponse toSignedUrlResponse(
+            List<MemberResponseDTO.SignedUrlResponse> signedUrls
+    ){
+        return MemberResponseDTO.SignedUrlBatchResponse.builder()
+                .files(signedUrls)
                 .build();
     }
 }

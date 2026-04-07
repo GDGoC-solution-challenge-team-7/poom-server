@@ -1,12 +1,13 @@
 package gdg.challenge.poom.domain.member.dto.response;
 
-import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
+import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.Mother;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record MemberResponseDTO() {
 
@@ -30,5 +31,11 @@ public record MemberResponseDTO() {
             String signedUrl,
             String publicUrl
     ){ }
+
+    // 업로드된 파일 요청 - 여러건
+    @Builder
+    public record SignedUrlBatchResponse(
+            List<MemberResponseDTO.SignedUrlResponse> files
+    ){}
 
 }
