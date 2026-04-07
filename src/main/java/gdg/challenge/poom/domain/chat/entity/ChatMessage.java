@@ -33,13 +33,16 @@ public class ChatMessage extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    private String mediaUrl;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CharacterType characterType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CharacterType characterType;
+    public void changeMessageType(MessageType newMessageType) {
+        this.messageType = newMessageType;
+    }
+
 }
