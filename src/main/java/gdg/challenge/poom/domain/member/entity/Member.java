@@ -85,6 +85,8 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ChatMode chatMode = ChatMode.VOICE;
 
+    private String profileImage;
+
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
         this.name = request.name();
         this.email = request.email();
@@ -113,5 +115,9 @@ public class Member extends BaseEntity {
     public void updateDailyAlarmDateLogic(LocalDateTime nextSendAt, LocalDateTime lastSendAt) {
         this.nextSendAt = nextSendAt;
         this.lastSendAt = lastSendAt;
+    }
+
+    public void updateProfileImage(String profileImage){
+        this.profileImage = profileImage;
     }
 }

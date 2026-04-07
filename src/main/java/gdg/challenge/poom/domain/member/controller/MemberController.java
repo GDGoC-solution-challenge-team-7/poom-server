@@ -53,4 +53,16 @@ public class MemberController {
     ){
         return ApiResponse.onSuccess(gcsService.generateUploadSignedUrl(customUserDetails.getMemberId(), request));
     }
+
+    @Operation(summary = "사용자 프로필 이미지 업로드",
+            description = "발급받은 signed-url로 사용자 profileImage 저장하는 API" +
+                    " objectName 요청")
+    @PostMapping("profile-images")
+    public ApiResponse<Void> uploadProfileImage(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody MemberRequestDTO.ProfileImageRequest request
+    ){
+        memberCommandService.uploadMemberProfileImage(customUserDetails.getMemberId(), request);
+        return ApiResponse.onSuccess(null);
+    }
 }

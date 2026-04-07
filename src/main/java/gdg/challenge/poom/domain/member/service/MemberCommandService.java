@@ -22,4 +22,10 @@ public class MemberCommandService {
         member.changeMemberInfo(request);
     }
 
+    public void uploadMemberProfileImage(Long memberId, MemberRequestDTO.ProfileImageRequest request){
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        member.updateProfileImage(request.profileImageUrl());
+    }
+
 }

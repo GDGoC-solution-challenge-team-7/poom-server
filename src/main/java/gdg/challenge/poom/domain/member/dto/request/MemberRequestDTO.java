@@ -39,4 +39,8 @@ public record MemberRequestDTO() {
             List<SignedUrlRequest> files
     ){}
 
+    public record ProfileImageRequest(
+            String profileImageUrl
+    ){}
+
 }
