@@ -1,11 +1,13 @@
 package gdg.challenge.poom.domain.member.dto.request;
 
+import gdg.challenge.poom.domain.chat.entity.enums.UploadDomain;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record MemberRequestDTO() {
 
@@ -25,9 +27,16 @@ public record MemberRequestDTO() {
             String expertiseFile
     ){ }
 
-    // 파일 업로드 요청
+    // 파일 업로드 요청 - 단건
     public record SignedUrlRequest(
             String filename,
-            String contentType
+            String contentType,
+            UploadDomain domain
     ){}
+
+    // 파일 업로드 요청 - 여러건
+    public record SignedUrlBatchRequest(
+            List<SignedUrlRequest> files
+    ){}
+
 }
