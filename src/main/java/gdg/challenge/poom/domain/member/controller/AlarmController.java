@@ -57,7 +57,10 @@ public class AlarmController {
 
     @Operation(summary = "알림 설정 업데이트 API", description = "알림 설정을 업데이트하는 API")
     @PatchMapping("/settings")
-    public ApiResponse<Void> updateAlarmSettings(AlarmRequestDTO.UpdateAlarmSetting request, @AuthenticationPrincipal CustomUserDetails customUserDetails){
+    public ApiResponse<Void> updateAlarmSettings(
+            @RequestBody AlarmRequestDTO.UpdateAlarmSetting request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
         alarmCommandService.updateAlarmSettings(request, customUserDetails.getMemberId());
         return ApiResponse.onSuccess(null);
     }
