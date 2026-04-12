@@ -12,6 +12,7 @@ import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.AlarmException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 @Service
@@ -73,6 +75,7 @@ public class AlarmCommandService {
             // 2. 다음 발송 시간 갱신 (다음날)
             target.updateDailyAlarmDateLogic(target.getNextSendAt().plusDays(1), LocalDateTime.now());
         } catch (Exception e) {
+            log.error("알람 전송 실패 memberId={}", target.getId(), e);
             throw new AlarmException(AlarmErrorCode.FCM_SEND_FAIL);
         }
     }
