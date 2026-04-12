@@ -22,9 +22,9 @@ public class AlarmConverter {
     }
 
     // AlarmResponseDTO.AlarmList
-    public static AlarmResponseDTO.AlarmList toAlarmList(List<Alarm> alarms){
+    public static AlarmResponseDTO.AlarmList toAlarmList(List<Alarm> alarms, CharacterType characterType){
         List<AlarmResponseDTO.Alarm> alarmList = alarms.stream()
-                .map(AlarmConverter::toAlarmItem)
+                .map(alarm ->AlarmConverter.toAlarmItem(alarm, characterType))
                 .toList();
 
         return AlarmResponseDTO.AlarmList.builder()
@@ -32,10 +32,11 @@ public class AlarmConverter {
                 .build();
     }
 
-    public static AlarmResponseDTO.Alarm toAlarmItem(Alarm alarm){
+    public static AlarmResponseDTO.Alarm toAlarmItem(Alarm alarm, CharacterType characterType){
         return AlarmResponseDTO.Alarm.builder()
                 .alarmType(alarm.getAlarmType())
                 .description(alarm.getDescription())
+                .characterType(characterType)
                 // TODO: ImageUrl도 같이 보내기 GCS 구현 후
                 .imageUrl(null)
                 .build();

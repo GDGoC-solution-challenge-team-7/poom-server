@@ -1,5 +1,6 @@
 package gdg.challenge.poom.domain.member.dto.response;
 
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import lombok.Builder;
 
@@ -18,7 +19,8 @@ public record AlarmResponseDTO() {
             String title,
             AlarmType alarmType,
             String description,
-            String imageUrl
+            String imageUrl,
+            CharacterType characterType
     ){}
 
     @Builder
