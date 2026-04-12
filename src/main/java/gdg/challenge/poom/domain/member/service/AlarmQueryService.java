@@ -26,7 +26,7 @@ public class AlarmQueryService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         List<Alarm> alarmList = alarmRepository.findByMember(member);
-        return AlarmConverter.toAlarmList(alarmList);
+        return AlarmConverter.toAlarmList(alarmList, member.getCharacterType());
     }
 
     public AlarmResponseDTO.AlarmSetting getAlarmSettings(Long memberId){
