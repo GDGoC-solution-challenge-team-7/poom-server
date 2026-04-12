@@ -6,6 +6,7 @@ import gdg.challenge.poom.domain.member.dto.response.AlarmResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Alarm;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
+import gdg.challenge.poom.domain.util.TimeAgoUtil;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -33,10 +34,13 @@ public class AlarmConverter {
     }
 
     public static AlarmResponseDTO.Alarm toAlarmItem(Alarm alarm, CharacterType characterType){
+        String timeAgo = TimeAgoUtil.toTimeAgo(alarm.getCreatedAt());
+
         return AlarmResponseDTO.Alarm.builder()
                 .alarmType(alarm.getAlarmType())
                 .description(alarm.getDescription())
                 .characterType(characterType)
+                .timeAgo(timeAgo)
                 // TODO: ImageUrl도 같이 보내기 GCS 구현 후
                 .imageUrl(null)
                 .build();

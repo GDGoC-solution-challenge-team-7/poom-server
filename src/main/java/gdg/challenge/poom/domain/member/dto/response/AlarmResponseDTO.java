@@ -20,7 +20,8 @@ public record AlarmResponseDTO() {
             AlarmType alarmType,
             String description,
             String imageUrl,
-            CharacterType characterType
+            CharacterType characterType,
+            String timeAgo
     ){}
 
     @Builder
