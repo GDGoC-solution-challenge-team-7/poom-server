@@ -21,7 +21,7 @@ public class AlarmController {
     private final AlarmCommandService alarmCommandService;
     private final AlarmQueryService alarmQueryService;
 
-    @Operation(summary = "알림 테스트용 API by 요시", description = "알림 테스트하기 위해 생성한 API")
+    @Operation(summary = "알림 테스트용 API", description = "알림 테스트하기 위해 생성한 API")
     @PostMapping
     public ApiResponse<Void> alarm(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,

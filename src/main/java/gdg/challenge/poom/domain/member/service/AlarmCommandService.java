@@ -7,7 +7,9 @@ import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import gdg.challenge.poom.domain.member.repository.AlarmRepository;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
+import gdg.challenge.poom.global.error.code.status.AlarmErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
+import gdg.challenge.poom.global.error.exception.handler.AlarmException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +72,9 @@ public class AlarmCommandService {
             fcmAlarmSender.send(target, sendAlarm);
             // 2. 다음 발송 시간 갱신 (다음날)
             target.updateDailyAlarmDateLogic(target.getNextSendAt().plusDays(1), LocalDateTime.now());
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            throw new AlarmException(AlarmErrorCode.FCM_SEND_FAIL);
+        }
     }
 
 }
