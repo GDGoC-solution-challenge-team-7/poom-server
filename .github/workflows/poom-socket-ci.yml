@@ -6,7 +6,7 @@
 #   "Deploy poom-socket to Cloud Run" 단계에 gcloud --set-env-vars / --set-secrets 를 추가해야 함.
 #
 # 필요한 GitHub Secrets:
-#   CLOUD_RUN_SOCKET_SERVICE — 소켓 전용 Cloud Run 서비스 이름
+#   CLOUD_RUN_SOCKET_SERVICE — 소켓 전용 Cloud Run 서비스 이름 (비어 있으면 gcloud run deploy 가 실패함)
 #   나머지 GCP_* / GAR 은 dev_deploy.yml 과 동일
 # =============================================================================
 
