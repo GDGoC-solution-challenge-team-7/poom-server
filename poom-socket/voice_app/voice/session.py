@@ -4,6 +4,7 @@ import asyncio
 
 from fastapi import WebSocket, WebSocketDisconnect
 from loguru import logger
+from pipecat.frames.frames import StartFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -146,6 +147,7 @@ async def run_voice_session(websocket: WebSocket) -> None:
             ],
         )
         runner = PipelineRunner(handle_sigint=False)
+        await task.queue_frame(StartFrame())
         await runner.run(task)
     except WebSocketDisconnect:
         logger.info("Client disconnected")

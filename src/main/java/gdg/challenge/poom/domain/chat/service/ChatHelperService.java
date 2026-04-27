@@ -3,7 +3,6 @@ package gdg.challenge.poom.domain.chat.service;
 import gdg.challenge.poom.domain.chat.converter.ChatConverter;
 import gdg.challenge.poom.domain.chat.dto.request.ChatRequestDTO;
 import gdg.challenge.poom.domain.chat.dto.response.ChatResponseDTO;
-import gdg.challenge.poom.domain.chat.entity.ChatMessage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
@@ -24,6 +23,7 @@ import org.springframework.ai.content.Media;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -85,16 +86,20 @@ public class ChatHelperService {
         byte[] imageBytes = null;
         String mime = "image/jpeg";
 
-        // TODO: 여러 개의 사진 처리 (AI)
-//        if (request.imageUrl() != null && !request.imageUrl().isBlank()) {
-//            var fetched = fetchImageFromUrl(request.imageUrl().strip());
-//            if (fetched != null) {
-//                imageBytes = fetched.bytes();
-//                if (fetched.mimeType() != null) {
-//                    mime = fetched.mimeType();
-//                }
-//            }
-//        }
+        if (request.imageUrls() != null && !request.imageUrls().isEmpty()) {
+            Optional<ImageFetchResult> firstValid = request.imageUrls().stream()
+                    .filter(url -> url != null && !url.isBlank())
+                    .map(url -> fetchImageFromUrl(url.strip()))
+                    .filter(result -> result != null && result.bytes() != null && result.bytes().length > 0)
+                    .findFirst();
+            if (firstValid.isPresent()) {
+                ImageFetchResult fetched = firstValid.get();
+                imageBytes = fetched.bytes();
+                if (fetched.mimeType() != null && !fetched.mimeType().isBlank()) {
+                    mime = fetched.mimeType();
+                }
+            }
+        }
 
 
 
@@ -135,8 +140,12 @@ public class ChatHelperService {
                 int semicolon = contentType.indexOf(';');
                 mime = (semicolon >= 0 ? contentType.substring(0, semicolon) : contentType).strip();
             }
-            if (mime == null || !mime.startsWith("image/")) {
-                mime = "image/jpeg";
+            if (mime == null || !isImageMimeType(mime)) {
+                mime = inferMimeTypeFromUrl(url);
+            }
+            if (mime == null || !isImageMimeType(mime)) {
+                log.warn("이미지 MIME 확인 실패(비이미지 응답): {} - contentType={}", url, contentType);
+                return null;
             }
             return new ImageFetchResult(response.getBody(), mime);
         } catch (Exception e) {
@@ -146,6 +155,32 @@ public class ChatHelperService {
     }
 
     private record ImageFetchResult(byte[] bytes, String mimeType) {}
+
+    private static boolean isImageMimeType(String mime) {
+        try {
+            return mime != null && MediaType.parseMediaType(mime).getType().equalsIgnoreCase("image");
+        } catch (Exception e) {
+            return mime != null && mime.toLowerCase().startsWith("image/");
+        }
+    }
+
+    private static String inferMimeTypeFromUrl(String url) {
+        String lower = url.toLowerCase();
+        int queryIdx = lower.indexOf('?');
+        if (queryIdx >= 0) {
+            lower = lower.substring(0, queryIdx);
+        }
+        if (lower.endsWith(".png")) return MimeTypeUtils.IMAGE_PNG_VALUE;
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MimeTypeUtils.IMAGE_JPEG_VALUE;
+        if (lower.endsWith(".gif")) return MediaType.IMAGE_GIF_VALUE;
+        if (lower.endsWith(".webp")) return "image/webp";
+        if (lower.endsWith(".bmp")) return "image/bmp";
+        if (lower.endsWith(".svg")) return "image/svg+xml";
+        if (lower.endsWith(".heic")) return "image/heic";
+        if (lower.endsWith(".heif")) return "image/heif";
+        if (lower.endsWith(".avif")) return "image/avif";
+        return null;
+    }
 
     /**
      * LLM 응답에서 <chat_title>...</chat_title> 형태의 요약 제목을 추출한다.
