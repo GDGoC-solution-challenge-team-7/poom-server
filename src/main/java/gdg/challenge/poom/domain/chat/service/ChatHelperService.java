@@ -17,8 +17,6 @@ import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.content.Media;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -31,9 +29,9 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -52,6 +50,7 @@ public class ChatHelperService {
 
     private static final String DEFAULT_STYLE = CharacterType.EMPATHY.toString(); // 기본 AI 응답 스타일
     private static final String PROVISIONAL_TITLE = "새 대화";
+    private static final String IMAGE_ONLY_PROMPT = "첨부한 이미지를 보고 현재 상황을 이해한 뒤 적절한 답변을 해줘."; // 사용자가 이미지만 입력할 경우
 
     private final ChatClient poomChatClient;
     private final RestTemplate imageFetchRestTemplate;
@@ -61,9 +60,7 @@ public class ChatHelperService {
 
     /**
      * 사용자 메시지와 스타일에 따라 AI 응답을 반환합니다.
-     * imageUrl이 있으면 해당 URL에서 이미지를 가져옵니다.
-     *
-     *  imageUrl 선택. 이미지 URL (http/https, S3 presigned URL 등)
+     * imageUrls가 있으면 해당 URL의 이미지들을 가져와 멀티모달 입력으로 전달합니다.
      */
     public ChatResponseDTO.ReplyMessage chat(Long memberId, ChatRequestDTO.ChatMessageRequest request) {
         Member member = memberRepository.findById(memberId)
@@ -76,34 +73,20 @@ public class ChatHelperService {
         ChatRoom chatRoom = chatCommandService.createChatRoom(memberId, provisionalTitle, request);
         chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), chatRoom, memberId, request.imageUrls());
 
-        // 사용자가 message(텍스트)를 작성하지 않을 경우
-        if (request.message() == null || request.message().isBlank()) {
+        String normalizedMessage = request.message() == null ? "" : request.message().strip();
+        List<ImageFetchResult> images = fetchImagesFromUrls(request.imageUrls());
+        boolean hasImages = !images.isEmpty();
+
+        // 텍스트/이미지 모두 비어있으면 기본 안내 문구 반환
+        if (normalizedMessage.isBlank() && !hasImages) {
             String reply = "오늘 하루 어떤 점이 가장 기억에 남으신가요? 한마디라도 괜찮아요.";
             chatCommandService.createChatMessage(SenderType.AI, MessageType.TEXT, reply, chatRoom, memberId, null);
             return ChatConverter.toReplyMessage(reply, chatRoom.getId(), provisionalTitle);
         }
-        // 이미지 처리
-        byte[] imageBytes = null;
-        String mime = "image/jpeg";
 
-        if (request.imageUrls() != null && !request.imageUrls().isEmpty()) {
-            Optional<ImageFetchResult> firstValid = request.imageUrls().stream()
-                    .filter(url -> url != null && !url.isBlank())
-                    .map(url -> fetchImageFromUrl(url.strip()))
-                    .filter(result -> result != null && result.bytes() != null && result.bytes().length > 0)
-                    .findFirst();
-            if (firstValid.isPresent()) {
-                ImageFetchResult fetched = firstValid.get();
-                imageBytes = fetched.bytes();
-                if (fetched.mimeType() != null && !fetched.mimeType().isBlank()) {
-                    mime = fetched.mimeType();
-                }
-            }
-        }
-
-
-
-        String rawReply = chatWithPrompt(request.message(), member.getCharacterType().toString(), imageBytes, mime);
+        // 이미지 전용 입력이면 AI가 이미지를 해석할 수 있도록 기본 지시문을 함께 전달
+        String userInputForAi = normalizedMessage.isBlank() ? IMAGE_ONLY_PROMPT : normalizedMessage;
+        String rawReply = chatWithPrompt(userInputForAi, member.getCharacterType().toString(), images);
 
         // <chat_title>...</chat_title> 구간을 파싱해 ChatRoom에 저장하고,
         // 사용자에게 보여줄 답변 문자열에서는 해당 토큰을 제거한다.
@@ -118,7 +101,7 @@ public class ChatHelperService {
     }
 
     /**
-     * http/https URL에서 이미지를 가져옵니다. S3 presigned URL 등 지원.
+     * http/https URL에서 이미지를 가져옵니다. S3 presigned URL
      */
     private ImageFetchResult fetchImageFromUrl(String url) {
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
@@ -152,6 +135,24 @@ public class ChatHelperService {
             log.warn("이미지 URL 다운로드 실패: {} - {}", url, e.getMessage());
             return null;
         }
+    }
+
+    private List<ImageFetchResult> fetchImagesFromUrls(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return List.of();
+        }
+
+        List<ImageFetchResult> images = new ArrayList<>();
+        for (String url : imageUrls) {
+            if (url == null || url.isBlank()) {
+                continue;
+            }
+            ImageFetchResult fetched = fetchImageFromUrl(url.strip());
+            if (fetched != null && fetched.bytes() != null && fetched.bytes().length > 0) {
+                images.add(fetched);
+            }
+        }
+        return images;
     }
 
     private record ImageFetchResult(byte[] bytes, String mimeType) {}
@@ -224,22 +225,25 @@ public class ChatHelperService {
         return currentTitle == null || currentTitle.isBlank() || currentTitle.equals(provisionalTitle);
     }
 
-    private String chatWithPrompt(String userMessage, String style, byte[] imageBytes, String imageMimeType) {
+    private String chatWithPrompt(String userMessage, String style, List<ImageFetchResult> images) {
         String resolvedStyle = (style == null || style.isBlank()) ? DEFAULT_STYLE : style.trim().toLowerCase();
         if (!STYLE_PROMPT_PATHS.containsKey(resolvedStyle)) {
             resolvedStyle = DEFAULT_STYLE;
         }
         String systemPrompt = getSystemPrompt(resolvedStyle);
         try {
-            if (imageBytes != null && imageBytes.length > 0) {
-                var systemMessage = new SystemMessage(systemPrompt);
-                var media = new Media(MimeTypeUtils.parseMimeType(imageMimeType), new ByteArrayResource(imageBytes));
-                var userMsg = UserMessage.builder()
-                        .text(userMessage)
-                        .media(media)
-                        .build();
+            if (images != null && !images.isEmpty()) {
                 return poomChatClient.prompt()
-                        .messages(List.of(systemMessage, userMsg))
+                        .system(systemPrompt)
+                        .user(userSpec -> {
+                            userSpec.text(userMessage);
+                            for (ImageFetchResult image : images) {
+                                userSpec.media(new Media(
+                                        MimeTypeUtils.parseMimeType(image.mimeType()),
+                                        new ByteArrayResource(image.bytes()))
+                                );
+                            }
+                        })
                         .call()
                         .content();
             }
