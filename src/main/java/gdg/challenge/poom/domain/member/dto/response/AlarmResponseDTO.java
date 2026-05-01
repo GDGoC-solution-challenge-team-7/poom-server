@@ -27,6 +27,7 @@ public record AlarmResponseDTO() {
     @Builder
     public record AlarmSetting(
         Boolean pushAlarm,
-        LocalTime dailyAlarmTime
+        LocalTime dailyAlarmTime,
+        String deviceToken
     ){}
 }
