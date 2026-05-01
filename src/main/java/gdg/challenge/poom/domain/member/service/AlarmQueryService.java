@@ -32,6 +32,6 @@ public class AlarmQueryService {
     public AlarmResponseDTO.AlarmSetting getAlarmSettings(Long memberId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-        return  AlarmConverter.toAlarmSetting(member.getPushAlarm(), member.getDailyAlarmTime());
+        return  AlarmConverter.toAlarmSetting(member.getPushAlarm(), member.getDailyAlarmTime(), member.getDeviceToken());
     }
 }

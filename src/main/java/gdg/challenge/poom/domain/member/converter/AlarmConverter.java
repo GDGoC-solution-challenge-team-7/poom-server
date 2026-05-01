@@ -15,10 +15,11 @@ import java.util.List;
 public class AlarmConverter {
 
     //AlarmResponseDTO.AlarmSetting
-    public static AlarmResponseDTO.AlarmSetting toAlarmSetting(Boolean pushAlarm, LocalTime dailyAlarmTime){
+    public static AlarmResponseDTO.AlarmSetting toAlarmSetting(Boolean pushAlarm, LocalTime dailyAlarmTime, String deviceToken){
         return AlarmResponseDTO.AlarmSetting.builder()
                 .pushAlarm(pushAlarm)
                 .dailyAlarmTime(dailyAlarmTime)
+                .deviceToken(deviceToken)
                 .build();
     }
 
