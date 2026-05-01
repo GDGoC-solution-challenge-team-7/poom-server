@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -51,6 +52,15 @@ public class AlarmCommandService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
+        LocalDateTime nextSendAt = LocalDate.now().atTime(request.dailyAlarmTime());
+
+        // 오늘 그 시간이 아직 안 지났으면 → 오늘
+        // 오늘 그 시간이 이미 지났으면 → 내일
+        if (nextSendAt.isBefore(LocalDateTime.now())) {
+            nextSendAt = nextSendAt.plusDays(1);
+        }
+
+        member.updateNextSendAt(nextSendAt);
         member.updateAlarmSetting(request.pushAlarm(), request.dailyAlarmTime());
     }
 
@@ -73,7 +83,9 @@ public class AlarmCommandService {
             // 1. 알림 발송
             fcmAlarmSender.send(target, sendAlarm);
             // 2. 다음 발송 시간 갱신 (다음날)
-            target.updateDailyAlarmDateLogic(target.getNextSendAt().plusDays(1), LocalDateTime.now());
+            target.updateDailyAlarmDateLogic(LocalDate.now()
+                    .plusDays(1)
+                    .atTime(target.getDailyAlarmTime()), LocalDateTime.now());
         } catch (Exception e) {
             log.error("알람 전송 실패 memberId={}", target.getId(), e);
             throw new AlarmException(AlarmErrorCode.FCM_SEND_FAIL);
