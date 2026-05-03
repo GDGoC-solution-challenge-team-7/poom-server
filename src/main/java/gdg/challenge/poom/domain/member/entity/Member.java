@@ -70,8 +70,7 @@ public class Member extends BaseEntity {
     @Builder.Default
     private LocalTime dailyAlarmTime = LocalTime.of(9, 0);
 
-    @Builder.Default
-    private LocalDateTime nextSendAt = LocalDateTime.now();
+    private LocalDateTime nextSendAt;
 
     @Builder.Default
     private LocalDateTime lastSendAt = LocalDateTime.now();

@@ -3,6 +3,10 @@ package gdg.challenge.poom.domain.auth.converter;
 import gdg.challenge.poom.domain.auth.dto.request.AuthRequestDTO;
 import gdg.challenge.poom.domain.auth.dto.response.AuthResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Member;
+import gdg.challenge.poom.domain.util.TimeUtil;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class AuthConverter {
 
@@ -22,6 +26,7 @@ public class AuthConverter {
                 .gender(dto.gender())
                 .userType(dto.userType())
                 .childBirthDate(dto.childBirthDate())
+                .nextSendAt(TimeUtil.calculateNextSendAt(LocalTime.of(9, 0)))
                 .expertiseFile(dto.expertiseFile())
                 .hasGivenBirth(dto.hasGivenBirth())
                 .build();
