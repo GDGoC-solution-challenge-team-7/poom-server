@@ -32,10 +32,16 @@ public class ChatConverter {
     }
 
     public static ChatResponseDTO.ChatMessage toChatMessageDTO(ChatMessage chatMessage) {
+        List<String> imageUrls = chatMessage.getChatMessageImages() == null ? List.of()
+                : chatMessage.getChatMessageImages().stream()
+                .map(ChatMessageImage::getImageUrl)
+                .toList();
+
         return ChatResponseDTO.ChatMessage.builder()
                 .content(chatMessage.getContent())
                 .senderType(chatMessage.getSenderType())
                 .characterType(chatMessage.getCharacterType())
+                .chatMessageImageSignedUrl(imageUrls)
                 .createdAt(chatMessage.getCreatedAt())
                 .build();
     }
