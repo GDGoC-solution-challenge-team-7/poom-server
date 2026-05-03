@@ -7,6 +7,7 @@ import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import gdg.challenge.poom.domain.member.repository.AlarmRepository;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
+import gdg.challenge.poom.domain.util.TimeUtil;
 import gdg.challenge.poom.global.error.code.status.AlarmErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.AlarmException;
@@ -52,14 +53,7 @@ public class AlarmCommandService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        LocalDateTime nextSendAt = LocalDate.now().atTime(request.dailyAlarmTime());
-
-        // 오늘 그 시간이 아직 안 지났으면 → 오늘
-        // 오늘 그 시간이 이미 지났으면 → 내일
-        if (nextSendAt.isBefore(LocalDateTime.now())) {
-            nextSendAt = nextSendAt.plusDays(1);
-        }
-
+        LocalDateTime nextSendAt = TimeUtil.calculateNextSendAt(request.dailyAlarmTime());
         member.updateNextSendAt(nextSendAt);
         member.updateAlarmSetting(request.pushAlarm(), request.dailyAlarmTime());
     }

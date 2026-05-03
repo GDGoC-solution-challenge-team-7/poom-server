@@ -1,9 +1,11 @@
 package gdg.challenge.poom.domain.util;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
-public class TimeAgoUtil {
+public class TimeUtil {
     public static String toTimeAgo(LocalDateTime createdAt) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -42,5 +44,13 @@ public class TimeAgoUtil {
 
         long years = days / 365;
         return years + "y";
+    }
+
+    public static LocalDateTime calculateNextSendAt(LocalTime alarmTime) {
+        LocalDateTime nextSendAt = LocalDate.now().atTime(alarmTime);
+        if (nextSendAt.isBefore(LocalDateTime.now())) {
+            nextSendAt = nextSendAt.plusDays(1);
+        }
+        return nextSendAt;
     }
 }

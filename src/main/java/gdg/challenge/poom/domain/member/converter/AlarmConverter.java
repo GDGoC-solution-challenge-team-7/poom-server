@@ -6,7 +6,7 @@ import gdg.challenge.poom.domain.member.dto.response.AlarmResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Alarm;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
-import gdg.challenge.poom.domain.util.TimeAgoUtil;
+import gdg.challenge.poom.domain.util.TimeUtil;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -35,7 +35,7 @@ public class AlarmConverter {
     }
 
     public static AlarmResponseDTO.Alarm toAlarmItem(Alarm alarm, CharacterType characterType){
-        String timeAgo = TimeAgoUtil.toTimeAgo(alarm.getCreatedAt());
+        String timeAgo = TimeUtil.toTimeAgo(alarm.getCreatedAt());
 
         return AlarmResponseDTO.Alarm.builder()
                 .alarmType(alarm.getAlarmType())
