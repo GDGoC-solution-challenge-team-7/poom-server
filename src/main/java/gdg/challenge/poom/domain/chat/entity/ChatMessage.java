@@ -8,6 +8,9 @@ import gdg.challenge.poom.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -41,8 +44,16 @@ public class ChatMessage extends BaseEntity {
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessageImage> chatMessageImages = new ArrayList<>();
+
     public void changeMessageType(MessageType newMessageType) {
         this.messageType = newMessageType;
     }
 
+    public void addImage(List<ChatMessageImage> chatMessageImages) {
+        this.chatMessageImages.addAll(chatMessageImages);
+        for (ChatMessageImage chatMessageImage:chatMessageImages)
+            chatMessageImage.setChatMessage(this);
+    }
 }

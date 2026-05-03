@@ -58,13 +58,15 @@ public class ChatCommandService {
         ChatMessage chatMessage = ChatConverter.toChatMessage(
                 senderType, messageType, content, chatRoom, member.getCharacterType()
         );
+        ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
-        if (imageUrls != null) {
+        if (hasImages(imageUrls)) {
             chatMessage.changeMessageType(MessageType.TEXT_IMAGE);
             List<ChatMessageImage> chatMessageImages = ChatConverter.toChatMessageImages(imageUrls, chatMessage);
+            savedChatMessage.addImage(chatMessageImages);
             chatMessageImageRepository.saveAll(chatMessageImages);
         }
-        return chatMessageRepository.save(chatMessage);
+        return savedChatMessage;
     }
 
     public ChatResponseDTO.ChatRoomSetting setChatRoomSetting(Long memberId, ChatRequestDTO.ChatRoomSetting request) {
@@ -79,5 +81,9 @@ public class ChatCommandService {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
 
+    }
+
+    private boolean hasImages(List<String> imageUrls){
+        return imageUrls != null && !imageUrls.isEmpty();
     }
 }
