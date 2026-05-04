@@ -41,32 +41,34 @@ public class AlarmConverter {
                 .alarmType(alarm.getAlarmType())
                 .description(alarm.getDescription())
                 .characterType(alarm.getCharacterType())
+                .alarmListVerContent(alarm.getAlarmListVerContent())
                 .timeAgo(timeAgo)
-                // TODO: ImageUrl도 같이 보내기 GCS 구현 후
-                .imageUrl(null)
                 .build();
     }
 
     // 저장하기 위한 Alarm 만들기
     public static Alarm toAlarm(Member member, AlarmRequestDTO.SendAlarm request){
         return Alarm.builder()
+                .title(request.title())
                 .description(request.description())
                 .alarmType(request.alarmType())
                 .characterType(request.characterType())
+                .alarmListVerContent(request.alarmListVerContent())
                 .member(member)
                 .build();
     }
 
     //
     public static AlarmRequestDTO.SendAlarm toSendAlarm(
-            AlarmType alarmType, String description, String imageUrl,
-            CharacterType characterType, LocalDateTime createdAt
+            AlarmType alarmType, String description, String title,
+            CharacterType characterType, String alarmListVerContent,LocalDateTime createdAt
     ){
         return AlarmRequestDTO.SendAlarm.builder()
+                .title(title)
                 .alarmType(alarmType)
                 .description(description)
-                .imageUrl(imageUrl)
                 .characterType(characterType)
+                .alarmListVerContent(alarmListVerContent)
                 .createdAt(createdAt)
                 .build();
     }
