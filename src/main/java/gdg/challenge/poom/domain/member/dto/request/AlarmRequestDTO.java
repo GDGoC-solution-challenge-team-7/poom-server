@@ -13,9 +13,9 @@ public record AlarmRequestDTO (){
 
     @Builder
     public record SendAlarm(
+            String title,
             AlarmType alarmType,
             String description,
-            String imageUrl,
             CharacterType characterType,
             LocalDateTime createdAt
     ) {

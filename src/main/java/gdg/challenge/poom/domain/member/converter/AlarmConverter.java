@@ -48,6 +48,7 @@ public class AlarmConverter {
     // 저장하기 위한 Alarm 만들기
     public static Alarm toAlarm(Member member, AlarmRequestDTO.SendAlarm request){
         return Alarm.builder()
+                .title(request.title())
                 .description(request.description())
                 .alarmType(request.alarmType())
                 .characterType(request.characterType())
@@ -57,13 +58,13 @@ public class AlarmConverter {
 
     //
     public static AlarmRequestDTO.SendAlarm toSendAlarm(
-            AlarmType alarmType, String description, String imageUrl,
+            AlarmType alarmType, String description, String title,
             CharacterType characterType, LocalDateTime createdAt
     ){
         return AlarmRequestDTO.SendAlarm.builder()
+                .title(title)
                 .alarmType(alarmType)
                 .description(description)
-                .imageUrl(imageUrl)
                 .characterType(characterType)
                 .createdAt(createdAt)
                 .build();

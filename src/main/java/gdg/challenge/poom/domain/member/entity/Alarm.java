@@ -21,6 +21,9 @@ public class Alarm extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
+    private String title;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "alarm_type")
     private AlarmType alarmType;
