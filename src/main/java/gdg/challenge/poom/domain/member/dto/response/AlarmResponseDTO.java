@@ -20,6 +20,7 @@ public record AlarmResponseDTO() {
             AlarmType alarmType,
             String description,
             CharacterType characterType,
+            String alarmListVerContent,
             String timeAgo
     ){}
 

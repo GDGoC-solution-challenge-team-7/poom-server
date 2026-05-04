@@ -41,6 +41,7 @@ public class AlarmConverter {
                 .alarmType(alarm.getAlarmType())
                 .description(alarm.getDescription())
                 .characterType(alarm.getCharacterType())
+                .alarmListVerContent(alarm.getAlarmListVerContent())
                 .timeAgo(timeAgo)
                 .build();
     }
