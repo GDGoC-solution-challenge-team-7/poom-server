@@ -412,6 +412,19 @@
           return;
         }
 
+        // AudioContext는 반드시 사용자 제스처(버튼 클릭) 체인 안에서 시작해야 한다.
+        // ws.onopen 안에서만 만들면 배포(HTTPS) 환경에서 suspended로 남아 onaudioprocess가
+        // 돌지 않고 마이크 PCM이 서버로 전송되지 않는 경우가 많다.
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          await audioContext.resume();
+        } catch (e) {
+          setStatus('오디오를 시작할 수 없습니다: ' + e.message, 'error');
+          stream.getTracks().forEach(function (t) { t.stop(); });
+          stream = null;
+          return;
+        }
+
         const wsUrl = buildVoiceWebSocketUrl();
         updateWsUrlPreview();
         setStatus('연결 중…', 'idle');
@@ -420,11 +433,17 @@
           ws = new WebSocket(wsUrl);
         } catch (e) {
           setStatus('연결 실패: ' + e.message, 'error');
+          stream.getTracks().forEach(function (t) { t.stop(); });
+          stream = null;
+          if (audioContext) {
+            audioContext.close();
+            audioContext = null;
+          }
           return;
         }
 
         ws.binaryType = 'arraybuffer';
-        ws.onopen = () => {
+        ws.onopen = async () => {
           setStatus('연결됨. 말해 보세요.', 'connected');
           startBtn.style.display = 'none';
           stopBtn.style.display = 'block';
@@ -438,6 +457,11 @@
           voiceStateInterval = setInterval(function () {
             if (Date.now() > aiSpeakingUntil) setVoiceState('listening');
           }, 150);
+          if (audioContext && audioContext.state === 'suspended') {
+            try {
+              await audioContext.resume();
+            } catch (_) {}
+          }
           startSendingAudio();
         };
         ws.onclose = () => {
@@ -470,9 +494,9 @@
       }
 
       function startSendingAudio() {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
+        if (!audioContext) {
+          setStatus('오디오 컨텍스트가 없습니다. 다시 시도해 주세요.', 'error');
+          return;
         }
         var inRate = audioContext.sampleRate;
         source = audioContext.createMediaStreamSource(stream);
@@ -508,7 +532,10 @@
         }
         if (stream) stream.getTracks().forEach(t => t.stop());
         if (ws) { ws.close(); ws = null; }
-        if (audioContext) audioContext.close();
+        if (audioContext) {
+          audioContext.close();
+          audioContext = null;
+        }
         startBtn.style.display = 'block';
         stopBtn.style.display = 'none';
       }
