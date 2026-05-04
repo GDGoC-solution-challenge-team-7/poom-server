@@ -3,6 +3,7 @@ package gdg.challenge.poom.domain.member.service;
 import gdg.challenge.poom.domain.member.alarm.service.FCMAlarmSender;
 import gdg.challenge.poom.domain.member.converter.AlarmConverter;
 import gdg.challenge.poom.domain.member.dto.request.AlarmRequestDTO;
+import gdg.challenge.poom.domain.member.entity.Alarm;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import gdg.challenge.poom.domain.member.repository.AlarmRepository;
@@ -39,7 +40,9 @@ public class AlarmCommandService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         fcmAlarmSender.send(member, request);
-        alarmRepository.save(AlarmConverter.toAlarm(member, request));
+        Alarm alarm = AlarmConverter.toAlarm(member, request);
+        log.info("FCM 전송 성공 후, 저장되어야 함. description={}", alarm.getDescription());
+        alarmRepository.save(alarm);
     }
 
     public void updateDeviceToken(AlarmRequestDTO.UpdateDeviceToken request, Long memberId){

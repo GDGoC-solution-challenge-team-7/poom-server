@@ -24,9 +24,9 @@ public class AlarmConverter {
     }
 
     // AlarmResponseDTO.AlarmList
-    public static AlarmResponseDTO.AlarmList toAlarmList(List<Alarm> alarms, CharacterType characterType){
+    public static AlarmResponseDTO.AlarmList toAlarmList(List<Alarm> alarms){
         List<AlarmResponseDTO.Alarm> alarmList = alarms.stream()
-                .map(alarm ->AlarmConverter.toAlarmItem(alarm, characterType))
+                .map(AlarmConverter::toAlarmItem)
                 .toList();
 
         return AlarmResponseDTO.AlarmList.builder()
@@ -34,13 +34,13 @@ public class AlarmConverter {
                 .build();
     }
 
-    public static AlarmResponseDTO.Alarm toAlarmItem(Alarm alarm, CharacterType characterType){
+    public static AlarmResponseDTO.Alarm toAlarmItem(Alarm alarm){
         String timeAgo = TimeUtil.toTimeAgo(alarm.getCreatedAt());
 
         return AlarmResponseDTO.Alarm.builder()
                 .alarmType(alarm.getAlarmType())
                 .description(alarm.getDescription())
-                .characterType(characterType)
+                .characterType(alarm.getCharacterType())
                 .timeAgo(timeAgo)
                 // TODO: ImageUrl도 같이 보내기 GCS 구현 후
                 .imageUrl(null)
@@ -52,6 +52,7 @@ public class AlarmConverter {
         return Alarm.builder()
                 .description(request.description())
                 .alarmType(request.alarmType())
+                .characterType(request.characterType())
                 .member(member)
                 .build();
     }
