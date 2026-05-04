@@ -52,6 +52,10 @@ public class ChatMessage extends BaseEntity {
     }
 
     public void addImage(List<ChatMessageImage> chatMessageImages) {
+        if (chatMessageImages == null || chatMessageImages.isEmpty()) {
+            return;
+        }
+
         this.chatMessageImages.addAll(chatMessageImages);
         for (ChatMessageImage chatMessageImage:chatMessageImages)
             chatMessageImage.setChatMessage(this);

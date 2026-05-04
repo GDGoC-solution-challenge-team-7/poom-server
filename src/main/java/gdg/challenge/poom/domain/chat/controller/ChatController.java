@@ -9,6 +9,7 @@ import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -61,7 +62,7 @@ public class ChatController {
     @PatchMapping("/chat/settings")
     public ApiResponse<ChatResponseDTO.ChatRoomSetting> changeChatRoomSetting(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody ChatRequestDTO.ChatRoomSetting chatRoomSetting
+            @RequestBody @Valid ChatRequestDTO.ChatRoomSetting chatRoomSetting
     ){
         ChatResponseDTO.ChatRoomSetting chatRoomSettingResponse = chatCommandService.setChatRoomSetting(customUserDetails.getMemberId(), chatRoomSetting);
         return ApiResponse.onSuccess(chatRoomSettingResponse);
