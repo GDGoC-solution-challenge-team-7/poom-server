@@ -78,7 +78,7 @@ public class AlarmCommandService {
             );
 
             // 1. 알림 발송
-            fcmAlarmSender.send(target, sendAlarm);
+            send(target.getId(), sendAlarm);
             // 2. 다음 발송 시간 갱신 (다음날)
             target.updateDailyAlarmDateLogic(LocalDate.now()
                     .plusDays(1)

@@ -1,5 +1,6 @@
 package gdg.challenge.poom.domain.member.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import lombok.Builder;
@@ -27,6 +28,7 @@ public record AlarmRequestDTO (){
 
     public record UpdateAlarmSetting(
             Boolean pushAlarm,
+            @JsonFormat(pattern = "HH:mm:ss")
             LocalTime dailyAlarmTime
     ){}
 }
