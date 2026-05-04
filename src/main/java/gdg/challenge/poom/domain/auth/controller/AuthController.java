@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,7 @@ public class AuthController {
 
     @Operation(summary = "회원가입 API", description = "회원가입하는 API")
     @PostMapping("/sign-up")
-    public ApiResponse<AuthResponseDTO.TokenResult> signUp(@RequestBody AuthRequestDTO.SignUp request){
+    public ApiResponse<AuthResponseDTO.TokenResult> signUp(@RequestBody @Valid AuthRequestDTO.SignUp request){
         AuthResponseDTO.TokenResult tokenResult = authCommandService.signUp(request);
         return ApiResponse.onSuccess(tokenResult);
     }

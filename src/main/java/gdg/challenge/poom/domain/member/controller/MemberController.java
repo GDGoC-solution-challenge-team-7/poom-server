@@ -9,6 +9,7 @@ import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class MemberController {
     @PutMapping
     public ApiResponse<Void> changeMemberInfo(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody MemberRequestDTO.ChangeMemberInfo request
+            @RequestBody @Valid MemberRequestDTO.ChangeMemberInfo request
     ){
         memberCommandService.changeMemberInfo(customUserDetails.getMemberId(), request);
         return ApiResponse.onSuccess(null);
@@ -49,7 +50,7 @@ public class MemberController {
     @PostMapping("signed-url")
     public ApiResponse<MemberResponseDTO.SignedUrlBatchResponse> createSignedUrl(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody MemberRequestDTO.SignedUrlBatchRequest request
+            @RequestBody @Valid MemberRequestDTO.SignedUrlBatchRequest request
     ){
         return ApiResponse.onSuccess(gcsService.generateUploadSignedUrl(customUserDetails.getMemberId(), request));
     }
@@ -60,7 +61,7 @@ public class MemberController {
     @PostMapping("profile-images")
     public ApiResponse<Void> uploadProfileImage(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody MemberRequestDTO.ProfileImageRequest request
+            @RequestBody @Valid MemberRequestDTO.ProfileImageRequest request
     ){
         memberCommandService.uploadMemberProfileImage(customUserDetails.getMemberId(), request);
         return ApiResponse.onSuccess(null);

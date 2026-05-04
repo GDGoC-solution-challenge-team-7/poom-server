@@ -8,6 +8,7 @@ import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class AlarmController {
     @Operation(summary = "디바이스 토큰 업데이트 API", description = "디바이스 토큰을 업데이트하는 API")
     @PatchMapping
     public ApiResponse<Void> updateDeviceToken(
-            @RequestBody AlarmRequestDTO.UpdateDeviceToken request,
+            @RequestBody @Valid AlarmRequestDTO.UpdateDeviceToken request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
         alarmCommandService.updateDeviceToken(request, customUserDetails.getMemberId());
@@ -58,7 +59,7 @@ public class AlarmController {
     @Operation(summary = "알림 설정 업데이트 API", description = "알림 설정을 업데이트하는 API")
     @PatchMapping("/settings")
     public ApiResponse<Void> updateAlarmSettings(
-            @RequestBody AlarmRequestDTO.UpdateAlarmSetting request,
+            @RequestBody @Valid AlarmRequestDTO.UpdateAlarmSetting request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
         alarmCommandService.updateAlarmSettings(request, customUserDetails.getMemberId());

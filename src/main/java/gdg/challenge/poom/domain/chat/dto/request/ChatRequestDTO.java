@@ -14,11 +14,8 @@ public record ChatRequestDTO() {
      * characterType: empathy(기본), solution. 이미지: imageUrl(S3 등 http/https URL).
      */
     public record ChatMessageRequest(
-            @NotNull
             Long chatRoomId,
-            @NotBlank
             String message,
-            @NotEmpty
             List<String> imageUrls
     ){}
 
