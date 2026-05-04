@@ -52,6 +52,7 @@ public class AlarmConverter {
                 .description(request.description())
                 .alarmType(request.alarmType())
                 .characterType(request.characterType())
+                .alarmListVerContent(request.alarmListVerContent())
                 .member(member)
                 .build();
     }
@@ -59,13 +60,14 @@ public class AlarmConverter {
     //
     public static AlarmRequestDTO.SendAlarm toSendAlarm(
             AlarmType alarmType, String description, String title,
-            CharacterType characterType, LocalDateTime createdAt
+            CharacterType characterType, String alarmListVerContent,LocalDateTime createdAt
     ){
         return AlarmRequestDTO.SendAlarm.builder()
                 .title(title)
                 .alarmType(alarmType)
                 .description(description)
                 .characterType(characterType)
+                .alarmListVerContent(alarmListVerContent)
                 .createdAt(createdAt)
                 .build();
     }

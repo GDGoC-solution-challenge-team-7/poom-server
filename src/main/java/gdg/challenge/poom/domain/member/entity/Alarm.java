@@ -21,6 +21,9 @@ public class Alarm extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "alarm_list_ver_content", columnDefinition = "TEXT")
+    private String alarmListVerContent;
+
     @Column(nullable = false)
     private String title;
 

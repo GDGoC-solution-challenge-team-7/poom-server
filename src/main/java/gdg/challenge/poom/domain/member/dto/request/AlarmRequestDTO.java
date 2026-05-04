@@ -23,6 +23,8 @@ public record AlarmRequestDTO (){
             String description,
             @NotNull
             CharacterType characterType,
+            @NotBlank
+            String alarmListVerContent,
             @NotNull
             LocalDateTime createdAt
     ) {
