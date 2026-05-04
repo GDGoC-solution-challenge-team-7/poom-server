@@ -19,7 +19,6 @@ public record AlarmResponseDTO() {
             String title,
             AlarmType alarmType,
             String description,
-            String imageUrl,
             CharacterType characterType,
             String timeAgo
     ){}

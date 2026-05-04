@@ -42,8 +42,6 @@ public class AlarmConverter {
                 .description(alarm.getDescription())
                 .characterType(alarm.getCharacterType())
                 .timeAgo(timeAgo)
-                // TODO: ImageUrl도 같이 보내기 GCS 구현 후
-                .imageUrl(null)
                 .build();
     }
 
