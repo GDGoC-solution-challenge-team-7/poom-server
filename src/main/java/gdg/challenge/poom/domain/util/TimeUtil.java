@@ -19,7 +19,7 @@ public class TimeUtil {
 
         long minutes = seconds / 60;
         if (minutes < 60) {
-            return minutes + "s";
+            return minutes + "m";
         }
 
         long hours = minutes / 60;
