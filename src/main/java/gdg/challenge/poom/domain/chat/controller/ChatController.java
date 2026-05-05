@@ -83,6 +83,7 @@ public class ChatController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable Long chatRoomId
     ){
+        chatCommandService.deleteChatRoom(customUserDetails.getMemberId(), chatRoomId);
         return ApiResponse.onSuccess(null);
     }
 }

@@ -32,4 +32,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             @Param("cursorId") Long cursorId,
             Pageable pageable
     );
+
+    void deleteByChatRoom(ChatRoom chatRoom);
 }
