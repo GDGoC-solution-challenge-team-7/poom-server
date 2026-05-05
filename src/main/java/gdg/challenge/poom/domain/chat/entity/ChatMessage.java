@@ -44,6 +44,7 @@ public class ChatMessage extends BaseEntity {
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
+    @Builder.Default
     @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessageImage> chatMessageImages = new ArrayList<>();
 
@@ -53,6 +54,7 @@ public class ChatMessage extends BaseEntity {
 
     public void addImage(List<ChatMessageImage> chatMessageImages) {
         if (chatMessageImages == null || chatMessageImages.isEmpty()) {
+            // TODO: 에러라고 띄우기
             return;
         }
 
