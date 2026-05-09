@@ -59,6 +59,7 @@ public class ChatCommandService {
         ChatMessage chatMessage = ChatConverter.toChatMessage(
                 senderType, messageType, content, chatRoom, member.getCharacterType()
         );
+        chatRoom.addChatMessage(chatMessage);
         ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
         if (hasImages(imageUrls)) {

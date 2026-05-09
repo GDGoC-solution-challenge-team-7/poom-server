@@ -7,6 +7,9 @@ import gdg.challenge.poom.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -30,6 +33,10 @@ public class ChatRoom extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessage> chatMessageList = new ArrayList<>();
+
     /**
      * LLM 응답에서 파싱한 요약 제목을 {@link #chatTitle}에 저장한다.
      */
@@ -38,5 +45,10 @@ public class ChatRoom extends BaseEntity {
             return;
         }
         this.chatTitle = parsedTitle.trim();
+    }
+
+    public void addChatMessage(ChatMessage chatMessage) {
+        chatMessageList.add(chatMessage);
+        chatMessage.setChatRoom(this);
     }
 }

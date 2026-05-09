@@ -136,11 +136,6 @@ public class AuthCommandService {
         redisStorageCommandService.addBlackList(refreshToken);
         redisStorageCommandService.addBlackList(accessToken);
 
-        //  채팅방 메시지 삭제
-        
-        // 채팅방 삭제
-
-        // member 삭제
         memberRepository.delete(member);
     }
 
