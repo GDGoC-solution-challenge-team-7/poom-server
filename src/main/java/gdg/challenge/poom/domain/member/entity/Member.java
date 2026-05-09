@@ -1,5 +1,6 @@
 package gdg.challenge.poom.domain.member.entity;
 
+import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
@@ -14,6 +15,8 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @Getter
@@ -89,6 +92,10 @@ public class Member extends BaseEntity {
 
     private String profileImage;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoom> chatRoomList = new ArrayList<>();
+
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
         this.name = request.name();
         this.email = request.email();
@@ -125,5 +132,10 @@ public class Member extends BaseEntity {
 
     public void updateNextSendAt(LocalDateTime nextSendAt) {
         this.nextSendAt = nextSendAt;
+    }
+
+    public void addChatRoom(ChatRoom chatRoom){
+        chatRoomList.add(chatRoom);
+        chatRoom.setMember(this);
     }
 }

@@ -52,14 +52,13 @@ public class VoiceTranscriptService {
             }
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-            ChatRoom room = chatRoomRepository.save(
-                    ChatRoom.builder()
-                            .chatTitle(PROVISIONAL_TITLE)
+            ChatRoom chatRoom = ChatRoom.builder()
+                    .chatTitle(PROVISIONAL_TITLE)
 //                            .chatMode(ChatMode.VOICE)
 //                            .characterType(request.characterType())
-                            .member(member)
-                            .build()
-            );
+                    .build();
+            member.addChatRoom(chatRoom);
+            ChatRoom room = chatRoomRepository.save(chatRoom);
             chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, content, room, memberId, null);
             return VoiceTranscriptSaved.builder()
                     .chatRoomId(room.getId())
