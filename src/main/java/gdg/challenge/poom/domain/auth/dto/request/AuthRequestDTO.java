@@ -1,5 +1,6 @@
 package gdg.challenge.poom.domain.auth.dto.request;
 
+import gdg.challenge.poom.domain.auth.entity.enums.WithdrawalReason;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
@@ -29,5 +30,11 @@ public record AuthRequestDTO() {
             BirthRelationship birthRelationship,
             String expertiseFile,
             Boolean hasGivenBirth
+    ){}
+
+    public record WithdrawRequest(
+            @NotNull
+            WithdrawalReason withdrawalReason,
+            String reasonDescription
     ){}
 }

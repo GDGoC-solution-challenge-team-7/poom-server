@@ -5,6 +5,7 @@ import gdg.challenge.poom.domain.auth.dto.response.AuthResponseDTO;
 import gdg.challenge.poom.domain.auth.dto.response.OAuth2ResponseDTO;
 import gdg.challenge.poom.domain.auth.service.command.AuthCommandService;
 import gdg.challenge.poom.global.error.ApiResponse;
+import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLDecoder;
@@ -51,4 +53,22 @@ public class AuthController {
         return ApiResponse.onSuccess(accessTokenResult);
     }
 
+    @Operation(summary = "탈퇴 API", description = "탈퇴하는 API")
+    @PostMapping("/withdraw")
+    public ApiResponse<Void> withdraw(
+            @RequestBody AuthRequestDTO.WithdrawRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+
+        return ApiResponse.onSuccess(null);
+    }
+
+    @Operation(summary = "로그아웃 API", description = "로그아웃하는 API")
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+
+        return ApiResponse.onSuccess(null);
+    }
 }
