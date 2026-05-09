@@ -44,7 +44,6 @@ public class AuthCommandService {
     private final RedisStorageCommandService redisStorageCommandService;
     private final RedisStorageQueryService redisStorageQueryService;
     private final WithdrawalReasonLogRepository withdrawalReasonLogRepository;
-    private final ChatRoomRepository chatRoomRepository;
 
     public OAuth2ResponseDTO.Login loginWithOAuth(HttpServletRequest request, HttpServletResponse response,
                                                    String code){
@@ -80,7 +79,7 @@ public class AuthCommandService {
         Social social = socialRepository.findById(request.socialId())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.SOCIAL_NOT_FOUND));
         Member member = memberRepository.save(AuthConverter.toMember(request));
-        social.addMember(member);
+        member.addSocial(social);
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
         AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
         return loginToken;

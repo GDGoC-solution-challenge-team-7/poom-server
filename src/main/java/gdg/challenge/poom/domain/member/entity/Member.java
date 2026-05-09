@@ -96,6 +96,10 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> chatRoomList = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Social> socialList = new ArrayList<>();
+
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
         this.name = request.name();
         this.email = request.email();
@@ -137,5 +141,10 @@ public class Member extends BaseEntity {
     public void addChatRoom(ChatRoom chatRoom){
         chatRoomList.add(chatRoom);
         chatRoom.setMember(this);
+    }
+
+    public void addSocial(Social social){
+        socialList.add(social);
+        social.setMember(this);
     }
 }
