@@ -49,6 +49,10 @@ spring:
       storage:
         bucket: ${BUCKET_NAME}
 
+  data:
+    redis:
+      host: {REDIS_HOST}
+      port: 6379
 cors:
   urls:
     - http://localhost:8080
