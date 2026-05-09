@@ -5,6 +5,8 @@ import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.global.common.BaseEntity;
+import gdg.challenge.poom.global.error.code.status.ChatErrorCode;
+import gdg.challenge.poom.global.error.exception.handler.ChatException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -54,8 +56,7 @@ public class ChatMessage extends BaseEntity {
 
     public void addImage(List<ChatMessageImage> chatMessageImages) {
         if (chatMessageImages == null || chatMessageImages.isEmpty()) {
-            // TODO: 에러라고 띄우기
-            return;
+            throw new ChatException(ChatErrorCode.CHAT_MESSAGE_IMAGE_REQUIRED);
         }
 
         this.chatMessageImages.addAll(chatMessageImages);

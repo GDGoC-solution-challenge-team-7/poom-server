@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -77,10 +78,15 @@ public class ChatCommandService {
         return ChatConverter.toChatRoomSetting(member);
     }
 
-    public void deleteChatRoom(Long chatRoomId) {
+    public void deleteChatRoom(Long memberId, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
 
+        if (!Objects.equals(memberId, chatRoom.getMember().getId())) {
+            throw new ChatException(ChatErrorCode.CHAT_ROOM_DELETE_DENIED);
+        }
+        chatMessageRepository.deleteByChatRoom(chatRoom);
+        chatRoomRepository.delete(chatRoom);
     }
 
     private boolean hasImages(List<String> imageUrls){

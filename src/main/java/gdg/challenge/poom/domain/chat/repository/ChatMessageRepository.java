@@ -33,5 +33,5 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             Pageable pageable
     );
 
-
+    void deleteByChatRoom(ChatRoom chatRoom);
 }
