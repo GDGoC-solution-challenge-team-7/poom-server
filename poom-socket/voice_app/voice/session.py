@@ -21,6 +21,7 @@ from pipecat.transports.websocket.fastapi import (
 )
 
 from voice_app.config import (
+    GEMINI_VAD_SILENCE_DURATION_MS,
     GEMINI_VOICE_ID,
     GEMINI_VOICE_MODEL,
     GOOGLE_API_KEY,
@@ -102,6 +103,7 @@ async def run_voice_session(websocket: WebSocket) -> None:
         )
 
     try:
+        logger.info("[voice] Gemini VAD silence_duration_ms={}", GEMINI_VAD_SILENCE_DURATION_MS)
         params = FastAPIWebsocketParams(
             serializer=RawPCMWebSocketSerializer(),
             add_wav_header=False,
@@ -119,7 +121,7 @@ async def run_voice_session(websocket: WebSocket) -> None:
                 temperature=0.7,
                 max_tokens=2048,
                 language=Language.KO_KR,
-                vad=GeminiVADParams(silence_duration_ms=500),
+                vad=GeminiVADParams(silence_duration_ms=GEMINI_VAD_SILENCE_DURATION_MS),
                 context_window_compression=ContextWindowCompressionParams(enabled=True),
             ),
         )
