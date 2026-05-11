@@ -428,6 +428,10 @@
       let nextPlayTime = 0;
       let aiSpeakingUntil = 0;
       let voiceStateInterval = null;
+      let browserRmsWindowSumSquares = 0;
+      let browserRmsWindowSampleCount = 0;
+      let browserRmsWindowPeak = 0;
+      let browserRmsWindowStartedAtMs = 0;
       const SEND_RATE = 16000;
       const PLAY_RATE = 24000;
       const VOICE_RMS_THRESHOLD = 0.003;
@@ -589,6 +593,10 @@
           void audioContext.resume();
         }
         lastSpeechAtMs = Date.now();
+        browserRmsWindowSumSquares = 0;
+        browserRmsWindowSampleCount = 0;
+        browserRmsWindowPeak = 0;
+        browserRmsWindowStartedAtMs = Date.now();
         if (noAudioDebugInterval) {
           clearInterval(noAudioDebugInterval);
         }
@@ -610,9 +618,34 @@
           const input = e.inputBuffer.getChannelData(0);
           let sumSquares = 0;
           for (let i = 0; i < input.length; i++) {
-            sumSquares += input[i] * input[i];
+            const v = input[i];
+            sumSquares += v * v;
+            const absV = Math.abs(v);
+            browserRmsWindowSumSquares += v * v;
+            browserRmsWindowSampleCount += 1;
+            if (absV > browserRmsWindowPeak) {
+              browserRmsWindowPeak = absV;
+            }
           }
           const rms = Math.sqrt(sumSquares / Math.max(1, input.length));
+          const nowMs = Date.now();
+          if (nowMs - browserRmsWindowStartedAtMs >= 1000) {
+            const windowRms = Math.sqrt(
+              browserRmsWindowSumSquares / Math.max(1, browserRmsWindowSampleCount)
+            );
+            console.info(
+              '[demo][debug] input_pcm_1s rms=',
+              windowRms.toFixed(5),
+              'peak=',
+              browserRmsWindowPeak.toFixed(5),
+              'samples=',
+              browserRmsWindowSampleCount
+            );
+            browserRmsWindowSumSquares = 0;
+            browserRmsWindowSampleCount = 0;
+            browserRmsWindowPeak = 0;
+            browserRmsWindowStartedAtMs = nowMs;
+          }
           // 볼륨 게이트로 프레임을 버리면 말 앞부분·작은 목소리가 STT에 전달되지 않음.
           // VAD/침묵 처리는 서버(Gemini)에 맡긴다.
           const pcm16k = resampleTo16kMono(input, inRate);
@@ -638,6 +671,10 @@
           clearInterval(noAudioDebugInterval);
           noAudioDebugInterval = null;
         }
+        browserRmsWindowSumSquares = 0;
+        browserRmsWindowSampleCount = 0;
+        browserRmsWindowPeak = 0;
+        browserRmsWindowStartedAtMs = 0;
         lastSpeechAtMs = 0;
         if (voiceVisual) {
           voiceVisual.classList.remove('visible');
