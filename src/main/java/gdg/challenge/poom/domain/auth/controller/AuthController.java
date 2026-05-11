@@ -52,23 +52,4 @@ public class AuthController {
         AuthResponseDTO.AccessTokenResult accessTokenResult = authCommandService.reissue(request, response);
         return ApiResponse.onSuccess(accessTokenResult);
     }
-
-    @Operation(summary = "탈퇴 API", description = "탈퇴하는 API")
-    @PostMapping("/withdraw")
-    public ApiResponse<Void> withdraw(
-            @RequestBody AuthRequestDTO.WithdrawRequest request,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
-    ){
-
-        return ApiResponse.onSuccess(null);
-    }
-
-    @Operation(summary = "로그아웃 API", description = "로그아웃하는 API")
-    @PostMapping("/logout")
-    public ApiResponse<Void> logout(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
-    ){
-
-        return ApiResponse.onSuccess(null);
-    }
 }

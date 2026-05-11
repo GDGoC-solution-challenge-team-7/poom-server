@@ -89,4 +89,12 @@ public class JwtUtil {
         return null;
     }
 
+    public boolean isValid(String token) {
+        try {
+            getClaims(token);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
+    }
 }

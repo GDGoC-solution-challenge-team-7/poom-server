@@ -51,7 +51,7 @@ spring:
 
   data:
     redis:
-      host: {REDIS_HOST}
+      host: ${REDIS_HOST}
       port: 6379
 cors:
   urls:

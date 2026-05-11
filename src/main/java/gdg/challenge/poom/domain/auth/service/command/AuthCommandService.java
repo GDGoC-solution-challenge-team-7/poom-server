@@ -82,6 +82,7 @@ public class AuthCommandService {
         member.addSocial(social);
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
         AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
+        redisStorageCommandService.addRefreshToken(member.getId(), loginToken.refreshToken());
         return loginToken;
     }
 

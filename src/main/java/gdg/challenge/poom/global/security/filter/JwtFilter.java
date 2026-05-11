@@ -1,5 +1,6 @@
 package gdg.challenge.poom.global.security.filter;
 
+import gdg.challenge.poom.domain.auth.service.query.RedisStorageQueryService;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.service.MemberQueryService;
 import gdg.challenge.poom.global.security.constants.AuthenticationConstants;
@@ -25,36 +26,34 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final MemberQueryService memberQueryService;
+    private final RedisStorageQueryService redisStorageQueryService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("[JWT] {} {}", request.getMethod(), request.getRequestURI());
-        String token = resolveToken(request);
-
-        if (!StringUtils.hasText(token)) {
+        if (!resolvableToken(request)){
             filterChain.doFilter(request, response);
             return;
         }
 
-        Long memberId = jwtUtil.getMemberId(token);
-        if (memberId == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        Member member = memberQueryService.findById(memberId);
-        CustomUserDetails customUserDetails = new CustomUserDetails(member);
+        String token = jwtUtil.resolveToken(request);
+        if (isValid(token)) {
+            Long memberId = jwtUtil.getMemberId(token);
+            Member member = memberQueryService.findById(memberId);
+            CustomUserDetails customUserDetails = new CustomUserDetails(member);
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
         filterChain.doFilter(request, response);
     }
 
-    private String resolveToken(HttpServletRequest request) {
+    private boolean resolvableToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AuthenticationConstants.AUTH_HEADER);
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(AuthenticationConstants.TOKEN_PREFIX)) {
-            return bearerToken.substring(AuthenticationConstants.TOKEN_PREFIX.length());
-        }
-        return null;
+        return StringUtils.hasText(bearerToken) && bearerToken.startsWith(AuthenticationConstants.TOKEN_PREFIX);
     }
 
+    private boolean isValid(String token){
+        return jwtUtil.isValid(token) && jwtUtil.getMemberId(token) != null && !redisStorageQueryService.isBlackList(token);
+    }
 }
