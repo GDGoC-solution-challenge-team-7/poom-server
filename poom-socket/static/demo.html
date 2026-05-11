@@ -357,11 +357,14 @@
       let stream = null;
       let processor = null;
       let source = null;
+      let lastSpeechAtMs = 0;
+      let noAudioDebugInterval = null;
       let nextPlayTime = 0;
       let aiSpeakingUntil = 0;
       let voiceStateInterval = null;
       const SEND_RATE = 16000;
       const PLAY_RATE = 24000;
+      const VOICE_RMS_THRESHOLD = 0.01;
 
       /**
        * 실제 AudioContext 샘플레이트 → 16kHz 선형 보간 리샘플.
@@ -412,9 +415,8 @@
           return;
         }
 
-        // AudioContext는 반드시 사용자 제스처(버튼 클릭) 체인 안에서 시작해야 한다.
-        // ws.onopen 안에서만 만들면 배포(HTTPS) 환경에서 suspended로 남아 onaudioprocess가
-        // 돌지 않고 마이크 PCM이 서버로 전송되지 않는 경우가 많다.
+        // AudioContext는 사용자 클릭 직후·WebSocket 열리기 전에 만든다.
+        // onopen 안에서만 만들면(비동기 끊김) suspended로 남아 onaudioprocess가 안 돌 수 있음.
         try {
           audioContext = new (window.AudioContext || window.webkitAudioContext)();
           await audioContext.resume();
@@ -443,7 +445,7 @@
         }
 
         ws.binaryType = 'arraybuffer';
-        ws.onopen = async () => {
+        ws.onopen = () => {
           setStatus('연결됨. 말해 보세요.', 'connected');
           startBtn.style.display = 'none';
           stopBtn.style.display = 'block';
@@ -458,9 +460,7 @@
             if (Date.now() > aiSpeakingUntil) setVoiceState('listening');
           }, 150);
           if (audioContext && audioContext.state === 'suspended') {
-            try {
-              await audioContext.resume();
-            } catch (_) {}
+            void audioContext.resume();
           }
           startSendingAudio();
         };
@@ -495,9 +495,24 @@
 
       function startSendingAudio() {
         if (!audioContext) {
-          setStatus('오디오 컨텍스트가 없습니다. 다시 시도해 주세요.', 'error');
-          return;
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
+        if (audioContext.state === 'suspended') {
+          void audioContext.resume();
+        }
+        lastSpeechAtMs = Date.now();
+        if (noAudioDebugInterval) {
+          clearInterval(noAudioDebugInterval);
+        }
+        noAudioDebugInterval = setInterval(function () {
+          if (!ws || ws.readyState !== WebSocket.OPEN) return;
+          if (Date.now() - lastSpeechAtMs >= 5000) {
+            setStatus('디버그: 5초 이상 음성이 감지되지 않습니다.', 'error');
+            console.warn('[demo][debug] 5초 이상 무음 상태');
+            ws.send('__DEBUG_NO_VOICE_5S__');
+            lastSpeechAtMs = Date.now();
+          }
+        }, 1000);
         var inRate = audioContext.sampleRate;
         source = audioContext.createMediaStreamSource(stream);
         const bufferSize = 2048;
@@ -505,10 +520,18 @@
         processor.onaudioprocess = (e) => {
           if (!ws || ws.readyState !== WebSocket.OPEN) return;
           const input = e.inputBuffer.getChannelData(0);
+          let sumSquares = 0;
+          for (let i = 0; i < input.length; i++) {
+            sumSquares += input[i] * input[i];
+          }
+          const rms = Math.sqrt(sumSquares / Math.max(1, input.length));
           // 볼륨 게이트로 프레임을 버리면 말 앞부분·작은 목소리가 STT에 전달되지 않음.
           // VAD/침묵 처리는 서버(Gemini)에 맡긴다.
           const pcm16k = resampleTo16kMono(input, inRate);
           const pcm = floatTo16BitPCM(pcm16k);
+          if (rms >= VOICE_RMS_THRESHOLD && pcm.byteLength > 0) {
+            lastSpeechAtMs = Date.now();
+          }
           ws.send(pcm);
         };
         source.connect(processor);
@@ -523,6 +546,11 @@
           clearInterval(voiceStateInterval);
           voiceStateInterval = null;
         }
+        if (noAudioDebugInterval) {
+          clearInterval(noAudioDebugInterval);
+          noAudioDebugInterval = null;
+        }
+        lastSpeechAtMs = 0;
         if (voiceVisual) {
           voiceVisual.classList.remove('visible');
           voiceVisual.setAttribute('aria-hidden', 'true');
