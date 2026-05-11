@@ -63,6 +63,10 @@ class RawPCMWebSocketSerializer(FrameSerializer):
                     "[voice][debug] 클라이언트에서 5초 무음 감지됨. "
                     "마이크 입력 레벨/브라우저 권한/오디오 장치를 확인하세요."
                 )
+            elif data.startswith("__DEBUG_INFO__:"):
+                _, _, rest = data.partition("__DEBUG_INFO__:")
+                tag, _, body = rest.partition(":")
+                logger.warning("[voice][debug] 클라이언트 {}: {}", tag or "info", body)
             return None
         if not data:
             return None
