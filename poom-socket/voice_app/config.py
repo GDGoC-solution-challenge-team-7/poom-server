@@ -33,6 +33,7 @@ SYSTEM_INSTRUCTION = (
 
 GEMINI_VOICE_MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025"
 GEMINI_VOICE_ID = "Leda"
+GEMINI_VAD_SILENCE_DURATION_MS = int(os.getenv("GEMINI_VAD_SILENCE_DURATION_MS", "500"))
 
 # UserStoppedSpeaking 이후 늦게 도착하는 전사를 묶기 위한 지연(초).
 USER_TURN_SETTLE_DELAY_SEC = float(os.getenv("USER_TURN_SETTLE_DELAY_SEC", "0.35"))

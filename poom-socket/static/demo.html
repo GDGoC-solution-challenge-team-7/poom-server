@@ -435,6 +435,66 @@
       const SEND_RATE = 16000;
       const PLAY_RATE = 24000;
       const VOICE_RMS_THRESHOLD = 0.003;
+      let transcriptionStats = { userNonFinal: 0, userFinal: 0, aiFinal: 0 };
+      let transcriptionSummaryInterval = null;
+
+      /**
+       * 서버 `send_json` 전사 페이로드(`observers.py`) 수신 시 카운터 갱신 및 콘솔 로그.
+       * @returns {boolean} 전사 디버그로 처리했으면 true
+       */
+      function handleServerJsonForTranscriptionDebug(str) {
+        var payload;
+        try {
+          payload = JSON.parse(str);
+        } catch (_) {
+          return false;
+        }
+        if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+          return false;
+        }
+        var shaped =
+          'user_text' in payload ||
+          'ai_text' in payload ||
+          'user_text_final' in payload ||
+          'ai_text_final' in payload;
+        if (!shaped) {
+          return false;
+        }
+        var ut =
+          payload.user_text != null && String(payload.user_text).trim()
+            ? String(payload.user_text).trim()
+            : '';
+        var at =
+          payload.ai_text != null && String(payload.ai_text).trim()
+            ? String(payload.ai_text).trim()
+            : '';
+        var uf = !!payload.user_text_final;
+        var af = !!payload.ai_text_final;
+        if (ut) {
+          if (uf) {
+            transcriptionStats.userFinal += 1;
+          } else {
+            transcriptionStats.userNonFinal += 1;
+          }
+        }
+        if (af && at) {
+          transcriptionStats.aiFinal += 1;
+        }
+        if (uf || af) {
+          console.info('[demo][debug] transcription_event', {
+            counts: {
+              user_non_final: transcriptionStats.userNonFinal,
+              user_final: transcriptionStats.userFinal,
+              ai_final: transcriptionStats.aiFinal,
+            },
+            user_text: ut.slice(0, 80),
+            ai_text: at.slice(0, 80),
+            user_text_final: uf,
+            ai_text_final: af,
+          });
+        }
+        return true;
+      }
 
       /**
        * 실제 AudioContext 샘플레이트 → 16kHz 선형 보간 리샘플.
@@ -470,6 +530,16 @@
 
       async function start() {
         setStatus('마이크 권한 요청 중…', 'idle');
+        var pageQ = new URLSearchParams(location.search);
+        var disableAudioProcessing = pageQ.get('disable_audio_processing') === '1';
+        var audioConstraints = {
+          channelCount: 1,
+          echoCancellation: !disableAudioProcessing,
+          noiseSuppression: !disableAudioProcessing,
+          autoGainControl: !disableAudioProcessing,
+          sampleRate: 48000
+        };
+        console.info('[demo][debug] audio constraints:', audioConstraints);
         const permissionBefore = await debugMicrophonePermissionState();
         const beforePermission = await debugAudioInputDevices('권한 요청 전');
         if (!beforePermission.hasAudioInput) {
@@ -478,13 +548,7 @@
         }
         try {
           stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              channelCount: 1,
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-              sampleRate: 48000
-            }
+            audio: audioConstraints
           });
         } catch (e) {
           setStatus('마이크 권한이 필요합니다: ' + e.message, 'error');
@@ -551,6 +615,31 @@
           voiceStateInterval = setInterval(function () {
             if (Date.now() > aiSpeakingUntil) setVoiceState('listening');
           }, 150);
+          transcriptionStats = { userNonFinal: 0, userFinal: 0, aiFinal: 0 };
+          if (transcriptionSummaryInterval) {
+            clearInterval(transcriptionSummaryInterval);
+            transcriptionSummaryInterval = null;
+          }
+          function logTranscriptionSummary() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            var u = transcriptionStats.userNonFinal + transcriptionStats.userFinal;
+            var a = transcriptionStats.aiFinal;
+            var zero = u === 0 && a === 0;
+            console.info('[demo][debug] transcription_counts', {
+              user_non_final: transcriptionStats.userNonFinal,
+              user_final: transcriptionStats.userFinal,
+              user_events: u,
+              ai_final: a,
+              transcription_zero: zero,
+            });
+            if (zero) {
+              console.warn(
+                '[demo][debug] transcription_zero: 이 구간 동안 서버 전사 JSON이 없음 — STT/VAD/백엔드 로그 확인'
+              );
+            }
+          }
+          logTranscriptionSummary();
+          transcriptionSummaryInterval = setInterval(logTranscriptionSummary, 12000);
           if (audioContext && audioContext.state === 'suspended') {
             void audioContext.resume();
           }
@@ -563,8 +652,10 @@
         ws.onerror = () => setStatus('연결 오류 발생.', 'error');
 
         ws.onmessage = (ev) => {
-          // 서버가 전사/메타데이터용 JSON 텍스트 프레임을 보낼 수 있음 — 시연 페이지는 오디오만 재생.
-          if (typeof ev.data === 'string') return;
+          if (typeof ev.data === 'string') {
+            handleServerJsonForTranscriptionDebug(ev.data);
+            return;
+          }
           if (ev.data instanceof ArrayBuffer && ev.data.byteLength > 0 && audioContext) {
             const buffer = ev.data;
             const view = new Int16Array(buffer);
@@ -670,6 +761,10 @@
         if (noAudioDebugInterval) {
           clearInterval(noAudioDebugInterval);
           noAudioDebugInterval = null;
+        }
+        if (transcriptionSummaryInterval) {
+          clearInterval(transcriptionSummaryInterval);
+          transcriptionSummaryInterval = null;
         }
         browserRmsWindowSumSquares = 0;
         browserRmsWindowSampleCount = 0;
