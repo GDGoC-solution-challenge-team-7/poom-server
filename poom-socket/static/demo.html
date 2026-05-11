@@ -352,6 +352,72 @@
         }
       }
 
+      async function debugAudioInputDevices(stageLabel) {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+          console.warn('[demo][debug] enumerateDevices 미지원 브라우저');
+          return { hasAudioInput: false, count: 0 };
+        }
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const audioInputs = devices.filter(function (d) { return d.kind === 'audioinput'; });
+          console.info(
+            '[demo][debug] 마이크 장치 점검(' + stageLabel + '):',
+            audioInputs.length,
+            '개',
+            audioInputs.map(function (d, i) {
+              return {
+                index: i,
+                deviceId: d.deviceId || '(empty)',
+                label: d.label || '(권한 전: 라벨 비어있음)'
+              };
+            })
+          );
+          return { hasAudioInput: audioInputs.length > 0, count: audioInputs.length };
+        } catch (e) {
+          console.warn('[demo][debug] enumerateDevices 실패:', e);
+          return { hasAudioInput: false, count: 0 };
+        }
+      }
+
+      async function debugMicrophonePermissionState() {
+        if (!navigator.permissions || !navigator.permissions.query) {
+          return 'unsupported';
+        }
+        try {
+          const p = await navigator.permissions.query({ name: 'microphone' });
+          return p && p.state ? p.state : 'unknown';
+        } catch (_) {
+          return 'unsupported';
+        }
+      }
+
+      function sendDebugTextToServer(tag, payload) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        var body = JSON.stringify(payload || {});
+        ws.send('__DEBUG_INFO__:' + tag + ':' + body);
+      }
+
+      function getActiveMicTrackDebugInfo(streamObj) {
+        if (!streamObj || !streamObj.getAudioTracks) {
+          return { hasTrack: false };
+        }
+        var track = streamObj.getAudioTracks()[0];
+        if (!track) {
+          return { hasTrack: false };
+        }
+        var settings = (track.getSettings && track.getSettings()) || {};
+        return {
+          hasTrack: true,
+          label: track.label || '(empty)',
+          enabled: track.enabled,
+          muted: track.muted,
+          readyState: track.readyState || 'unknown',
+          deviceId: settings.deviceId || '(unknown)',
+          sampleRate: settings.sampleRate || '(unknown)',
+          channelCount: settings.channelCount || '(unknown)',
+        };
+      }
+
       let ws = null;
       let audioContext = null;
       let stream = null;
@@ -400,6 +466,12 @@
 
       async function start() {
         setStatus('마이크 권한 요청 중…', 'idle');
+        const permissionBefore = await debugMicrophonePermissionState();
+        const beforePermission = await debugAudioInputDevices('권한 요청 전');
+        if (!beforePermission.hasAudioInput) {
+          setStatus('디버그: 인식된 마이크 장치가 없습니다. OS 입력 장치를 확인해 주세요.', 'error');
+          return;
+        }
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -412,6 +484,13 @@
           });
         } catch (e) {
           setStatus('마이크 권한이 필요합니다: ' + e.message, 'error');
+          return;
+        }
+        const permissionAfter = await debugMicrophonePermissionState();
+        const afterPermission = await debugAudioInputDevices('권한 허용 후');
+        const activeMicInfo = getActiveMicTrackDebugInfo(stream);
+        if (!afterPermission.hasAudioInput) {
+          setStatus('디버그: 권한 허용 후에도 마이크 장치가 보이지 않습니다.', 'error');
           return;
         }
 
@@ -446,6 +525,15 @@
 
         ws.binaryType = 'arraybuffer';
         ws.onopen = () => {
+          sendDebugTextToServer('mic_permission', {
+            before: permissionBefore,
+            after: permissionAfter,
+          });
+          sendDebugTextToServer('audio_device_count', {
+            before: beforePermission.count,
+            after: afterPermission.count,
+          });
+          sendDebugTextToServer('active_mic', activeMicInfo);
           setStatus('연결됨. 말해 보세요.', 'connected');
           startBtn.style.display = 'none';
           stopBtn.style.display = 'block';
