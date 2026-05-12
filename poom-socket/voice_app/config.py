@@ -33,6 +33,7 @@ SYSTEM_INSTRUCTION = (
 
 GEMINI_VOICE_MODEL = "models/gemini-2.5-flash-native-audio-preview-12-2025"
 GEMINI_VOICE_ID = "Leda"
+GEMINI_VAD_SILENCE_DURATION_MS = int(os.getenv("GEMINI_VAD_SILENCE_DURATION_MS", "500"))
 
 # UserStoppedSpeaking 이후 늦게 도착하는 전사를 묶기 위한 지연(초).
 USER_TURN_SETTLE_DELAY_SEC = float(os.getenv("USER_TURN_SETTLE_DELAY_SEC", "0.35"))
@@ -41,9 +42,6 @@ USER_TURN_SETTLE_DELAY_SEC = float(os.getenv("USER_TURN_SETTLE_DELAY_SEC", "0.35
 SPRING_BASE_URL = (os.getenv("SPRING_BASE_URL") or "").strip()
 # 음성 전사 저장은 LLM 없음 — 기본 타임아웃 짧게.
 SPRING_CHAT_TIMEOUT_SEC = float(os.getenv("SPRING_CHAT_TIMEOUT_SEC", "60"))
-
-# WebSocket으로 들어온 첫 바이너리 오디오 청크 수신 여부 로그(1회). 배포·클라이언트 연동 진단용.
-VOICE_DEBUG_AUDIO = (os.getenv("VOICE_DEBUG_AUDIO") or "").strip().lower() in ("1", "true", "yes")
 
 if SPRING_BASE_URL:
     logger.info("[spring] 설정됨: SPRING_BASE_URL={}", SPRING_BASE_URL)
