@@ -1,5 +1,7 @@
 package gdg.challenge.poom.domain.member.controller;
 
+import gdg.challenge.poom.domain.auth.dto.request.AuthRequestDTO;
+import gdg.challenge.poom.domain.auth.service.command.AuthCommandService;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
 import gdg.challenge.poom.domain.member.dto.response.MemberResponseDTO;
 import gdg.challenge.poom.domain.member.service.GcsService;
@@ -9,6 +11,7 @@ import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +26,7 @@ public class MemberController {
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
     private final GcsService gcsService;
+    private final AuthCommandService authCommandService;
 
     @Operation(summary = "멤버 정보 조회 API", description = "멤버의 정보를 조회하는 API")
     @GetMapping
@@ -64,6 +68,27 @@ public class MemberController {
             @RequestBody @Valid MemberRequestDTO.ProfileImageRequest request
     ){
         memberCommandService.uploadMemberProfileImage(customUserDetails.getMemberId(), request);
+        return ApiResponse.onSuccess(null);
+    }
+
+    @Operation(summary = "탈퇴 API", description = "탈퇴하는 API")
+    @DeleteMapping("/withdraw")
+    public ApiResponse<Void> withdraw(
+            HttpServletRequest request,
+            @RequestBody @Valid AuthRequestDTO.WithdrawRequest withdrawRequest,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        authCommandService.withdraw(request, customUserDetails.getMemberId(), withdrawRequest);
+        return ApiResponse.onSuccess(null);
+    }
+
+    @Operation(summary = "로그아웃 API", description = "로그아웃하는 API")
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(
+            HttpServletRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        authCommandService.logout(request, customUserDetails.getMemberId());
         return ApiResponse.onSuccess(null);
     }
 }

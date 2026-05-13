@@ -2,6 +2,8 @@ package gdg.challenge.poom.domain.auth.converter;
 
 import gdg.challenge.poom.domain.auth.dto.request.AuthRequestDTO;
 import gdg.challenge.poom.domain.auth.dto.response.AuthResponseDTO;
+import gdg.challenge.poom.domain.auth.entity.WithdrawalReasonLog;
+import gdg.challenge.poom.domain.auth.entity.enums.WithdrawalReason;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.util.TimeUtil;
 
@@ -36,6 +38,12 @@ public class AuthConverter {
         return AuthResponseDTO.AccessTokenResult.builder()
                 .memberId(memberId)
                 .accessToken(accessToken)
+                .build();
+    }
+
+    public static WithdrawalReasonLog toWithdrawalReasonLog(WithdrawalReason reason, String detail){
+        return WithdrawalReasonLog.builder()
+                .reason(reason)
                 .build();
     }
 }

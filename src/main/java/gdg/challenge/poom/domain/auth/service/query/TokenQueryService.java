@@ -4,6 +4,8 @@ import gdg.challenge.poom.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+
 @Service
 @RequiredArgsConstructor
 public class TokenQueryService {
@@ -12,5 +14,13 @@ public class TokenQueryService {
 
     public Long getMemberId(String token) {
         return jwtUtil.getMemberId(token);
+    }
+
+    public Duration getAccessTokenExpiration() {
+        return jwtUtil.getAccessExpiration();
+    }
+
+    public Duration getRefreshTokenExpiration() {
+        return jwtUtil.getRefreshExpiration();
     }
 }

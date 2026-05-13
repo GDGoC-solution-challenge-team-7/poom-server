@@ -40,9 +40,9 @@ public class ChatCommandService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         if (request.chatRoomId() == null) {
-            return chatRoomRepository.save(
-                    ChatConverter.toChatRoom(member, title, request)
-            );
+            ChatRoom chatRoom = ChatConverter.toChatRoom(member, title, request);
+            member.addChatRoom(chatRoom);
+            return chatRoomRepository.save(chatRoom);
         } else {
             return chatRoomRepository.findById(request.chatRoomId())
                     .orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
@@ -59,6 +59,7 @@ public class ChatCommandService {
         ChatMessage chatMessage = ChatConverter.toChatMessage(
                 senderType, messageType, content, chatRoom, member.getCharacterType()
         );
+        chatRoom.addChatMessage(chatMessage);
         ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
         if (hasImages(imageUrls)) {

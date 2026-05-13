@@ -1,7 +1,9 @@
 package gdg.challenge.poom.global.security;
 
+import gdg.challenge.poom.domain.auth.service.query.RedisStorageQueryService;
 import gdg.challenge.poom.domain.member.service.MemberQueryService;
 import gdg.challenge.poom.global.data.CorsConfigData;
+import gdg.challenge.poom.global.security.filter.AuthenticationEntryPointImpl;
 import gdg.challenge.poom.global.security.filter.JwtFilter;
 import gdg.challenge.poom.global.util.JwtUtil;
 import jakarta.servlet.Filter;
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -26,6 +29,7 @@ public class SecurityConfig {
     private final CorsConfigData corsConfigData;
     private final JwtUtil jwtUtil;
     private final MemberQueryService memberQueryService;
+    private final RedisStorageQueryService redisStorageQueryService;
 
     private String[] allowUrl = {
             API_PREFIX + "/auth/**",
@@ -59,6 +63,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .cors( cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint()))
                 ;
 
         return http.build();
@@ -79,6 +84,11 @@ public class SecurityConfig {
 
     @Bean
     Filter jwtFilter() {
-        return new JwtFilter(jwtUtil, memberQueryService);
+        return new JwtFilter(jwtUtil, memberQueryService, redisStorageQueryService);
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new AuthenticationEntryPointImpl();
     }
 }

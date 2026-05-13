@@ -42,6 +42,7 @@ public class ChatMessage extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CharacterType characterType;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;

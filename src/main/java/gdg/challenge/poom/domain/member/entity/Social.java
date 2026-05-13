@@ -23,6 +23,7 @@ public class Social extends BaseEntity {
     @Column(name = "provider_id")
     private String providerId;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
