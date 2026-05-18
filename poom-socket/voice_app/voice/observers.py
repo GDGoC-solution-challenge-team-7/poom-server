@@ -74,7 +74,7 @@ class VoiceSessionObserver(BaseObserver):
                 "ai_text_final": ai_text_final,
             })
         except Exception as e:
-            logger.debug("VoiceSessionObserver send_json skipped: {}", e)
+            logger.warning("VoiceSessionObserver send_json failed (클라이언트 전사 JSON 미전달): {}", e)
 
     async def _on_user_turn_final(self, text: str) -> None:
         logger.info("[voice] user_text_final: {}", text)
