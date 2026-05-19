@@ -57,11 +57,6 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean resolvableToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AuthenticationConstants.AUTH_HEADER);
-        return StringUtils.hasText(bearerToken) && bearerToken.startsWith(AuthenticationConstants.TOKEN_PREFIX);
-    }
-
     private boolean isValid(String token){
         return jwtUtil.isValid(token) && jwtUtil.getMemberId(token) != null && !redisStorageQueryService.isBlackList(token);
     }
