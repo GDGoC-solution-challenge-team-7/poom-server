@@ -17,7 +17,9 @@ import gdg.challenge.poom.domain.member.entity.Social;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.domain.member.repository.SocialRepository;
 import gdg.challenge.poom.domain.member.repository.WithdrawalReasonLogRepository;
+import gdg.challenge.poom.global.error.code.status.AuthErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
+import gdg.challenge.poom.global.error.exception.handler.AuthException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import gdg.challenge.poom.global.security.constants.AuthenticationConstants;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
@@ -44,6 +46,7 @@ public class AuthCommandService {
     private final RedisStorageCommandService redisStorageCommandService;
     private final RedisStorageQueryService redisStorageQueryService;
     private final WithdrawalReasonLogRepository withdrawalReasonLogRepository;
+    private final JwtUtil jwtUtil;
 
     public OAuth2ResponseDTO.Login loginWithOAuth(HttpServletRequest request, HttpServletResponse response,
                                                    String code){
@@ -87,8 +90,18 @@ public class AuthCommandService {
     }
 
     public AuthResponseDTO.AccessTokenResult reissue(HttpServletRequest request, HttpServletResponse response){
-        String refreshToken = JwtUtil.resolveToken(request);
+        String refreshToken = jwtUtil.resolveRefreshToken(request);
+
+        // request Refresh-Token 헤더에 있는 토큰 파싱 가능 여부
+        if (refreshToken == null || !jwtUtil.isValid(refreshToken)) {
+            throw new AuthException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
         Long memberId = getMemberId(refreshToken);
+        String savedRefreshToken = redisStorageQueryService.getRefreshToken(memberId);
+        // 기존에 있는 토큰 동일 여부
+        if (savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
+            throw new AuthException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
