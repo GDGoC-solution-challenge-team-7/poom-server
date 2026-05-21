@@ -103,6 +103,10 @@ public class Member extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Alarm> alarmList = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Journal> journalList = new ArrayList<>();
 
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
@@ -152,6 +156,12 @@ public class Member extends BaseEntity {
         socialList.add(social);
         social.setMember(this);
     }
+
+    public void addAlarm(Alarm alarm){
+        alarmList.add(alarm);
+        alarm.setMember(this);
+    }
+
 
     public void addJournal(Journal journal){
         journalList.add(journal);
