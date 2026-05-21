@@ -89,6 +89,16 @@ public class JwtUtil {
         return null;
     }
 
+    public String resolveRefreshToken(HttpServletRequest request) {
+        String bearer = request.getHeader("Refresh-Token");
+
+        if (bearer != null && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+
+        return null;
+    }
+
     public boolean isValid(String token) {
         try {
             getClaims(token);

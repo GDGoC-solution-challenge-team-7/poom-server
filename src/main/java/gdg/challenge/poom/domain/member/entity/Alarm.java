@@ -12,7 +12,8 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "alarm")
-public class Alarm extends BaseEntity {
+public
+class Alarm extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "alarm_id")
@@ -37,5 +38,6 @@ public class Alarm extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
+    @Setter
     private Member member;
 }

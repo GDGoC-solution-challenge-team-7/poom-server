@@ -3,6 +3,7 @@ package gdg.challenge.poom.domain.member.entity;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
+import gdg.challenge.poom.domain.journal.entity.Journal;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
 import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
@@ -100,6 +101,14 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Social> socialList = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Alarm> alarmList = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Journal> journalList = new ArrayList<>();
+
     public void changeMemberInfo(MemberRequestDTO.ChangeMemberInfo request){
         this.name = request.name();
         this.email = request.email();
@@ -146,5 +155,16 @@ public class Member extends BaseEntity {
     public void addSocial(Social social){
         socialList.add(social);
         social.setMember(this);
+    }
+
+    public void addAlarm(Alarm alarm){
+        alarmList.add(alarm);
+        alarm.setMember(this);
+    }
+
+
+    public void addJournal(Journal journal){
+        journalList.add(journal);
+        journal.setMember(this);
     }
 }

@@ -60,12 +60,12 @@ public class MemberController {
     }
 
     @Operation(summary = "사용자 프로필 이미지 업로드",
-            description = "발급받은 signed-url로 사용자 profileImage 저장하는 API" +
+            description = "사용자 profileImage 저장하는 API 및 signed-url 발급" +
                     " objectName 요청")
     @PostMapping("profile-images")
-    public ApiResponse<Void> uploadProfileImage(
+    public ApiResponse<MemberResponseDTO.SignedUrlResponse> uploadProfileImage(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody @Valid MemberRequestDTO.ProfileImageRequest request
+            @RequestBody @Valid MemberRequestDTO.SignedUrlRequest request
     ){
         memberCommandService.uploadMemberProfileImage(customUserDetails.getMemberId(), request);
         return ApiResponse.onSuccess(null);

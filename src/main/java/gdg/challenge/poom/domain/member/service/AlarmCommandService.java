@@ -42,6 +42,7 @@ public class AlarmCommandService {
         fcmAlarmSender.send(member, request);
         Alarm alarm = AlarmConverter.toAlarm(member, request);
         log.info("FCM 전송 성공 후, 저장되어야 함. description={}", alarm.getDescription());
+        member.addAlarm(alarm);
         alarmRepository.save(alarm);
     }
 
