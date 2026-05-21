@@ -12,6 +12,7 @@ import gdg.challenge.poom.global.data.GcsConfigData;
 import gdg.challenge.poom.global.error.code.status.GcsErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.GcsException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.net.URL;
@@ -19,14 +20,16 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GcsService {
 
     private final GcsConfigData gcsConfigData;
+    private final Storage storage;
 
     // 단건 업로드
-    public MemberResponseDTO.SignedUrlResponse generateUploadSignedUrl(Long memberId, MemberRequestDTO.SignedUrlRequest request, Storage storage) {
+    public MemberResponseDTO.SignedUrlResponse generateUploadSignedUrl(Long memberId, MemberRequestDTO.SignedUrlRequest request) {
         validateFileType(request.domain(), request.contentType());
         String objectName = buildObjectName(memberId, request.domain(), request.filename());
 
@@ -50,15 +53,19 @@ public class GcsService {
             Long memberId,
             MemberRequestDTO.SignedUrlBatchRequest request
     ) {
-        Storage storage = StorageOptions.newBuilder()
-                .setProjectId(gcsConfigData.getProjectId())
-                .build()
-                .getService();
 
         List<MemberResponseDTO.SignedUrlResponse> results = request.files().stream()
-                .map(file -> generateUploadSignedUrl(memberId, file, storage))
+                .map(file -> generateUploadSignedUrl(memberId, file))
                 .toList();
         return MemberConverter.toSignedUrlResponse(results);
+    }
+
+    public void deleteFile(String objectKey) {
+        boolean deleted = storage.delete(gcsConfigData.getStorage().getBucket(), objectKey);
+
+        if (!deleted) {
+            throw new GcsException(GcsErrorCode.FILE_DELETE_FAILED);
+        }
     }
 
     // 다운로드 URL 생성

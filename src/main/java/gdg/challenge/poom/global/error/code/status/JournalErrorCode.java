@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum GcsErrorCode implements BaseErrorCode {
-    INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "FILE_400_1", "이미지 파일만 업로드할 수 있습니다."),
-    INVALID_EXPERT_PDF_FILE(HttpStatus.BAD_REQUEST, "FILE_400_2", "전문가 인증 파일은 PDF만 업로드할 수 있습니다."),
-    FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_500_1", "파일 삭제에 실패했습니다."),
+public enum JournalErrorCode implements BaseErrorCode {
+    JOURNAL_NOT_FOUND(HttpStatus.NOT_FOUND, "JOURNAL_404_1", "해당 일지를 찾을 수 없습니다."),
+    JOURNAL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "JOURNAL_403_1", "해당 일지에 접근할 권한이 없습니다."),
+    JOURNAL_IMAGE_REQUIRED(HttpStatus.BAD_REQUEST, "JOURNAL_IMAGE_400_1", "일기 이미지가 최소 1개 필요합니다."),
     ;
 
     private final HttpStatus status;
@@ -20,7 +20,7 @@ public enum GcsErrorCode implements BaseErrorCode {
 
     @Override
     public ErrorReasonDTO getReason() {
-        return gdg.challenge.poom.global.error.code.ErrorReasonDTO.builder()
+        return ErrorReasonDTO.builder()
                 .message(message)
                 .code(code)
                 .isSuccess(false)
@@ -29,7 +29,7 @@ public enum GcsErrorCode implements BaseErrorCode {
 
     @Override
     public ErrorReasonDTO getReasonHttpStatus() {
-        return gdg.challenge.poom.global.error.code.ErrorReasonDTO.builder()
+        return ErrorReasonDTO.builder()
                 .httpStatus(status)
                 .message(message)
                 .code(code)
