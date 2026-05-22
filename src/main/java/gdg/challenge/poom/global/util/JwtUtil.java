@@ -100,6 +100,10 @@ public class JwtUtil {
     }
 
     public boolean isValid(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+
         try {
             getClaims(token);
             return true;
