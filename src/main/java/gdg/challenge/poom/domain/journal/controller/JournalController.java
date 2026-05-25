@@ -6,6 +6,7 @@ import gdg.challenge.poom.domain.journal.service.command.JournalCommandService;
 import gdg.challenge.poom.domain.journal.service.query.JournalQueryService;
 import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/journal")
-@Controller
+@RestController
+@Tag(name = "일기 API")
 public class JournalController {
 
     private final JournalCommandService journalCommandService;
