@@ -53,6 +53,7 @@ public class JournalConverter {
 
     public static JournalResponseDTO.Journal toJournal(Journal journal){
         return JournalResponseDTO.Journal.builder()
+                .journalId(journal.getId())
                 .journalDate(journal.getJournalDate())
                 .journalEmotion(journal.getJournalEmotion())
                 .build();

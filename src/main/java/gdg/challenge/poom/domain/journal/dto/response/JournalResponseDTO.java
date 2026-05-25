@@ -30,6 +30,7 @@ public record JournalResponseDTO() {
 
     @Builder
     public record Journal(
+            Long journalId,
             LocalDate journalDate,
             JournalEmotion journalEmotion
     ){}
