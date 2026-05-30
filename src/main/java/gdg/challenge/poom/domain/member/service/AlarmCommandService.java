@@ -73,8 +73,8 @@ public class AlarmCommandService {
 
     private void sendAndUpdate(Member target) {
         try {
-            String alarmTitle = target.getCharacterType() + " is Here for You!";
-            String alarmContent = target.getName() + ", how was your day? " + target.getCharacterType() + " is listening";
+            String alarmTitle = target.getCharacterType().getKoName() + "와 오늘도 대화해 볼까요?";
+            String alarmContent = "오늘의 기분은 어떠신가요?" + target.getCharacterType() + "와 함께 이야기해 볼까요?☺\uFE0F";
             String alarmListVerContent = target.getCharacterType() + " is here. Shall we talk? ";
             AlarmRequestDTO.SendAlarm sendAlarm = AlarmConverter.toSendAlarm(
                     AlarmType.CHAT, alarmContent, alarmTitle, target.getCharacterType(), alarmListVerContent,  LocalDateTime.now()
