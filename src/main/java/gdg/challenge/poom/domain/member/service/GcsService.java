@@ -98,6 +98,7 @@ public class GcsService {
             case PROFILE_IMAGE -> "member/profile/" + memberId + "/" + uuid + extension;
             case CHAT_IMAGE -> "chat/message/" + memberId + "/" + uuid + extension;
             case EXPERT_VERIFICATION -> "expert/verification/" + memberId + "/" + uuid + extension;
+            case JOURNAL -> "member/journal/" + memberId + "/" + uuid + extension;
         };
     }
 
