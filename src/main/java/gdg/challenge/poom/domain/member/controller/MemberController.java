@@ -49,7 +49,7 @@ public class MemberController {
 
     @Operation(summary = "이미지 업로드용 Signed URL 발급",
             description = "해당 API를 호출하여 업로드 URL을 받은 뒤, 해당 URL로 파일 바이너리를 포함한 PUT 요청을 전송하여 업로드를 수행" +
-                    "목적별 업로드 도메인 선택(PROFILE_IMAGE|CHAT_IMAGE|EXPERT_VERIFICATION)"
+                    "목적별 업로드 도메인 선택(PROFILE_IMAGE|CHAT_IMAGE|EXPERT_VERIFICATION|JOURNAL_IMAGE)"
     )
     @PostMapping("signed-url")
     public ApiResponse<MemberResponseDTO.SignedUrlBatchResponse> createSignedUrl(

@@ -3,7 +3,6 @@ package gdg.challenge.poom.domain.member.service;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 import gdg.challenge.poom.domain.chat.entity.enums.UploadDomain;
 import gdg.challenge.poom.domain.member.converter.MemberConverter;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
@@ -70,10 +69,6 @@ public class GcsService {
 
     // 다운로드 URL 생성
     public String generateDownloadSignedUrl(String objectName) {
-        Storage storage = StorageOptions.newBuilder()
-                .setProjectId(gcsConfigData.getProjectId())
-                .build()
-                .getService();
 
         BlobInfo blobInfo = BlobInfo.newBuilder(
                 gcsConfigData.getStorage().getBucket(),
@@ -98,6 +93,7 @@ public class GcsService {
             case PROFILE_IMAGE -> "member/profile/" + memberId + "/" + uuid + extension;
             case CHAT_IMAGE -> "chat/message/" + memberId + "/" + uuid + extension;
             case EXPERT_VERIFICATION -> "expert/verification/" + memberId + "/" + uuid + extension;
+            case JOURNAL_IMAGE -> "member/journal/" + memberId + "/" + uuid + extension;
         };
     }
 
@@ -110,7 +106,7 @@ public class GcsService {
 
     private void validateFileType(UploadDomain domain, String contentType) {
         switch (domain) {
-            case PROFILE_IMAGE, CHAT_IMAGE -> {
+            case PROFILE_IMAGE, CHAT_IMAGE, JOURNAL_IMAGE -> {
                 if (contentType == null || !contentType.startsWith("image/")) {
                     throw new GcsException(GcsErrorCode.INVALID_IMAGE_FILE);
                 }

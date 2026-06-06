@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class GcsConfigData {
     private String projectId;
     private Storage storage;
+    private String credentialsJson;
 
     @Getter
     @Setter
