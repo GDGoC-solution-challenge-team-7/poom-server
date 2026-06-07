@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 public enum GcsErrorCode implements BaseErrorCode {
     INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "FILE_400_1", "이미지 파일만 업로드할 수 있습니다."),
     INVALID_EXPERT_PDF_FILE(HttpStatus.BAD_REQUEST, "FILE_400_2", "전문가 인증 파일은 PDF만 업로드할 수 있습니다."),
+    INVALID_IMAGE_URL(HttpStatus.BAD_REQUEST, "FILE_400_3", "잘못된 이미지 경로입니다."),
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "FILE_404_1", "파일을 찾을 수 없습니다."),
     FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_500_1", "파일 삭제에 실패했습니다."),
     ;
 
