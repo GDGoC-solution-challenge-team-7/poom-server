@@ -17,6 +17,8 @@ import gdg.challenge.poom.domain.member.entity.Social;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.domain.member.repository.SocialRepository;
 import gdg.challenge.poom.domain.member.repository.WithdrawalReasonLogRepository;
+import gdg.challenge.poom.domain.member.service.GcsService;
+import gdg.challenge.poom.domain.util.MemberFileCollector;
 import gdg.challenge.poom.global.error.code.status.AuthErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.AuthException;
@@ -29,8 +31,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -46,6 +51,8 @@ public class AuthCommandService {
     private final RedisStorageCommandService redisStorageCommandService;
     private final RedisStorageQueryService redisStorageQueryService;
     private final WithdrawalReasonLogRepository withdrawalReasonLogRepository;
+    private final MemberFileCollector memberFileCollector;
+    private final GcsService gcsService;
     private final JwtUtil jwtUtil;
 
     public OAuth2ResponseDTO.Login loginWithOAuth(HttpServletRequest request, HttpServletResponse response,
@@ -134,7 +141,7 @@ public class AuthCommandService {
     public void withdraw(HttpServletRequest request, Long memberId, AuthRequestDTO.WithdrawRequest withdrawRequest){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-
+        List<String> imageUrls = memberFileCollector.collectByMemberId(memberId);
         if (withdrawRequest.withdrawalReason() != WithdrawalReason.OTHER && withdrawRequest.reasonDescription() != null){
             throw new MemberException(MemberErrorCode.WITHDRAWAL_REASON_CONTENT_NOT_ALLOWED);
         }
@@ -150,6 +157,15 @@ public class AuthCommandService {
         redisStorageCommandService.addBlackList(accessToken);
 
         memberRepository.delete(member);
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        imageUrls.forEach(gcsService::deleteFile);
+                    }
+                }
+        );
     }
 
     private String resolveToken(HttpServletRequest request) {
