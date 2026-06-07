@@ -21,7 +21,7 @@ public class JournalController {
     private final JournalCommandService journalCommandService;
     private final JournalQueryService journalQueryService;
 
-    @Operation(summary = "일기 생성 API", description = "일기 생성 API")
+    @Operation(summary = "일기 생성 API", description = "일기 생성 API, 이미지 경로: member/journal")
     @PostMapping
     public ApiResponse<JournalResponseDTO.CreatedJournal> createJournal(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,

@@ -1,8 +1,6 @@
 package gdg.challenge.poom.domain.member.service;
 
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.HttpMethod;
-import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.*;
 import gdg.challenge.poom.domain.chat.entity.enums.UploadDomain;
 import gdg.challenge.poom.domain.member.converter.MemberConverter;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
@@ -60,9 +58,14 @@ public class GcsService {
     }
 
     public void deleteFile(String objectKey) {
-        boolean deleted = storage.delete(gcsConfigData.getStorage().getBucket(), objectKey);
+        try {
+            boolean deleted = storage.delete(gcsConfigData.getStorage().getBucket(), objectKey);
 
-        if (!deleted) {
+            if (!deleted) {
+                throw new GcsException(GcsErrorCode.FILE_NOT_FOUND);
+            }
+        } catch (StorageException e) {
+            log.error("GCS 파일 삭제 실패. imageUrl={}", objectKey, e);
             throw new GcsException(GcsErrorCode.FILE_DELETE_FAILED);
         }
     }
@@ -83,6 +86,16 @@ public class GcsService {
         );
 
         return signedUrl.toString();
+    }
+
+    public void validateExists(List<String> imageUrls) {
+        for (String imageUrl : imageUrls) {
+            Blob blob = storage.get(gcsConfigData.getStorage().getBucket(), imageUrl);
+
+            if (blob == null || !blob.exists()) {
+                throw new GcsException(GcsErrorCode.FILE_NOT_FOUND);
+            }
+        }
     }
 
     private String buildObjectName(Long memberId, UploadDomain domain, String filename) {

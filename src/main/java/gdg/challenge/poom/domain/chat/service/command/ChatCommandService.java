@@ -9,11 +9,14 @@ import gdg.challenge.poom.domain.chat.entity.ChatMessageImage;
 import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.chat.entity.enums.MessageType;
 import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
+import gdg.challenge.poom.domain.chat.entity.enums.UploadDomain;
 import gdg.challenge.poom.domain.chat.repository.ChatMessageImageRepository;
 import gdg.challenge.poom.domain.chat.repository.ChatMessageRepository;
 import gdg.challenge.poom.domain.chat.repository.ChatRoomRepository;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
+import gdg.challenge.poom.domain.member.service.GcsService;
+import gdg.challenge.poom.domain.util.ImageUrlValidator;
 import gdg.challenge.poom.global.error.code.status.ChatErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.ChatException;
@@ -21,6 +24,8 @@ import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +39,8 @@ public class ChatCommandService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageImageRepository chatMessageImageRepository;
     private final MemberRepository memberRepository;
+    private final GcsService gcsService;
+    private final ImageUrlValidator imageUrlValidator;
 
     public ChatRoom createChatRoom(Long memberId, String title, ChatRequestDTO.ChatMessageRequest request){
         Member member = memberRepository.findById(memberId)
@@ -63,6 +70,8 @@ public class ChatCommandService {
         ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
         if (hasImages(imageUrls)) {
+            imageUrlValidator.validateByDomain(imageUrls, UploadDomain.CHAT_IMAGE);
+            gcsService.validateExists(imageUrls);
             chatMessage.changeMessageType(MessageType.TEXT_IMAGE);
             List<ChatMessageImage> chatMessageImages = ChatConverter.toChatMessageImages(imageUrls, chatMessage);
             savedChatMessage.addImage(chatMessageImages);
@@ -86,10 +95,19 @@ public class ChatCommandService {
         if (!Objects.equals(memberId, chatRoom.getMember().getId())) {
             throw new ChatException(ChatErrorCode.CHAT_ROOM_DELETE_DENIED);
         }
+        List<String> imageUrls = chatMessageImageRepository.findImageUrlsByMemberId(memberId);
         chatMessageRepository.deleteByChatRoom(chatRoom);
         chatRoomRepository.delete(chatRoom);
+        // gcs 삭제 처리
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        imageUrls.forEach(gcsService::deleteFile);
+                    }
+                }
+        );
     }
-
     private boolean hasImages(List<String> imageUrls){
         return imageUrls != null && !imageUrls.isEmpty();
     }
