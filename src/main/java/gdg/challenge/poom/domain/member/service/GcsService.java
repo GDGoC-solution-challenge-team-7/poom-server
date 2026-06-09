@@ -88,6 +88,12 @@ public class GcsService {
         return signedUrl.toString();
     }
 
+    public List<String> generateDownloadSignedUrl(List<String> objectNameList) {
+        return objectNameList.stream()
+                .map(this::generateDownloadSignedUrl)
+                .toList();
+    }
+
     public void validateExists(List<String> imageUrls) {
         for (String imageUrl : imageUrls) {
             Blob blob = storage.get(gcsConfigData.getStorage().getBucket(), imageUrl);
