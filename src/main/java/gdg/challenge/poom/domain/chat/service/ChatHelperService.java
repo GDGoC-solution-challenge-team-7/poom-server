@@ -10,6 +10,7 @@ import gdg.challenge.poom.domain.chat.entity.enums.SenderType;
 import gdg.challenge.poom.domain.chat.service.command.ChatCommandService;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
+import gdg.challenge.poom.domain.member.service.GcsService;
 import gdg.challenge.poom.global.error.code.status.GeneralErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.GeneralException;
@@ -41,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatHelperService {
 
     private static final long IMAGE_MAX_BYTES = 10 * 1024 * 1024; // 10MB
+    private final GcsService gcsService;
 
     /** style -> 시스템 프롬프트 파일 경로 (prompts/ 하위) */
     private static final Map<String, String> STYLE_PROMPT_PATHS = Map.of(
@@ -74,7 +76,7 @@ public class ChatHelperService {
         chatCommandService.createChatMessage(SenderType.USER, MessageType.TEXT, request.message(), chatRoom, memberId, request.imageUrls());
 
         String normalizedMessage = request.message() == null ? "" : request.message().strip();
-        List<ImageFetchResult> images = fetchImagesFromUrls(request.imageUrls());
+        List<ImageFetchResult> images = fetchImagesFromUrls(gcsService.generateDownloadSignedUrl(request.imageUrls()));
         boolean hasImages = !images.isEmpty();
 
         // 텍스트/이미지 모두 비어있으면 기본 안내 문구 반환

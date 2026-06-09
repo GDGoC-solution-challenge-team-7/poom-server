@@ -36,21 +36,16 @@ public class JournalConverter {
                 .build();
     }
 
-    public static JournalResponseDTO.JournalDetail toJournalDetail(Journal journal){
-
-        List<String> journalImageList = journal.getJournalImageList().stream()
-                .map(JournalImage::getImageUrl)
-                .toList();
-
-
+    public static JournalResponseDTO.JournalDetail toJournalDetail(Journal journal, List<String> signedUrlList){
         return JournalResponseDTO.JournalDetail.builder()
                 .journalDate(journal.getJournalDate())
                 .journalEmotion(journal.getJournalEmotion())
                 .content(journal.getContent())
-                .imageUrls(journalImageList)
+                .imageUrls(signedUrlList)
                 .build();
     }
 
+    // 리스트의 객체
     public static JournalResponseDTO.Journal toJournal(Journal journal){
         return JournalResponseDTO.Journal.builder()
                 .journalId(journal.getId())

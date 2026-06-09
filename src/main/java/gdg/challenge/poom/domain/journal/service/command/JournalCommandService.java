@@ -43,7 +43,7 @@ public class JournalCommandService {
         member.addJournal(journal);
 
         if (request.imageUrls() != null && !request.imageUrls().isEmpty()){
-            imageUrlValidator.validateByDomain(request.imageUrls(), UploadDomain.JOURNAL_IMAGE);
+            imageUrlValidator.validateByDomainAndMemberId(request.imageUrls(), UploadDomain.JOURNAL_IMAGE, memberId);
             gcsService.validateExists(request.imageUrls());
             List<JournalImage> journalImageList = JournalConverter.toJournalImage(request.imageUrls());
             journal.addJournalImage(journalImageList);
@@ -64,7 +64,7 @@ public class JournalCommandService {
         }
         // 기존 이미지 삭제
         List<JournalImage> oldImages = journalImageRepository.findByJournal(journal);
-        if (oldImages.isEmpty()) {
+        if (!oldImages.isEmpty()) {
             List<String> oldKeys = oldImages.stream()
                     .map(JournalImage::getImageUrl)
                     .toList();
@@ -75,7 +75,7 @@ public class JournalCommandService {
         }
         // 요청 들어온 이미지 저장
         if (request.imageUrls() != null && !request.imageUrls().isEmpty()) {
-            imageUrlValidator.validateByDomain(request.imageUrls(), UploadDomain.JOURNAL_IMAGE);
+            imageUrlValidator.validateByDomainAndMemberId(request.imageUrls(), UploadDomain.JOURNAL_IMAGE, memberId);
             gcsService.validateExists(request.imageUrls());
             List<JournalImage> imageUrls = request.imageUrls().stream()
                     .map(imageUrl -> JournalImage.builder()
@@ -88,6 +88,7 @@ public class JournalCommandService {
         }
         journal.changeJournal(request.journalDate(), request.journalEmotion(), request.content());
     }
+
     public void deleteJournal(Long memberId, Long journalId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));

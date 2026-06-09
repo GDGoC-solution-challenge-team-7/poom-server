@@ -70,7 +70,7 @@ public class ChatCommandService {
         ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
         if (hasImages(imageUrls)) {
-            imageUrlValidator.validateByDomain(imageUrls, UploadDomain.CHAT_IMAGE);
+            imageUrlValidator.validateByDomainAndMemberId(imageUrls, UploadDomain.CHAT_IMAGE, memberId);
             gcsService.validateExists(imageUrls);
             chatMessage.changeMessageType(MessageType.TEXT_IMAGE);
             List<ChatMessageImage> chatMessageImages = ChatConverter.toChatMessageImages(imageUrls, chatMessage);

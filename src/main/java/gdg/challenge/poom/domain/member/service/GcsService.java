@@ -88,13 +88,21 @@ public class GcsService {
         return signedUrl.toString();
     }
 
-    public void validateExists(List<String> imageUrls) {
-        for (String imageUrl : imageUrls) {
-            Blob blob = storage.get(gcsConfigData.getStorage().getBucket(), imageUrl);
+    public List<String> generateDownloadSignedUrl(List<String> objectNameList) {
+        return objectNameList.stream()
+                .map(this::generateDownloadSignedUrl)
+                .toList();
+    }
 
-            if (blob == null || !blob.exists()) {
-                throw new GcsException(GcsErrorCode.FILE_NOT_FOUND);
-            }
+    public void validateExists(List<String> imageUrls) {
+        imageUrls.forEach(this::validateExists);
+    }
+
+    public void validateExists(String imageUrl) {
+        Blob blob = storage.get(gcsConfigData.getStorage().getBucket(), imageUrl);
+
+        if (blob == null || !blob.exists()) {
+            throw new GcsException(GcsErrorCode.FILE_NOT_FOUND);
         }
     }
 
