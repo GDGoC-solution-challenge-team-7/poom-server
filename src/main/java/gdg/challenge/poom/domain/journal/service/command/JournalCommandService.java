@@ -43,7 +43,7 @@ public class JournalCommandService {
         member.addJournal(journal);
 
         if (request.imageUrls() != null && !request.imageUrls().isEmpty()){
-            imageUrlValidator.validateByDomain(request.imageUrls(), UploadDomain.JOURNAL_IMAGE);
+            imageUrlValidator.validateByDomainAndMemberId(request.imageUrls(), UploadDomain.JOURNAL_IMAGE, memberId);
             gcsService.validateExists(request.imageUrls());
             List<JournalImage> journalImageList = JournalConverter.toJournalImage(request.imageUrls());
             journal.addJournalImage(journalImageList);
@@ -75,7 +75,7 @@ public class JournalCommandService {
         }
         // 요청 들어온 이미지 저장
         if (request.imageUrls() != null && !request.imageUrls().isEmpty()) {
-            imageUrlValidator.validateByDomain(request.imageUrls(), UploadDomain.JOURNAL_IMAGE);
+            imageUrlValidator.validateByDomainAndMemberId(request.imageUrls(), UploadDomain.JOURNAL_IMAGE, memberId);
             gcsService.validateExists(request.imageUrls());
             List<JournalImage> imageUrls = request.imageUrls().stream()
                     .map(imageUrl -> JournalImage.builder()

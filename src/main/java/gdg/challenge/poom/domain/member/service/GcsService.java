@@ -95,12 +95,14 @@ public class GcsService {
     }
 
     public void validateExists(List<String> imageUrls) {
-        for (String imageUrl : imageUrls) {
-            Blob blob = storage.get(gcsConfigData.getStorage().getBucket(), imageUrl);
+        imageUrls.forEach(this::validateExists);
+    }
 
-            if (blob == null || !blob.exists()) {
-                throw new GcsException(GcsErrorCode.FILE_NOT_FOUND);
-            }
+    public void validateExists(String imageUrl) {
+        Blob blob = storage.get(gcsConfigData.getStorage().getBucket(), imageUrl);
+
+        if (blob == null || !blob.exists()) {
+            throw new GcsException(GcsErrorCode.FILE_NOT_FOUND);
         }
     }
 
