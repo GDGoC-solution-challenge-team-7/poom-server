@@ -3,9 +3,11 @@ package gdg.challenge.poom.domain.journal.service.query;
 import gdg.challenge.poom.domain.journal.converter.JournalConverter;
 import gdg.challenge.poom.domain.journal.dto.response.JournalResponseDTO;
 import gdg.challenge.poom.domain.journal.entity.Journal;
+import gdg.challenge.poom.domain.journal.entity.JournalImage;
 import gdg.challenge.poom.domain.journal.repository.JournalRepository;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
+import gdg.challenge.poom.domain.member.service.GcsService;
 import gdg.challenge.poom.global.error.code.status.JournalErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.JournalException;
@@ -24,6 +26,7 @@ public class JournalQueryService {
 
     private final JournalRepository journalRepository;
     private final MemberRepository memberRepository;
+    private final GcsService gcsService;
 
     public JournalResponseDTO.JournalDetail getJournal(Long memberId, Long journalId){
         Member member = memberRepository.findById(memberId)
@@ -35,7 +38,12 @@ public class JournalQueryService {
             throw new JournalException(JournalErrorCode.JOURNAL_ACCESS_DENIED);
         }
 
-        return JournalConverter.toJournalDetail(journal);
+        List<String> journalImageList = journal.getJournalImageList().stream()
+                .map(JournalImage::getImageUrl)
+                .map(gcsService::generateDownloadSignedUrl)
+                .toList();
+
+        return JournalConverter.toJournalDetail(journal, journalImageList);
     }
 
     public JournalResponseDTO.JournalList getCalendar(Long memberId, int year, int month){

@@ -64,7 +64,7 @@ public class JournalCommandService {
         }
         // 기존 이미지 삭제
         List<JournalImage> oldImages = journalImageRepository.findByJournal(journal);
-        if (oldImages.isEmpty()) {
+        if (!oldImages.isEmpty()) {
             List<String> oldKeys = oldImages.stream()
                     .map(JournalImage::getImageUrl)
                     .toList();
@@ -88,6 +88,7 @@ public class JournalCommandService {
         }
         journal.changeJournal(request.journalDate(), request.journalEmotion(), request.content());
     }
+
     public void deleteJournal(Long memberId, Long journalId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
