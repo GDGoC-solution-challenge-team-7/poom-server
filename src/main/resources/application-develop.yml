@@ -48,6 +48,7 @@ spring:
       project-id: ${PROJECT_ID}
       storage:
         bucket: ${BUCKET_NAME}
+      credentials-json: ${GCP_CREDENTIALS_JSON}
 
   data:
     redis:
