@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.UUID;
@@ -72,7 +73,6 @@ public class GcsService {
 
     // 다운로드 URL 생성
     public String generateDownloadSignedUrl(String objectName) {
-
         BlobInfo blobInfo = BlobInfo.newBuilder(
                 gcsConfigData.getStorage().getBucket(),
                 objectName
@@ -84,7 +84,7 @@ public class GcsService {
                 Storage.SignUrlOption.httpMethod(HttpMethod.GET),
                 Storage.SignUrlOption.withV4Signature()
         );
-
+        log.info("다운로드 URL = [{}]", signedUrl.toString());
         return signedUrl.toString();
     }
 
