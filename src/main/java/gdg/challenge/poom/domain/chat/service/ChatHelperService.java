@@ -112,6 +112,9 @@ public class ChatHelperService {
             return null;
         }
         try {
+            log.info("FETCH URL = [{}]", url);
+            log.info("FETCH URI = [{}]", URI.create(url).toASCIIString());
+            log.info("FETCH RAW QUERY = [{}]", URI.create(url).getRawQuery());
             URI uri = URI.create(url);
             ResponseEntity<byte[]> response = imageFetchRestTemplate.getForEntity(uri, byte[].class);
             if (response.getBody() == null || response.getBody().length == 0) {
