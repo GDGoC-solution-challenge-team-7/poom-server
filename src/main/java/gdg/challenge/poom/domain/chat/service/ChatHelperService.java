@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +112,8 @@ public class ChatHelperService {
             return null;
         }
         try {
-            ResponseEntity<byte[]> response = imageFetchRestTemplate.getForEntity(url, byte[].class);
+            URI uri = URI.create(url);
+            ResponseEntity<byte[]> response = imageFetchRestTemplate.getForEntity(uri, byte[].class);
             if (response.getBody() == null || response.getBody().length == 0) {
                 return null;
             }
