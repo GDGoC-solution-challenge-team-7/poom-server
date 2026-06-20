@@ -39,6 +39,15 @@ public class AuthController {
         return ApiResponse.onSuccess(login);
     }
 
+    @Operation(summary = "구글 소셜 로그인 API",
+            description = "안드로이드 앱에서 발급받은 구글 ID Token을 검증하여 회원가입/로그인을 처리하고, 자체 JWT 토큰을 발급하는 API"
+    )
+    @PostMapping("/google")
+    public ApiResponse<OAuth2ResponseDTO.Login> googleLogin(@RequestBody @Valid AuthRequestDTO.TokenRequest tokenRequest) {
+        OAuth2ResponseDTO.Login login = authCommandService.verifyGoogleIdToken(tokenRequest.idToken());
+        return ApiResponse.onSuccess(login);
+    }
+
     @Operation(summary = "회원가입 API", description = "회원가입하는 API")
     @PostMapping("/sign-up")
     public ApiResponse<AuthResponseDTO.TokenResult> signUp(@RequestBody @Valid AuthRequestDTO.SignUp request){

@@ -1,5 +1,9 @@
 package gdg.challenge.poom.domain.auth.service.command;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import gdg.challenge.poom.domain.auth.converter.AuthConverter;
 import gdg.challenge.poom.domain.auth.converter.OAuthConverter;
 import gdg.challenge.poom.domain.auth.dto.request.AuthRequestDTO;
@@ -14,6 +18,7 @@ import gdg.challenge.poom.domain.chat.repository.ChatRoomRepository;
 import gdg.challenge.poom.domain.member.converter.MemberConverter;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.Social;
+import gdg.challenge.poom.domain.member.entity.enums.SocialType;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.domain.member.repository.SocialRepository;
 import gdg.challenge.poom.domain.member.repository.WithdrawalReasonLogRepository;
@@ -21,23 +26,28 @@ import gdg.challenge.poom.domain.member.service.GcsService;
 import gdg.challenge.poom.domain.util.MemberFileCollector;
 import gdg.challenge.poom.global.error.code.status.AuthErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
+import gdg.challenge.poom.global.error.code.status.OAuthErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.AuthException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
+import gdg.challenge.poom.global.error.exception.handler.OAuthException;
 import gdg.challenge.poom.global.security.constants.AuthenticationConstants;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import gdg.challenge.poom.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -54,6 +64,7 @@ public class AuthCommandService {
     private final MemberFileCollector memberFileCollector;
     private final GcsService gcsService;
     private final JwtUtil jwtUtil;
+    private final GoogleIdTokenVerifier verifier;
 
     public OAuth2ResponseDTO.Login loginWithOAuth(HttpServletRequest request, HttpServletResponse response,
                                                    String code){
@@ -80,6 +91,47 @@ public class AuthCommandService {
                     socialRepository.save(OAuthConverter.toSocial(userInfo))
             );
             return OAuthConverter.toLogin(userInfo.name(), userInfo.email(), true, social.getId(), null, null);
+        }
+    }
+
+    public OAuth2ResponseDTO.Login verifyGoogleIdToken(String idTokenString) {
+        try {
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+            if (idToken == null){
+                log.error("Google ID Token verification failed: Token is null or invalid");
+                throw new OAuthException(OAuthErrorCode.GOOGLE_TOKEN_VERIFICATION_FAILED);
+            }
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String socialId = payload.getSubject(); // 구글 고유 ID (예: 10293847...)
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+
+            Optional<Social> socialOptional = socialRepository.findByProviderIdAndSocialType(socialId, SocialType.GOOGLE);
+            Optional<Member> memberOptional = memberRepository.findByEmail(email);
+
+            // 이미 Member가 있는 경우
+            if (memberOptional.isPresent()) {
+                Member member = memberOptional.get();
+                Social social = socialOptional.orElseGet(() ->
+                        socialRepository.save(OAuthConverter.toSocial(SocialType.GOOGLE, socialId, member))
+                );
+                // jwt 발급해서 넘겨주기
+                CustomUserDetails customUserDetails = new CustomUserDetails(memberOptional.get());
+                AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
+                redisStorageCommandService.addRefreshToken(member.getId(), loginToken.refreshToken());
+                // response 형식에 맞춰서 주기
+                return OAuthConverter.toLogin(name, email, false, social.getId(), loginToken.accessToken(), loginToken.refreshToken());
+            }
+            // 회원가입이 안 된 경우
+            else {
+                Social social = socialOptional.orElseGet(() ->
+                        socialRepository.save(OAuthConverter.toSocial(SocialType.GOOGLE, socialId))
+                );
+                return OAuthConverter.toLogin(name, email, true, social.getId(), null, null);
+            }
+        } catch (Exception e){
+            log.error("Google ID Token verification unexpected error: ", e);
+            throw new OAuthException(OAuthErrorCode.GOOGLE_TOKEN_VERIFICATION_FAILED);
         }
     }
 

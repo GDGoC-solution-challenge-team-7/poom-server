@@ -32,6 +32,20 @@ public class OAuthConverter {
                 .build();
     }
 
+    public static Social toSocial(SocialType socialType,String socialId, Member member){
+        return Social.builder()
+                .socialType(socialType)
+                .providerId(socialId)
+                .member(member)
+                .build();
+    }
+
+    public static Social toSocial(SocialType socialType,String socialId){
+        return Social.builder()
+                .socialType(socialType)
+                .providerId(socialId)
+                .build();
+    }
 
     public static OAuth2ResponseDTO.Login toLogin(String name,String email, boolean isFirst, Long socialId,
                                                   String accessToken, String refreshToken) {

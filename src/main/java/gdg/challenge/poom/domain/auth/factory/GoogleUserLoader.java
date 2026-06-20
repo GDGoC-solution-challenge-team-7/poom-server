@@ -36,4 +36,8 @@ public class GoogleUserLoader extends AbstractOAuth2UserLoader{
     public String getSocialType() {
         return SOCIAL_TYPE.name().toLowerCase();
     }
+
+    public String getClientId(){
+        return super.getClientId();
+    }
 }
