@@ -39,6 +39,12 @@ public class AuthController {
         return ApiResponse.onSuccess(login);
     }
 
+    @PostMapping("/google")
+    public ApiResponse<OAuth2ResponseDTO.Login> googleLogin(AuthRequestDTO.TokenRequest tokenRequest) {
+        OAuth2ResponseDTO.Login login = authCommandService.verifyGoogleIdToken(tokenRequest.idToken());
+        return ApiResponse.onSuccess(login);
+    }
+
     @Operation(summary = "회원가입 API", description = "회원가입하는 API")
     @PostMapping("/sign-up")
     public ApiResponse<AuthResponseDTO.TokenResult> signUp(@RequestBody @Valid AuthRequestDTO.SignUp request){

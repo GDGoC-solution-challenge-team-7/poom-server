@@ -38,4 +38,8 @@ public record AuthRequestDTO() {
             WithdrawalReason withdrawalReason,
             String reasonDescription
     ){}
+
+    public record TokenRequest(
+            String idToken
+    ){}
 }
