@@ -40,6 +40,7 @@ public record AuthRequestDTO() {
     ){}
 
     public record TokenRequest(
+            @NotBlank
             String idToken
     ){}
 }
