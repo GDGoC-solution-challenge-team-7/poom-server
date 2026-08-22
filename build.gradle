@@ -58,6 +58,9 @@ dependencies {
 	implementation 'com.google.api-client:google-api-client:2.2.0'
 	implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
 
+	// Monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {

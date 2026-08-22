@@ -22,7 +22,7 @@ public enum MemberErrorCode implements BaseErrorCode {
 
     @Override
     public ErrorReasonDTO getReason() {
-        return gdg.challenge.poom.global.error.code.ErrorReasonDTO.builder()
+        return ErrorReasonDTO.builder()
                 .message(message)
                 .code(code)
                 .isSuccess(false)
@@ -31,7 +31,7 @@ public enum MemberErrorCode implements BaseErrorCode {
 
     @Override
     public ErrorReasonDTO getReasonHttpStatus() {
-        return gdg.challenge.poom.global.error.code.ErrorReasonDTO.builder()
+        return ErrorReasonDTO.builder()
                 .httpStatus(status)
                 .message(message)
                 .code(code)

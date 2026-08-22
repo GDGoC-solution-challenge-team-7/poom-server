@@ -47,7 +47,8 @@ public class SecurityConfig {
             "favicon.ico",
             "/error",
 
-            "/api/v1/alarms/dispatch"
+            "/api/v1/alarms/dispatch",
+            "/actuator/prometheus"
     };
 
 
