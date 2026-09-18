@@ -13,6 +13,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -31,8 +32,11 @@ public abstract class AbstractOAuth2UserLoader implements OAuth2UserLoader {
             String token = getAccessToken(code);
             // code로 UserInfo받기
             return getUserInfo(token);
-        }
-        catch (Exception e) {
+        } catch (HttpClientErrorException e) {
+            log.error("Kakao token error: status={}, body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw e;
+        } catch (Exception e) {
             e.printStackTrace();
             throw new OAuthException(OAuthErrorCode.FAIL_TO_GET_USER_INFO);
         }

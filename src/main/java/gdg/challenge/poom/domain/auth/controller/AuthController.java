@@ -5,15 +5,14 @@ import gdg.challenge.poom.domain.auth.dto.response.AuthResponseDTO;
 import gdg.challenge.poom.domain.auth.dto.response.OAuth2ResponseDTO;
 import gdg.challenge.poom.domain.auth.service.command.AuthCommandService;
 import gdg.challenge.poom.global.error.ApiResponse;
-import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLDecoder;
@@ -29,22 +28,25 @@ public class AuthController {
     private final AuthCommandService authCommandService;
 
     @Operation(summary = "구글 소셜 로그인 API", description = "구글 소셜 로그인하는 API")
-    @GetMapping("/callback")
+    @GetMapping("/callback/{provider}")
     public ApiResponse<OAuth2ResponseDTO.Login> signUp(HttpServletRequest request, HttpServletResponse response,
+                                                       @Parameter(description = "소셜 로그인 플랫폼(대소문자 상관 없음), [kakao, google, naver]", example = "kakao") @PathVariable String provider,
                                                        @RequestParam String code){
         String decodedCode = URLDecoder.decode(code, StandardCharsets.UTF_8);
         log.info("code(raw)='{}' len={}", code, code.length());
         log.info("code(decoded)='{}'", decodedCode);
-        OAuth2ResponseDTO.Login login = authCommandService.loginWithOAuth(request, response, decodedCode);
+        OAuth2ResponseDTO.Login login = authCommandService.loginWithOAuth(request, response, provider, decodedCode);
         return ApiResponse.onSuccess(login);
     }
 
-    @Operation(summary = "구글 소셜 로그인 API",
-            description = "안드로이드 앱에서 발급받은 구글 ID Token을 검증하여 회원가입/로그인을 처리하고, 자체 JWT 토큰을 발급하는 API"
+    @Operation(summary = "소셜 로그인 API (구글, 카카오)",
+            description = "안드로이드 앱에서 발급받은 ID Token을 검증하여 회원가입/로그인을 처리하고, 자체 JWT 토큰을 발급하는 API"
     )
-    @PostMapping("/google")
-    public ApiResponse<OAuth2ResponseDTO.Login> googleLogin(@RequestBody @Valid AuthRequestDTO.TokenRequest tokenRequest) {
-        OAuth2ResponseDTO.Login login = authCommandService.verifyGoogleIdToken(tokenRequest.idToken());
+    @PostMapping("/social/{provider}")
+    public ApiResponse<OAuth2ResponseDTO.Login> socialLogin(
+            @RequestBody @Valid AuthRequestDTO.TokenRequest tokenRequest,
+            @Parameter(description = "소셜 로그인 플랫폼(대소문자 상관 없음), [kakao, google]", example = "kakao") @PathVariable String provider) {
+        OAuth2ResponseDTO.Login login = authCommandService.socialLogin(tokenRequest.idToken(), provider);
         return ApiResponse.onSuccess(login);
     }
 
