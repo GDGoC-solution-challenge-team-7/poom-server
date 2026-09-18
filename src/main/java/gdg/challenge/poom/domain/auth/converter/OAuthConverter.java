@@ -2,6 +2,7 @@ package gdg.challenge.poom.domain.auth.converter;
 
 import gdg.challenge.poom.domain.auth.dto.response.OAuth2ResponseDTO;
 import gdg.challenge.poom.domain.auth.factory.dto.GoogleOAuth2ResponseDTO;
+import gdg.challenge.poom.domain.auth.factory.dto.KakaoOAuth2ResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.Social;
 import gdg.challenge.poom.domain.member.entity.enums.SocialType;
@@ -16,6 +17,15 @@ public class OAuthConverter {
                 .socialType(SocialType.GOOGLE)
                 .build();
     }
+
+    public static OAuth2ResponseDTO.GetUserInfo toGetUserInfo(KakaoOAuth2ResponseDTO.KakaoProfile kakaoProfile) {
+        return OAuth2ResponseDTO.GetUserInfo.builder()
+                .email(kakaoProfile.kakao_account().email())
+                .providerId(String.valueOf(kakaoProfile.id()))
+                .socialType(SocialType.KAKAO)
+                .build();
+    }
+
 
     public static Social toSocial(OAuth2ResponseDTO.GetUserInfo userInfo, Member member){
         return Social.builder()
