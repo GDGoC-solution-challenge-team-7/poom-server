@@ -27,6 +27,8 @@ spring:
             client-authentication-method: client_secret_post
             scope:
               - account_email
+              - profile_nickname
+              - profile_image
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
@@ -88,3 +90,6 @@ jwt:
 logging:
   level:
     org.springframework.security: DEBUG
+
+kakao:
+  native-app-key: ${KAKAO_NATIVE_APP_KEY}
