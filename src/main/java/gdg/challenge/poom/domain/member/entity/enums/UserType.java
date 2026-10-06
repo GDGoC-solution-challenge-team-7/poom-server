@@ -2,5 +2,5 @@ package gdg.challenge.poom.domain.member.entity.enums;
 
 
 public enum UserType {
-    MOTHER, FAMILY_OR_SUPPORTER, PROFESSIONAL;
+    NO_CHILD_PLAN, PREPARING_FOR_PREGNANCY, PREGNANT, RAISING_CHILDREN
 }

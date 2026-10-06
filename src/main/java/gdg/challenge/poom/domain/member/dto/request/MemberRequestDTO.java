@@ -1,14 +1,12 @@
 package gdg.challenge.poom.domain.member.dto.request;
 
 import gdg.challenge.poom.domain.chat.entity.enums.UploadDomain;
-import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,9 +25,7 @@ public record MemberRequestDTO() {
             Gender gender,
             @NotNull(message = "유저 타입은 필수 선택입니다.")
             UserType userType,
-            LocalDate childBirthDate,
-            BirthRelationship birthRelationship,
-            String expertiseFile
+            LocalDate childBirthDate
     ){ }
 
     // 파일 업로드 요청 - 단건

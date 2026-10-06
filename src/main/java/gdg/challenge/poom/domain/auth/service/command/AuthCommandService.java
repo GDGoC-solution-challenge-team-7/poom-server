@@ -7,6 +7,7 @@ import gdg.challenge.poom.domain.auth.converter.OAuthConverter;
 import gdg.challenge.poom.domain.auth.dto.request.AuthRequestDTO;
 import gdg.challenge.poom.domain.auth.dto.response.AuthResponseDTO;
 import gdg.challenge.poom.domain.auth.dto.response.OAuth2ResponseDTO;
+import gdg.challenge.poom.domain.auth.dto.util.EventDTO;
 import gdg.challenge.poom.domain.auth.entity.WithdrawalReasonLog;
 import gdg.challenge.poom.domain.auth.entity.enums.WithdrawalReason;
 import gdg.challenge.poom.domain.auth.factory.OAuth2UserLoader;
@@ -34,6 +35,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +66,8 @@ public class AuthCommandService {
     private final GcsService gcsService;
     private final JwtUtil jwtUtil;
     private final GoogleIdTokenVerifier verifier;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     public OAuth2ResponseDTO.Login loginWithOAuth(HttpServletRequest request, HttpServletResponse response,
                                                   String provider, String code){
@@ -160,6 +164,8 @@ public class AuthCommandService {
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
         AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
         redisStorageCommandService.addRefreshToken(member.getId(), loginToken.refreshToken());
+
+        eventPublisher.publishEvent(new EventDTO.SignUpCompletedEvent(member.getId()));
         return loginToken;
     }
 

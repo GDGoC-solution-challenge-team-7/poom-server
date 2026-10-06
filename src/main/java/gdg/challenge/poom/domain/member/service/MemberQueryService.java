@@ -31,11 +31,7 @@ public class MemberQueryService {
         if (member.getProfileImage() != null){
             profileImageSignedUrl = gcsService.generateDownloadSignedUrl(member.getProfileImage());
         }
-        String expertiseFile = null;
-        if (member.getExpertiseFile() != null){
-            expertiseFile = gcsService.generateDownloadSignedUrl(member.getExpertiseFile());
-        }
-        return  MemberConverter.toMemberInfo(member, profileImageSignedUrl, expertiseFile);
+        return  MemberConverter.toMemberInfo(member, profileImageSignedUrl);
     }
 
 }

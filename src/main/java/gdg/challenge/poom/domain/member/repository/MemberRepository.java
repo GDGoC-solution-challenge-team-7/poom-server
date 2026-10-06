@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
     boolean existsByEmail(String email);
+    boolean existsByCoupleCode(String coupleCode);
 
     @Query("""
         SELECT m FROM Member m
@@ -24,4 +25,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             @Param("now") LocalDateTime now,
             Pageable pageable
     );
+
+    Optional<Member> findByCoupleCode(String coupleCode);
 }

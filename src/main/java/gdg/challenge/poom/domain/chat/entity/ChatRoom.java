@@ -1,7 +1,5 @@
 package gdg.challenge.poom.domain.chat.entity;
 
-import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
-import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.global.common.BaseEntity;
 import jakarta.persistence.*;
