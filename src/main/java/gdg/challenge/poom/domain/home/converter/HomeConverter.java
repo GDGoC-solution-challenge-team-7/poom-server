@@ -10,7 +10,6 @@ public class HomeConverter {
     public static HomeResponseDTO.MemberBirthDate toMemberBirthDate(UserType userType, Mother mother, DateType dateType, Integer number) {
         return HomeResponseDTO.MemberBirthDate.builder()
                 .userType(userType)
-                .mother(mother)
                 .dateType(dateType)
                 .number(number)
                 .build();

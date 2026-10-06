@@ -9,7 +9,7 @@ import java.util.List;
 public class MemberConverter {
 
     public static MemberResponseDTO.MemberInfo toMemberInfo(
-            Member member, String profileImageSignedUrl, String expertiseFile
+            Member member, String profileImageSignedUrl
     ){
         return MemberResponseDTO.MemberInfo.builder()
                 .name(member.getName())
@@ -19,8 +19,6 @@ public class MemberConverter {
                 .userType(member.getUserType())
                 .mother(MemberStatusUtil.calcMotherStatus(member))
                 .childBirthDate(member.getChildBirthDate())
-                .birthRelationship(member.getBirthRelationship())
-                .expertiseFileSignedUrl(expertiseFile)
                 .profileImageSignedUrl(profileImageSignedUrl)
                 .build();
     }

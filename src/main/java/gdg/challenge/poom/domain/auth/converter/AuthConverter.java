@@ -29,7 +29,6 @@ public class AuthConverter {
                 .userType(dto.userType())
                 .childBirthDate(dto.childBirthDate())
                 .nextSendAt(TimeUtil.calculateNextSendAt(LocalTime.of(9, 0)))
-                .expertiseFile(dto.expertiseFile())
                 .hasGivenBirth(dto.hasGivenBirth())
                 .build();
     }

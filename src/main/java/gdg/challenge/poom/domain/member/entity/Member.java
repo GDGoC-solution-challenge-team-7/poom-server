@@ -5,7 +5,6 @@ import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 import gdg.challenge.poom.domain.journal.entity.Journal;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
-import gdg.challenge.poom.domain.member.entity.enums.BirthRelationship;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.Role;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
@@ -24,7 +23,12 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "member")
+@Table(name = "member", uniqueConstraints = {
+        @UniqueConstraint(
+                name = "uk_member_couple_code",
+                columnNames = "couple_code"
+        )
+})
 public class Member extends BaseEntity {
 
     @Id
@@ -45,10 +49,6 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-//    private String phoneNumber;
-//
-//    private Integer age;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
@@ -59,11 +59,6 @@ public class Member extends BaseEntity {
     private UserType userType;
 
     private LocalDate childBirthDate;
-
-    @Enumerated(EnumType.STRING)
-    private BirthRelationship birthRelationship;
-
-    private String expertiseFile;
 
     private String deviceToken;
 
@@ -93,6 +88,9 @@ public class Member extends BaseEntity {
 
     private String profileImage;
 
+    @Column(name = "couple_code", length = 6, unique = true)
+    private String coupleCode;
+
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> chatRoomList = new ArrayList<>();
@@ -116,8 +114,10 @@ public class Member extends BaseEntity {
         this.gender = request.gender();
         this.userType = request.userType();
         this.childBirthDate = request.childBirthDate();
-        this.birthRelationship = request.birthRelationship();
-        this.expertiseFile = request.expertiseFile();
+    }
+
+    public void assignCoupleCode(String coupleCode){
+        this.coupleCode = coupleCode;
     }
 
     public void updateDeviceToken(String deviceToken) {

@@ -1,13 +1,9 @@
 package gdg.challenge.poom.domain.journal.entity;
 
-import gdg.challenge.poom.domain.chat.entity.ChatMessageImage;
-import gdg.challenge.poom.domain.chat.entity.ChatRoom;
 import gdg.challenge.poom.domain.journal.entity.enums.JournalEmotion;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.global.common.BaseEntity;
-import gdg.challenge.poom.global.error.code.status.ChatErrorCode;
 import gdg.challenge.poom.global.error.code.status.JournalErrorCode;
-import gdg.challenge.poom.global.error.exception.handler.ChatException;
 import gdg.challenge.poom.global.error.exception.handler.JournalException;
 import jakarta.persistence.*;
 import lombok.*;
