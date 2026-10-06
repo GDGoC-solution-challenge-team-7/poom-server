@@ -27,10 +27,10 @@ public class AuthController {
 
     private final AuthCommandService authCommandService;
 
-    @Operation(summary = "구글 소셜 로그인 API", description = "구글 소셜 로그인하는 API")
+    @Operation(summary = "웹 소셜 로그인 API", description = "구글 소셜 로그인하는 API")
     @GetMapping("/callback/{provider}")
     public ApiResponse<OAuth2ResponseDTO.Login> signUp(HttpServletRequest request, HttpServletResponse response,
-                                                       @Parameter(description = "소셜 로그인 플랫폼(대소문자 상관 없음), [kakao, google, naver]", example = "kakao") @PathVariable String provider,
+                                                       @Parameter(description = "소셜 로그인 플랫폼(대소문자 상관 없음), [kakao, google]", example = "kakao") @PathVariable String provider,
                                                        @RequestParam String code){
         String decodedCode = URLDecoder.decode(code, StandardCharsets.UTF_8);
         log.info("code(raw)='{}' len={}", code, code.length());
