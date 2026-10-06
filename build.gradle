@@ -2,7 +2,6 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.10'
 	id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.flywaydb.flyway' version '11.7.2'
 }
 
 group = 'gdg.challenge'
@@ -61,8 +60,8 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
-//	implementation "org.flywaydb:flyway-core"
-//	runtimeOnly "org.flywaydb:flyway-mysql"
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-mysql'
 }
 
 tasks.named('test') {
@@ -71,11 +70,4 @@ tasks.named('test') {
 	// test 클래스를 classpath에서 못 찾는 ClassNotFoundException이 나는 환경이 있어,
 	// 통합 테스트는 ASCII 경로 클론 또는 IDE에서 돌리는 편이 안전함.)
 	onlyIf { !sourceSets.test.allSource.isEmpty() }
-}
-
-flyway {
-    url = System.getenv('DB_URL')
-    user = System.getenv('DB_USERNAME')
-    password = System.getenv('DB_PASSWORD')
-    locations = ['filesystem:src/main/resources/db/migration']
 }
