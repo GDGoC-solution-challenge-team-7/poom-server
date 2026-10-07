@@ -14,6 +14,7 @@ import gdg.challenge.poom.global.error.exception.handler.CoupleException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +26,10 @@ public class CoupleCommandService {
     private final MemberRepository memberRepository;
     private final CoupleRepository coupleRepository;
 
-    // 연결 코드 생성
-    public String createCoupleCode() {
-        return null;
-    }
-
     // 코드 입력 후 연결
     public CoupleResponseDTO.CreatedCouple connectCouple(Long memberId, CoupleRequestDTO.CoupleCode request) {
+        validateCoupleConnect(memberId);
+
         // codeSubmitter, memberB: 연결 코드를 입력한 사람
         Member codeSubmitter = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -45,17 +43,29 @@ public class CoupleCommandService {
     }
 
     // 부부 연결 복구
-    public String rejoinCouple(Long memberId) {
-
-        return null;
+    public void rejoinCouple(Long memberId) {
+        Couple couple = coupleRepository.findByMemberA_IdOrMemberB_Id(memberId, memberId)
+                .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
+        couple.restore();
     }
 
-    // 부부 연결 해제
+    // 부부 연결 해제 - 유예 시간 30일, 30일 후 영구 삭제
     public CoupleResponseDTO.ChangeStatusCouple deleteCouple(Long memberId) {
         Couple couple = coupleRepository.findByMemberA_IdOrMemberB_Id(memberId, memberId)
                 .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
-        couple.changeCoupleStatus(CoupleStatus.DISCONNECTED_GRACE_PERIOD);
+        couple.requestDisconnect();
         Member partner = couple.getPartnerOf(memberId);
         return CoupleConverter.toChangeStatusCouple(partner.getId(), memberId, couple);
+    }
+
+    private void validateCoupleConnect(Long memberId){
+        // 기존 부부 연결이 완전히 끊어져야 가능
+        if (coupleRepository.existsByMemberIdAndStatus(memberId, CoupleStatus.CONNECTED)) {
+            throw new CoupleException(CoupleErrorCode.MEMBER_ALREADY_CONNECTED);
+        }
+        // 유예 기간에 있는 부부 연결이 완전히 끊어져야 가능
+        if (coupleRepository.existsByMemberIdAndStatus(memberId, CoupleStatus.DISCONNECTED_GRACE_PERIOD)) {
+            throw new CoupleException(CoupleErrorCode.NEW_CONNECTION_NOT_ALLOWED_DURING_REJOIN_PERIOD);
+        }
     }
 }
