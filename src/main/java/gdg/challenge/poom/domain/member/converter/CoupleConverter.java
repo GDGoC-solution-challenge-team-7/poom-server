@@ -6,12 +6,12 @@ import gdg.challenge.poom.domain.member.entity.Member;
 
 public class CoupleConverter {
 
-    public static Couple createCouple(Member memberA, Member memberB) {
-        return Couple.builder()
-                .memberA(memberA)
-                .memberB(memberB)
-                .build();
-    }
+//    public static Couple createCouple(Member memberA, Member memberB) {
+//        return Couple.builder()
+//                .memberA(memberA)
+//                .memberB(memberB)
+//                .build();
+//    }
 
     public static CoupleResponseDTO.CreatedCouple toCreatedCouple(Couple couple){
         return CoupleResponseDTO.CreatedCouple.builder()

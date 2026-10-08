@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public interface CoupleRepository extends JpaRepository<Couple, Long> {
@@ -16,8 +17,8 @@ public interface CoupleRepository extends JpaRepository<Couple, Long> {
         select count(c) > 0
         from Couple c
         where (c.memberA.id = :memberId or c.memberB.id = :memberId)
-          and c.coupleStatus = :status
+          and c.coupleStatus in :statuses
         """)
     boolean existsByMemberIdAndStatus(@Param("memberId") Long memberId,
-                                      @Param("status") CoupleStatus status);
+                                      @Param("status") Collection<CoupleStatus> statuses);
 }

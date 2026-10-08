@@ -14,9 +14,10 @@ import gdg.challenge.poom.global.error.exception.handler.CoupleException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Transactional
@@ -37,8 +38,13 @@ public class CoupleCommandService {
         // codeOwner, memberA: 연결 코드 주인
         Member codeOwner = memberRepository.findByCoupleCode(request.coupleCode())
                 .orElseThrow(() -> new CoupleException(CoupleErrorCode.MEMBER_NOT_FOUND_BY_CODE));
-        Couple couple = CoupleConverter.createCouple(codeSubmitter, codeOwner);
-        Couple saved = coupleRepository.save(couple);
+
+        // 자신과 연결 될 수 없음
+        if (codeSubmitter.getId().equals(codeOwner.getId())) {
+            throw new CoupleException(CoupleErrorCode.SAME_MEMBER_CONNECTION_NOT_ALLOWED);
+        }
+
+        Couple saved = coupleRepository.save(Couple.create(codeSubmitter, codeOwner));
         return CoupleConverter.toCreatedCouple(saved);
     }
 
@@ -60,11 +66,11 @@ public class CoupleCommandService {
 
     private void validateCoupleConnect(Long memberId){
         // 기존 부부 연결이 완전히 끊어져야 가능
-        if (coupleRepository.existsByMemberIdAndStatus(memberId, CoupleStatus.CONNECTED)) {
+        if (coupleRepository.existsByMemberIdAndStatus(memberId, List.of(CoupleStatus.CONNECTED))) {
             throw new CoupleException(CoupleErrorCode.MEMBER_ALREADY_CONNECTED);
         }
         // 유예 기간에 있는 부부 연결이 완전히 끊어져야 가능
-        if (coupleRepository.existsByMemberIdAndStatus(memberId, CoupleStatus.DISCONNECTED_GRACE_PERIOD)) {
+        if (coupleRepository.existsByMemberIdAndStatus(memberId, List.of(CoupleStatus.DISCONNECTED_GRACE_PERIOD))) {
             throw new CoupleException(CoupleErrorCode.NEW_CONNECTION_NOT_ALLOWED_DURING_REJOIN_PERIOD);
         }
     }

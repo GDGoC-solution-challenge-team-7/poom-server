@@ -14,7 +14,7 @@ public enum CoupleErrorCode implements BaseErrorCode {
     SAME_MEMBER_CONNECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "COUPLE_400_1", "같은 회원끼리는 연결할 수 없습니다."),
     COUPLE_REJOIN_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "COUPLE_400_2", "부부 연결을 복구할 수 없습니다."),
     NEW_CONNECTION_NOT_ALLOWED_DURING_REJOIN_PERIOD(HttpStatus.CONFLICT, "COUPLE_409_1", "기존 부부 연결의 복구 유예기간에는 새로운 연결을 할 수 없습니다."),
-    MEMBER_ALREADY_CONNECTED(HttpStatus.CONFLICT, "COUPLE_409_2", "이미 연결된 상대가 있어 새로운 부부 연결을 할 수 없습니다.");
+    MEMBER_ALREADY_CONNECTED(HttpStatus.CONFLICT, "COUPLE_409_2", "이미 연결된 상대가 있어 새로운 부부 연결을 할 수 없습니다.")
     ;
 
 
