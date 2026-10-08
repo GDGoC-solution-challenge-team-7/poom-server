@@ -94,28 +94,6 @@ CREATE TABLE `chat_room` (
   CONSTRAINT `FK6x6htd2o9ba2r2wcrs72qau17` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `couple`
---
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `couple` (
-  `couple_id` bigint NOT NULL AUTO_INCREMENT,
-  `created_at` datetime(6) DEFAULT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `couple_status` enum('CONNECTED','DISCONNECTED_GRACE_PERIOD') DEFAULT NULL,
-  `member_a_id` bigint DEFAULT NULL,
-  `member_b_id` bigint DEFAULT NULL,
-  PRIMARY KEY (`couple_id`),
-  KEY `FKlqrofs4461uq26x1ttmchk270` (`member_a_id`),
-  KEY `FKtlmckme2msnqymntc9u6x2rhh` (`member_b_id`),
-  CONSTRAINT `FKlqrofs4461uq26x1ttmchk270` FOREIGN KEY (`member_a_id`) REFERENCES `member` (`member_id`),
-  CONSTRAINT `FKtlmckme2msnqymntc9u6x2rhh` FOREIGN KEY (`member_b_id`) REFERENCES `member` (`member_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 --
 -- Table structure for table `journal`
 --
