@@ -7,6 +7,8 @@ import gdg.challenge.poom.global.error.exception.handler.CoupleException;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -36,17 +38,44 @@ public class Couple extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CoupleStatus coupleStatus = CoupleStatus.CONNECTED;
 
-    public void changeCoupleStatus(CoupleStatus newStatus) {
-        this.coupleStatus = newStatus;
+    private LocalDateTime disconnectedAt;     // 연결 해제 시각
+
+    private LocalDateTime deleteScheduledAt;  // 실제 삭제 예정 시각
+
+    // member의 id 정렬을 통해 부부 중복 연결 방지
+    public static Couple create(Member a, Member b) {
+        Couple c = new Couple();
+        boolean aFirst = a.getId() < b.getId();
+        c.memberA = aFirst ? a : b;
+        c.memberB = aFirst ? b : a;
+        c.coupleStatus = CoupleStatus.CONNECTED;
+        return c;
     }
 
+
+    // 연결 해제 - 유예 기간 30일 설정
+    public void requestDisconnect() {
+        this.coupleStatus = CoupleStatus.DISCONNECTED_GRACE_PERIOD;
+        this.disconnectedAt = LocalDateTime.now();
+        this.deleteScheduledAt = this.disconnectedAt.plusDays(30);
+    }
+
+    // 연결 복구
+    public void restore() {
+        if (coupleStatus != CoupleStatus.DISCONNECTED_GRACE_PERIOD
+                || LocalDateTime.now().isAfter(deleteScheduledAt)) {
+            throw new CoupleException(CoupleErrorCode.COUPLE_REJOIN_NOT_ALLOWED);
+        }
+
+        this.coupleStatus = CoupleStatus.CONNECTED;
+        this.disconnectedAt = null;
+        this.deleteScheduledAt = null;
+    }
+
+    // 상대방 구하기
     public Member getPartnerOf(Long memberId) {
-        if (memberA.getId().equals(memberId)) {
-            return memberB;
-        }
-        if (memberB.getId().equals(memberId)) {
-            return memberA;
-        }
+        if (memberA.getId().equals(memberId)) return memberB;
+        if (memberB.getId().equals(memberId)) return memberA;
         throw new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER);
     }
 }
