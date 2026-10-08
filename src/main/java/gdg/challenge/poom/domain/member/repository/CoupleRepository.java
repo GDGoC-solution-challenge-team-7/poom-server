@@ -22,7 +22,7 @@ public interface CoupleRepository extends JpaRepository<Couple, Long> {
           and c.coupleStatus in :statuses
         """)
     boolean existsByMemberIdAndStatus(@Param("memberId") Long memberId,
-                                      @Param("status") Collection<CoupleStatus> statuses);
+                                      @Param("statuses") Collection<CoupleStatus> statuses);
 
     // 실제 삭제 예정 시각이 지난 부부들 조회
     List<Couple> findByCoupleStatusAndDeleteScheduledAtBefore(
