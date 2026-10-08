@@ -5,6 +5,7 @@ import gdg.challenge.poom.domain.journal.dto.response.JournalResponseDTO;
 import gdg.challenge.poom.domain.journal.entity.Journal;
 import gdg.challenge.poom.domain.journal.entity.JournalImage;
 import gdg.challenge.poom.domain.journal.entity.enums.JournalEmotion;
+import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -65,6 +66,13 @@ public class JournalConverter {
                 .year(year)
                 .month(month)
                 .journalList(list)
+                .build();
+    }
+
+    public static JournalResponseDTO.JournalChangedVisibility toJournalChangedVisibility(Long journalId, Visibility visibility){
+        return JournalResponseDTO.JournalChangedVisibility.builder()
+                .journalId(journalId)
+                .visibility(visibility)
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package gdg.challenge.poom.domain.journal.entity;
 
 import gdg.challenge.poom.domain.journal.entity.enums.JournalEmotion;
+import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.global.common.BaseEntity;
 import gdg.challenge.poom.global.error.code.status.JournalErrorCode;
@@ -17,7 +18,11 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "journal")
+@Table(name = "journal",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_journal_member_date",
+                columnNames = {"member_id", "journal_date"})
+)
 public class Journal extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +40,10 @@ public class Journal extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Visibility visibility = Visibility.PRIVATE;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     @Setter
@@ -49,6 +58,24 @@ public class Journal extends BaseEntity {
         this.journalEmotion = journalEmotion;
         this.content = content;
     }
+
+    // 공개범위 변경 도메인 메서드
+    public void changeVisibility(Visibility visibility) {
+        this.visibility = visibility;
+    }
+
+//    // 접근 가능 여부 판단 (핵심 로직)
+//    public boolean canBeViewedBy(Member viewer) {
+//        // 작성자 본인은 항상 가능
+//        if (member.getId().equals(viewer.getId())) {
+//            return true;
+//        }
+//        // 부부 공유일 때만 같은 커플이면 가능
+//        return visibility == Visibility.COUPLE
+//                && member.getCouple() != null
+//                && viewer.getCouple() != null
+//                && member.getCouple().getId().equals(viewer.getCouple().getId());
+//    }
 
     public void addJournalImage(List<JournalImage> journalImageList) {
         if (journalImageList == null || journalImageList.isEmpty()) {

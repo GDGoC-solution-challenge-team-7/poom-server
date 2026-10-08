@@ -8,6 +8,7 @@ import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +62,17 @@ public class JournalController {
     ){
         journalCommandService.updateJournal(customUserDetails.getMemberId(), journalId, request);
         return ApiResponse.onSuccess(null);
+    }
+
+    @Operation(summary = "일기 공개 범위 수정 API", description = "일기 공개 범위 수정하는 API, 'PRIVATE'|'COUPLE'")
+    @PatchMapping("/{journalId}")
+    public ApiResponse<JournalResponseDTO.JournalChangedVisibility> updateJournalVisibility(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody @Valid JournalRequestDTO.JournalVisibilityRequest request,
+            @PathVariable Long journalId
+    ){
+        JournalResponseDTO.JournalChangedVisibility journal = journalCommandService.updateJournalVisibility(customUserDetails.getMemberId(), journalId, request);
+        return ApiResponse.onSuccess(journal);
     }
 
     @Operation(summary = "일기 삭제 API", description = "일기 삭제하는 API")

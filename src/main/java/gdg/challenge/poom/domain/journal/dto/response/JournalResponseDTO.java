@@ -1,6 +1,7 @@
 package gdg.challenge.poom.domain.journal.dto.response;
 
 import gdg.challenge.poom.domain.journal.entity.enums.JournalEmotion;
+import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -33,5 +34,11 @@ public record JournalResponseDTO() {
             Long journalId,
             LocalDate journalDate,
             JournalEmotion journalEmotion
+    ){}
+
+    @Builder
+    public record JournalChangedVisibility(
+            Long journalId,
+            Visibility visibility
     ){}
 }
