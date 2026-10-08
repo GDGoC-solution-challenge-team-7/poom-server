@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -62,6 +63,18 @@ public class CoupleCommandService {
         couple.requestDisconnect();
         Member partner = couple.getPartnerOf(memberId);
         return CoupleConverter.toChangeStatusCouple(partner.getId(), memberId, couple);
+    }
+
+    // 만료 시 부부 데이터 삭제
+    public void deleteExpiredConnections(){
+        List<Couple> expiredCouple = coupleRepository.findByCoupleStatusAndDeleteScheduledAtBefore(
+                CoupleStatus.DISCONNECTED_GRACE_PERIOD, LocalDateTime.now()
+        );
+
+        for (Couple c : expiredCouple) {
+            // TODO: 연관 데이터부터 삭제 후 연결 삭제
+            coupleRepository.delete(c);
+        }
     }
 
     private void validateCoupleConnect(Long memberId){
