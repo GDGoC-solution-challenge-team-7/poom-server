@@ -53,29 +53,17 @@ public class Journal extends BaseEntity {
     @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JournalImage> journalImageList = new ArrayList<>();
 
-    public void changeJournal(LocalDate journalDate, JournalEmotion journalEmotion, String content) {
+    public void changeJournal(LocalDate journalDate, JournalEmotion journalEmotion, String content, Visibility visibility) {
         this.journalDate = journalDate;
         this.journalEmotion = journalEmotion;
         this.content = content;
+        this.visibility = visibility;
     }
 
     // 공개범위 변경 도메인 메서드
     public void changeVisibility(Visibility visibility) {
         this.visibility = visibility;
     }
-
-//    // 접근 가능 여부 판단 (핵심 로직)
-//    public boolean canBeViewedBy(Member viewer) {
-//        // 작성자 본인은 항상 가능
-//        if (member.getId().equals(viewer.getId())) {
-//            return true;
-//        }
-//        // 부부 공유일 때만 같은 커플이면 가능
-//        return visibility == Visibility.COUPLE
-//                && member.getCouple() != null
-//                && viewer.getCouple() != null
-//                && member.getCouple().getId().equals(viewer.getCouple().getId());
-//    }
 
     public void addJournalImage(List<JournalImage> journalImageList) {
         if (journalImageList == null || journalImageList.isEmpty()) {

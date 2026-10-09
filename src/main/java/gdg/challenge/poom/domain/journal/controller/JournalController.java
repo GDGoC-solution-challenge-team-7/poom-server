@@ -10,11 +10,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/journal")
+@RequestMapping("/api/v1/journals")
 @RestController
 @Tag(name = "일기 API")
 public class JournalController {
@@ -33,14 +37,33 @@ public class JournalController {
     }
 
     @Operation(summary = "월별 일기 조회 API", description = "월별 일기 조회하는 API")
-    @GetMapping
-    public ApiResponse<JournalResponseDTO.JournalList> getCalendar(
+    @GetMapping("/calendar")
+    public ApiResponse<JournalResponseDTO.JournalListByMonth> getCalendarByMonth(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestParam("year") int year,
-            @RequestParam("month") int month
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
     ){
-        JournalResponseDTO.JournalList calendar = journalQueryService.getCalendar(customUserDetails.getMemberId(), year, month);
+        JournalResponseDTO.JournalListByMonth calendar = journalQueryService.getCalendar(customUserDetails.getMemberId(), month);
         return ApiResponse.onSuccess(calendar);
+    }
+
+    @Operation(summary = "날짜별 일기 조회 API", description = "월별 일기 조회하는 API")
+    @GetMapping("/{date}")
+    public ApiResponse<JournalResponseDTO.JournalByDate> getJournalByDate(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ){
+        JournalResponseDTO.JournalByDate journalByDate = journalQueryService.getJournalByDate(customUserDetails.getMemberId(), date);
+        return ApiResponse.onSuccess(journalByDate);
+    }
+
+    @Operation(summary = "일기 리스트 조회 API", description = "월별 일기 조회하는 API")
+    @GetMapping
+    public ApiResponse<JournalResponseDTO.JournalList> getJournalList(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
+    ){
+        journalQueryService.getJournalByMonth(customUserDetails.getMemberId(), month);
+        return ApiResponse.onSuccess(null);
     }
 
     @Operation(summary = "일기 상세 조회 API", description = "일기 상세 조회하는 API")
@@ -65,7 +88,7 @@ public class JournalController {
     }
 
     @Operation(summary = "일기 공개 범위 수정 API", description = "일기 공개 범위 수정하는 API, 'PRIVATE'|'COUPLE'")
-    @PatchMapping("/{journalId}")
+    @PatchMapping("/{journalId}/visibility")
     public ApiResponse<JournalResponseDTO.JournalChangedVisibility> updateJournalVisibility(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestBody @Valid JournalRequestDTO.JournalVisibilityRequest request,

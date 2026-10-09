@@ -8,6 +8,7 @@ import gdg.challenge.poom.domain.journal.entity.enums.JournalEmotion;
 import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 public class JournalConverter {
@@ -17,8 +18,8 @@ public class JournalConverter {
                 .journalDate(request.journalDate())
                 .journalEmotion(request.journalEmotion())
                 .content(request.content())
+                .visibility(request.visibility())
                 .build();
-
     }
 
     public static List<JournalImage> toJournalImage (List<String> imageUrls){
@@ -37,12 +38,31 @@ public class JournalConverter {
                 .build();
     }
 
-    public static JournalResponseDTO.JournalDetail toJournalDetail(Journal journal, List<String> signedUrlList){
+    public static JournalResponseDTO.JournalDetail toJournalDetail(Journal journal, List<JournalResponseDTO.ImageUrl> signedUrlList){
+        JournalResponseDTO.Author author = JournalResponseDTO.Author.builder()
+                .memberId(journal.getMember().getId())
+                .nickname(journal.getMember().getName())
+                .build();
+
         return JournalResponseDTO.JournalDetail.builder()
-                .journalDate(journal.getJournalDate())
+                .journalId(journal.getId())
+                .author(author)
                 .journalEmotion(journal.getJournalEmotion())
+                .journalDescription(journal.getJournalEmotion().getDescription())
                 .content(journal.getContent())
+                .visibility(journal.getVisibility())
                 .imageUrls(signedUrlList)
+                .build();
+    }
+
+    public static JournalResponseDTO.JournalByDate toJournalByDate(
+            LocalDate journalDate, Journal myJournal, List<JournalResponseDTO.ImageUrl> myUrlList,
+            Journal partnerJournal, List<JournalResponseDTO.ImageUrl> partnerUrlList
+    ){
+        return JournalResponseDTO.JournalByDate.builder()
+                .journalDate(journalDate)
+                .myJournal(toJournalDetail(myJournal, myUrlList))
+                .partnerJournal(toJournalDetail(partnerJournal, partnerUrlList))
                 .build();
     }
 
@@ -55,15 +75,14 @@ public class JournalConverter {
                 .build();
     }
 
-    public static JournalResponseDTO.JournalList toJournalList(List<Journal> journalList, int year, int month){
+    public static JournalResponseDTO.JournalListByMonth toJournalList(List<Journal> journalList, YearMonth month){
 
         List<JournalResponseDTO.Journal> list = journalList.stream()
                 .map(JournalConverter::toJournal)
                 .toList();
 
 
-        return JournalResponseDTO.JournalList.builder()
-                .year(year)
+        return JournalResponseDTO.JournalListByMonth.builder()
                 .month(month)
                 .journalList(list)
                 .build();

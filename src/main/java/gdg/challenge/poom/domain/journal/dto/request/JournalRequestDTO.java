@@ -13,7 +13,8 @@ public record JournalRequestDTO() {
             LocalDate journalDate,
             JournalEmotion journalEmotion,
             String content,
-            List<String> imageUrls
+            List<String> imageUrls,
+            Visibility visibility
     ){}
 
     public record JournalVisibilityRequest(

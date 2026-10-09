@@ -5,27 +5,44 @@ import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 public record JournalResponseDTO() {
     @Builder
     public record CreatedJournal(
             LocalDate journalDate,
-            JournalEmotion journalEmotion
+            JournalEmotion journalEmotion,
+            Visibility visibility
     ){}
 
     @Builder
     public record JournalDetail(
-            LocalDate journalDate,
+            Long journalId,
+            Author author,
             JournalEmotion journalEmotion,
+            String journalDescription,
             String content,
-            List<String> imageUrls
+            Visibility visibility,
+            List<ImageUrl> imageUrls
     ){}
 
     @Builder
+    public record JournalByDate(
+            LocalDate journalDate,
+            JournalDetail myJournal,
+            JournalDetail partnerJournal
+    ){}
+
     public record JournalList(
-            int year,
-            int month,
+            LocalDate journalDate,
+            List<JournalDetail> journalDetails
+    ){}
+
+    // 달력 조회용 리스트
+    @Builder
+    public record JournalListByMonth(
+            YearMonth month,
             List<Journal> journalList
     ){}
 
@@ -40,5 +57,17 @@ public record JournalResponseDTO() {
     public record JournalChangedVisibility(
             Long journalId,
             Visibility visibility
+    ){}
+
+    @Builder
+    public record Author(
+            Long memberId,
+            String nickname
+    ){}
+
+    @Builder
+    public record ImageUrl(
+            Long imageId,
+            String url
     ){}
 }

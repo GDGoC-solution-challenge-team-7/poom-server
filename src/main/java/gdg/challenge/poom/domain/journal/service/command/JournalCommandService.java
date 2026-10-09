@@ -86,7 +86,7 @@ public class JournalCommandService {
             journal.addJournalImage(imageUrls);
             journalImageRepository.saveAll(imageUrls);
         }
-        journal.changeJournal(request.journalDate(), request.journalEmotion(), request.content());
+        journal.changeJournal(request.journalDate(), request.journalEmotion(), request.content(), request.visibility());
     }
 
     // 일기 공개범위 변경
