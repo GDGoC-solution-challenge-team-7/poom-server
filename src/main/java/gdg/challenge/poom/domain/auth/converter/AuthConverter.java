@@ -30,6 +30,7 @@ public class AuthConverter {
                 .childBirthDate(dto.childBirthDate())
                 .nextSendAt(TimeUtil.calculateNextSendAt(LocalTime.of(9, 0)))
                 .hasGivenBirth(dto.hasGivenBirth())
+                .characterType(dto.characterType())
                 .build();
     }
 
