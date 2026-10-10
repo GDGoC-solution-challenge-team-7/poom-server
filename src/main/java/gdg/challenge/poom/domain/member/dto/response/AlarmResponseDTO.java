@@ -26,8 +26,17 @@ public record AlarmResponseDTO() {
 
     @Builder
     public record AlarmSetting(
-        Boolean pushAlarm,
-        LocalTime dailyAlarmTime,
+        Boolean allEnabled,
+        Boolean chatEnabled,
+        LocalTime chatAlarmTime,
+        Boolean sharedJournalEnabled,
+        Boolean journalReminderEnabled,
+        LocalTime journalReminderTime,
         String deviceToken
+    ){}
+
+    @Builder
+    public record UpdateAllAlarm(
+            Boolean allEnabled
     ){}
 }

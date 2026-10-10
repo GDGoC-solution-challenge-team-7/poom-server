@@ -124,11 +124,6 @@ public class Member extends BaseEntity {
         this.deviceToken = deviceToken;
     }
 
-    public void updateAlarmSetting(Boolean pushAlarm, LocalTime dailyAlarmTime) {
-        this.pushAlarm = pushAlarm;
-        this.dailyAlarmTime = dailyAlarmTime;
-    }
-
     public void setChatRoomSetting(CharacterType characterType, ChatMode chatMode) {
         this.characterType = characterType;
         this.chatMode = chatMode;
@@ -141,10 +136,6 @@ public class Member extends BaseEntity {
 
     public void updateProfileImage(String profileImage){
         this.profileImage = profileImage;
-    }
-
-    public void updateNextSendAt(LocalDateTime nextSendAt) {
-        this.nextSendAt = nextSendAt;
     }
 
     public void addChatRoom(ChatRoom chatRoom){

@@ -58,12 +58,22 @@ public class AlarmController {
 
     @Operation(summary = "알림 설정 업데이트 API", description = "알림 설정을 업데이트하는 API")
     @PatchMapping("/settings")
-    public ApiResponse<Void> updateAlarmSettings(
+    public ApiResponse<AlarmResponseDTO.AlarmSetting> updateAlarmSettings(
             @RequestBody @Valid AlarmRequestDTO.UpdateAlarmSetting request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
-        alarmCommandService.updateAlarmSettings(request, customUserDetails.getMemberId());
-        return ApiResponse.onSuccess(null);
+        AlarmResponseDTO.AlarmSetting alarmSetting = alarmCommandService.updateAlarmSettings(request, customUserDetails.getMemberId());
+        return ApiResponse.onSuccess(alarmSetting);
+    }
+
+    @Operation(summary = "알림 전체 ON/OFF 토글 API", description = "알림 설정을 업데이트하는 API")
+    @PatchMapping("/settings")
+    public ApiResponse<AlarmResponseDTO.UpdateAllAlarm> toggleAllAlarmSettings(
+            @RequestBody @Valid AlarmRequestDTO.UpdateAllAlarm request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        AlarmResponseDTO.UpdateAllAlarm updateAllAlarm = alarmCommandService.updateAllAlarmSettings(request, customUserDetails.getMemberId());
+        return ApiResponse.onSuccess(updateAllAlarm);
     }
 
     @Operation(summary = "알림 배치 실행 (내부용)", description = "Cloud Scheduler에 의해 주기적으로 호출되는 내부 API")

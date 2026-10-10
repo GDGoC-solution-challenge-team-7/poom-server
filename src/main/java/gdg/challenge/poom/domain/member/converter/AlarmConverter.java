@@ -4,21 +4,24 @@ import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.member.dto.request.AlarmRequestDTO;
 import gdg.challenge.poom.domain.member.dto.response.AlarmResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Alarm;
+import gdg.challenge.poom.domain.member.entity.AlarmSetting;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import gdg.challenge.poom.domain.util.TimeUtil;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 public class AlarmConverter {
 
     //AlarmResponseDTO.AlarmSetting
-    public static AlarmResponseDTO.AlarmSetting toAlarmSetting(Boolean pushAlarm, LocalTime dailyAlarmTime, String deviceToken){
+    public static AlarmResponseDTO.AlarmSetting toAlarmSetting(AlarmSetting alarmSetting, String deviceToken){
         return AlarmResponseDTO.AlarmSetting.builder()
-                .pushAlarm(pushAlarm)
-                .dailyAlarmTime(dailyAlarmTime)
+                .allEnabled(alarmSetting.isAllEnabled())
+                .chatAlarmTime(alarmSetting.getChatAlarmTime())
+                .sharedJournalEnabled(alarmSetting.isSharedJournalEnabled())
+                .journalReminderEnabled(alarmSetting.isJournalReminderEnabled())
+                .journalReminderTime(alarmSetting.getJournalReminderTime())
                 .deviceToken(deviceToken)
                 .build();
     }

@@ -3,10 +3,13 @@ package gdg.challenge.poom.domain.member.service;
 import gdg.challenge.poom.domain.member.alarm.service.FCMAlarmSender;
 import gdg.challenge.poom.domain.member.converter.AlarmConverter;
 import gdg.challenge.poom.domain.member.dto.request.AlarmRequestDTO;
+import gdg.challenge.poom.domain.member.dto.response.AlarmResponseDTO;
 import gdg.challenge.poom.domain.member.entity.Alarm;
+import gdg.challenge.poom.domain.member.entity.AlarmSetting;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import gdg.challenge.poom.domain.member.repository.AlarmRepository;
+import gdg.challenge.poom.domain.member.repository.AlarmSettingRepository;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.domain.util.TimeUtil;
 import gdg.challenge.poom.global.error.code.status.AlarmErrorCode;
@@ -32,6 +35,7 @@ public class AlarmCommandService {
 
     private final MemberRepository memberRepository;
     private final AlarmRepository alarmRepository;
+    private final AlarmSettingRepository alarmSettingRepository;
     private final FCMAlarmSender fcmAlarmSender;
     private static final int BATCH_SIZE = 500;
 
@@ -53,13 +57,23 @@ public class AlarmCommandService {
         member.updateDeviceToken(request.deviceToken());
     }
 
-    public void updateAlarmSettings(AlarmRequestDTO.UpdateAlarmSetting request, Long memberId){
+    public AlarmResponseDTO.AlarmSetting updateAlarmSettings(AlarmRequestDTO.UpdateAlarmSetting request, Long memberId){
+        AlarmSetting alarmSetting = alarmSettingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_SETTING_NOT_FOUND));
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        LocalDateTime nextSendAt = TimeUtil.calculateNextSendAt(request.chatAlarmTime());
+        alarmSetting.updateNextSendAt(nextSendAt);
+        alarmSetting.updateAlarmSetting(request);
+        return AlarmConverter.toAlarmSetting(alarmSetting, member.getDeviceToken());
+    }
 
-        LocalDateTime nextSendAt = TimeUtil.calculateNextSendAt(request.dailyAlarmTime());
-        member.updateNextSendAt(nextSendAt);
-        member.updateAlarmSetting(request.pushAlarm(), request.dailyAlarmTime());
+    public AlarmResponseDTO.UpdateAllAlarm updateAllAlarmSettings(AlarmRequestDTO.UpdateAllAlarm request, Long memberId){
+        AlarmSetting alarmSetting = alarmSettingRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_SETTING_NOT_FOUND));
+
+        alarmSetting.updateAll(request.allEnabled());
+        return AlarmResponseDTO.UpdateAllAlarm.builder().allEnabled(alarmSetting.isAllEnabled()).build();
     }
 
     public void dispatchDueAlarms(){
