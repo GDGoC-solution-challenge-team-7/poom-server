@@ -13,7 +13,20 @@ import java.util.Optional;
 
 public interface CoupleRepository extends JpaRepository<Couple, Long> {
 
-    Optional<Couple> findByMemberA_IdOrMemberB_Id(Long memberAId, Long memberBId);
+    @Query("""
+    select c from Couple c
+    where (c.memberA.id = :memberId or c.memberB.id = :memberId)
+    """)
+    Optional<Couple> getCoupleByMemberId(@Param("memberId") Long memberId);
+
+    @Query("""
+        select c
+        from Couple c
+        where (c.memberA.id = :memberId or c.memberB.id = :memberId)
+          and c.coupleStatus in :statuses
+        """)
+    Optional<Couple> getCoupleByMemberIdAndStatus(@Param("memberId") Long memberId,
+                                      @Param("statuses") Collection<CoupleStatus> statuses);
 
     @Query("""
         select count(c) > 0

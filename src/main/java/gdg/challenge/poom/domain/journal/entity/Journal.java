@@ -1,6 +1,7 @@
 package gdg.challenge.poom.domain.journal.entity;
 
 import gdg.challenge.poom.domain.journal.entity.enums.JournalEmotion;
+import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.global.common.BaseEntity;
 import gdg.challenge.poom.global.error.code.status.JournalErrorCode;
@@ -17,7 +18,11 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "journal")
+@Table(name = "journal",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_journal_member_date",
+                columnNames = {"member_id", "journal_date"})
+)
 public class Journal extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +40,10 @@ public class Journal extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Visibility visibility = Visibility.PRIVATE;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     @Setter
@@ -44,10 +53,16 @@ public class Journal extends BaseEntity {
     @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JournalImage> journalImageList = new ArrayList<>();
 
-    public void changeJournal(LocalDate journalDate, JournalEmotion journalEmotion, String content) {
+    public void changeJournal(LocalDate journalDate, JournalEmotion journalEmotion, String content, Visibility visibility) {
         this.journalDate = journalDate;
         this.journalEmotion = journalEmotion;
         this.content = content;
+        this.visibility = visibility;
+    }
+
+    // 공개범위 변경 도메인 메서드
+    public void changeVisibility(Visibility visibility) {
+        this.visibility = visibility;
     }
 
     public void addJournalImage(List<JournalImage> journalImageList) {

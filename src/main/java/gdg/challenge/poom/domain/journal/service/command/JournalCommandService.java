@@ -86,7 +86,18 @@ public class JournalCommandService {
             journal.addJournalImage(imageUrls);
             journalImageRepository.saveAll(imageUrls);
         }
-        journal.changeJournal(request.journalDate(), request.journalEmotion(), request.content());
+        journal.changeJournal(request.journalDate(), request.journalEmotion(), request.content(), request.visibility());
+    }
+
+    // 일기 공개범위 변경
+    public JournalResponseDTO.JournalChangedVisibility updateJournalVisibility(Long memberId, Long journalId, JournalRequestDTO.JournalVisibilityRequest request){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        Journal journal = journalRepository.findById(journalId)
+                .orElseThrow(() -> new JournalException(JournalErrorCode.JOURNAL_NOT_FOUND));
+        journal.changeVisibility(request.visibility());
+        return JournalConverter.toJournalChangedVisibility(journal.getId(), journal.getVisibility());
     }
 
     public void deleteJournal(Long memberId, Long journalId){

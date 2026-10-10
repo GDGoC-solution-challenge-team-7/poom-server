@@ -5,8 +5,10 @@ import gdg.challenge.poom.domain.journal.dto.response.JournalResponseDTO;
 import gdg.challenge.poom.domain.journal.entity.Journal;
 import gdg.challenge.poom.domain.journal.entity.JournalImage;
 import gdg.challenge.poom.domain.journal.entity.enums.JournalEmotion;
+import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 public class JournalConverter {
@@ -16,8 +18,8 @@ public class JournalConverter {
                 .journalDate(request.journalDate())
                 .journalEmotion(request.journalEmotion())
                 .content(request.content())
+                .visibility(request.visibility())
                 .build();
-
     }
 
     public static List<JournalImage> toJournalImage (List<String> imageUrls){
@@ -36,12 +38,32 @@ public class JournalConverter {
                 .build();
     }
 
-    public static JournalResponseDTO.JournalDetail toJournalDetail(Journal journal, List<String> signedUrlList){
+    public static JournalResponseDTO.JournalDetail toJournalDetail(Journal journal, List<JournalResponseDTO.ImageUrl> signedUrlList){
+        JournalResponseDTO.Author author = JournalResponseDTO.Author.builder()
+                .memberId(journal.getMember().getId())
+                .nickname(journal.getMember().getName())
+                .build();
+
         return JournalResponseDTO.JournalDetail.builder()
-                .journalDate(journal.getJournalDate())
+                .journalId(journal.getId())
+                .journalCreatedDate(journal.getJournalDate())
+                .author(author)
                 .journalEmotion(journal.getJournalEmotion())
+                .journalDescription(journal.getJournalEmotion().getDescription())
                 .content(journal.getContent())
+                .visibility(journal.getVisibility())
                 .imageUrls(signedUrlList)
+                .build();
+    }
+
+    public static JournalResponseDTO.JournalByDate toJournalByDate(
+            LocalDate journalDate, Journal myJournal, List<JournalResponseDTO.ImageUrl> myUrlList,
+            Journal partnerJournal, List<JournalResponseDTO.ImageUrl> partnerUrlList
+    ){
+        return JournalResponseDTO.JournalByDate.builder()
+                .journalDate(journalDate)
+                .myJournal(myJournal != null ? toJournalDetail(myJournal, myUrlList): null)
+                .partnerJournal(partnerJournal != null ? toJournalDetail(partnerJournal, partnerUrlList): null)
                 .build();
     }
 
@@ -54,18 +76,40 @@ public class JournalConverter {
                 .build();
     }
 
-    public static JournalResponseDTO.JournalList toJournalList(List<Journal> journalList, int year, int month){
+    public static JournalResponseDTO.JournalListByMonth toJournalList(List<Journal> journalList, YearMonth month){
 
         List<JournalResponseDTO.Journal> list = journalList.stream()
                 .map(JournalConverter::toJournal)
                 .toList();
 
 
-        return JournalResponseDTO.JournalList.builder()
-                .year(year)
+        return JournalResponseDTO.JournalListByMonth.builder()
                 .month(month)
                 .journalList(list)
                 .build();
     }
 
+    public static JournalResponseDTO.JournalChangedVisibility toJournalChangedVisibility(Long journalId, Visibility visibility){
+        return JournalResponseDTO.JournalChangedVisibility.builder()
+                .journalId(journalId)
+                .visibility(visibility)
+                .build();
+    }
+
+    public static JournalResponseDTO.JournalList toJournalListByMonth(YearMonth date, List<Journal> journalList){
+        List<JournalResponseDTO.JournalDetail> journalDetailList = journalList.stream()
+                .map(journal -> {
+                    List<JournalResponseDTO.ImageUrl> imageUrlList = journal.getJournalImageList().stream()
+                            .map(jImages -> JournalResponseDTO.ImageUrl.builder()
+                                    .imageId(jImages.getId())
+                                    .url(jImages.getImageUrl())
+                                    .build()).toList();
+                    return toJournalDetail(journal, imageUrlList);}
+                ).toList();
+
+        return JournalResponseDTO.JournalList.builder()
+                .journalDate(date)
+                .journalDetails(journalDetailList)
+                .build();
+    }
 }

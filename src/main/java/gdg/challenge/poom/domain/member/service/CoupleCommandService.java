@@ -51,14 +51,14 @@ public class CoupleCommandService {
 
     // 부부 연결 복구
     public void rejoinCouple(Long memberId) {
-        Couple couple = coupleRepository.findByMemberA_IdOrMemberB_Id(memberId, memberId)
+        Couple couple = coupleRepository.getCoupleByMemberId(memberId)
                 .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
         couple.restore();
     }
 
     // 부부 연결 해제 - 유예 시간 30일, 30일 후 영구 삭제
     public CoupleResponseDTO.ChangeStatusCouple deleteCouple(Long memberId) {
-        Couple couple = coupleRepository.findByMemberA_IdOrMemberB_Id(memberId, memberId)
+        Couple couple = coupleRepository.getCoupleByMemberId(memberId)
                 .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
         couple.requestDisconnect();
         Member partner = couple.getPartnerOf(memberId);
