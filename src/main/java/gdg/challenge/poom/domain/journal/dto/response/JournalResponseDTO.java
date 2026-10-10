@@ -34,8 +34,9 @@ public record JournalResponseDTO() {
             JournalDetail partnerJournal
     ){}
 
+    @Builder
     public record JournalList(
-            LocalDate journalDate,
+            YearMonth journalDate,
             List<JournalDetail> journalDetails
     ){}
 

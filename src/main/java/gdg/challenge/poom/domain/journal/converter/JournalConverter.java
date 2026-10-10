@@ -95,4 +95,20 @@ public class JournalConverter {
                 .build();
     }
 
+    public static JournalResponseDTO.JournalList toJournalListByMonth(YearMonth date, List<Journal> journalList){
+        List<JournalResponseDTO.JournalDetail> journalDetailList = journalList.stream()
+                .map(journal -> {
+                    List<JournalResponseDTO.ImageUrl> imageUrlList = journal.getJournalImageList().stream()
+                            .map(jImages -> JournalResponseDTO.ImageUrl.builder()
+                                    .imageId(jImages.getId())
+                                    .url(jImages.getImageUrl())
+                                    .build()).toList();
+                    return toJournalDetail(journal, imageUrlList);}
+                ).toList();
+
+        return JournalResponseDTO.JournalList.builder()
+                .journalDate(date)
+                .journalDetails(journalDetailList)
+                .build();
+    }
 }

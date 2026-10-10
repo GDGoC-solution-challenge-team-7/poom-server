@@ -1,6 +1,7 @@
 package gdg.challenge.poom.domain.journal.controller;
 
 import gdg.challenge.poom.domain.journal.dto.request.JournalRequestDTO;
+import gdg.challenge.poom.domain.journal.dto.request.enums.JournalAuthor;
 import gdg.challenge.poom.domain.journal.dto.response.JournalResponseDTO;
 import gdg.challenge.poom.domain.journal.service.command.JournalCommandService;
 import gdg.challenge.poom.domain.journal.service.query.JournalQueryService;
@@ -60,10 +61,11 @@ public class JournalController {
     @GetMapping
     public ApiResponse<JournalResponseDTO.JournalList> getJournalList(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
+            @RequestParam JournalAuthor author
     ){
-        journalQueryService.getJournalByMonth(customUserDetails.getMemberId(), month);
-        return ApiResponse.onSuccess(null);
+        JournalResponseDTO.JournalList journalByMonth = journalQueryService.getJournalByMonth(customUserDetails.getMemberId(), month, author);
+        return ApiResponse.onSuccess(journalByMonth);
     }
 
     @Operation(summary = "일기 상세 조회 API", description = "일기 상세 조회하는 API")

@@ -1,8 +1,10 @@
 package gdg.challenge.poom.domain.journal.service.query;
 
 import gdg.challenge.poom.domain.journal.converter.JournalConverter;
+import gdg.challenge.poom.domain.journal.dto.request.enums.JournalAuthor;
 import gdg.challenge.poom.domain.journal.dto.response.JournalResponseDTO;
 import gdg.challenge.poom.domain.journal.entity.Journal;
+import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
 import gdg.challenge.poom.domain.journal.repository.JournalRepository;
 import gdg.challenge.poom.domain.member.entity.Couple;
 import gdg.challenge.poom.domain.member.entity.Member;
@@ -88,8 +90,23 @@ public class JournalQueryService {
         return JournalConverter.toJournalByDate(date, myJournal, myJournalImageList, partnerJournal, partnerJournalImageList);
     }
 
-    public JournalResponseDTO.JournalListByMonth getJournalByMonth(Long memberId, YearMonth month){
-        // TODO: 내 일기/상대방 일기 분기
-        return null;
+    public JournalResponseDTO.JournalList getJournalByMonth(Long memberId, YearMonth month, JournalAuthor author){
+        Long targetMemberId;
+        List<Visibility> visibilities;
+
+        if (author == JournalAuthor.ME) {       // 나의 일기
+            targetMemberId = memberId;
+            visibilities = List.of(Visibility.PRIVATE, Visibility.COUPLE);
+        } else {        // 상대방의 일기
+            Couple couple = coupleRepository.getCoupleByMemberId(memberId)
+                    .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
+            targetMemberId = couple.getPartnerOf(memberId).getId(); // 커플이 아니면 예외
+            visibilities = List.of(Visibility.COUPLE);          // 공개한 일기만
+        }
+
+        List<Journal> journals = journalRepository.findMonthly(
+                targetMemberId, month.atDay(1), month.atEndOfMonth(), visibilities);
+
+        return JournalConverter.toJournalListByMonth(month, journals);
     }
 }

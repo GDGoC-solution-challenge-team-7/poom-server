@@ -12,6 +12,7 @@ public enum JournalErrorCode implements BaseErrorCode {
     JOURNAL_NOT_FOUND(HttpStatus.NOT_FOUND, "JOURNAL_404_1", "해당 일지를 찾을 수 없습니다."),
     JOURNAL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "JOURNAL_403_1", "해당 일지에 접근할 권한이 없습니다."),
     JOURNAL_IMAGE_REQUIRED(HttpStatus.BAD_REQUEST, "JOURNAL_IMAGE_400_1", "일기 이미지가 최소 1개 필요합니다."),
+    JOURNAL_INVALID_AUTHOR(HttpStatus.BAD_REQUEST, "JOURNAL_400_2", "author는 me 또는 partner여야 합니다.")
     ;
 
     private final HttpStatus status;
