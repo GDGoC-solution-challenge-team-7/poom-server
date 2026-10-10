@@ -19,6 +19,7 @@ public record JournalResponseDTO() {
     @Builder
     public record JournalDetail(
             Long journalId,
+            LocalDate journalCreatedDate,
             Author author,
             JournalEmotion journalEmotion,
             String journalDescription,

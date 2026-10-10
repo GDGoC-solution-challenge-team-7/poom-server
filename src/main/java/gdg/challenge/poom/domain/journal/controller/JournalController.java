@@ -8,6 +8,8 @@ import gdg.challenge.poom.domain.journal.service.query.JournalQueryService;
 import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,11 @@ public class JournalController {
     @GetMapping("/calendar")
     public ApiResponse<JournalResponseDTO.JournalListByMonth> getCalendarByMonth(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @Parameter(
+                    description = "조회할 연월 (yyyy-MM)",
+                    example = "2026-10",
+                    schema = @Schema(type = "string", pattern = "^\\d{4}-(0[1-9]|1[0-2])$")
+            )
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
     ){
         JournalResponseDTO.JournalListByMonth calendar = journalQueryService.getCalendar(customUserDetails.getMemberId(), month);
@@ -48,9 +55,14 @@ public class JournalController {
     }
 
     @Operation(summary = "날짜별 일기 조회 API", description = "월별 일기 조회하는 API")
-    @GetMapping("/{date}")
+    @GetMapping("/date/{date}")
     public ApiResponse<JournalResponseDTO.JournalByDate> getJournalByDate(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @Parameter(
+                    description = "조회할 일기 날짜 (yyyy-MM-dd)",
+                    example = "2026-10-11",
+                    schema = @Schema(type = "string", format = "date")
+            )
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ){
         JournalResponseDTO.JournalByDate journalByDate = journalQueryService.getJournalByDate(customUserDetails.getMemberId(), date);
@@ -61,6 +73,11 @@ public class JournalController {
     @GetMapping
     public ApiResponse<JournalResponseDTO.JournalList> getJournalList(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @Parameter(
+                    description = "조회할 연월 (yyyy-MM)",
+                    example = "2026-10",
+                    schema = @Schema(type = "string", pattern = "^\\d{4}-(0[1-9]|1[0-2])$")
+            )
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
             @RequestParam JournalAuthor author
     ){

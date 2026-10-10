@@ -46,6 +46,7 @@ public class JournalConverter {
 
         return JournalResponseDTO.JournalDetail.builder()
                 .journalId(journal.getId())
+                .journalCreatedDate(journal.getJournalDate())
                 .author(author)
                 .journalEmotion(journal.getJournalEmotion())
                 .journalDescription(journal.getJournalEmotion().getDescription())
@@ -61,8 +62,8 @@ public class JournalConverter {
     ){
         return JournalResponseDTO.JournalByDate.builder()
                 .journalDate(journalDate)
-                .myJournal(toJournalDetail(myJournal, myUrlList))
-                .partnerJournal(toJournalDetail(partnerJournal, partnerUrlList))
+                .myJournal(myJournal != null ? toJournalDetail(myJournal, myUrlList): null)
+                .partnerJournal(partnerJournal != null ? toJournalDetail(partnerJournal, partnerUrlList): null)
                 .build();
     }
 

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -75,14 +76,16 @@ public class JournalQueryService {
 
         Journal myJournal = journalRepository.findByMemberIdAndJournalDate(memberId, date)
                 .orElse(null);
-        List<JournalResponseDTO.ImageUrl> myJournalImageList = myJournal.getJournalImageList().stream()
+        List<JournalResponseDTO.ImageUrl> myJournalImageList = Optional.ofNullable(myJournal)
+                .map(Journal::getJournalImageList).orElse(List.of()).stream()
                 .map(image -> JournalResponseDTO.ImageUrl.builder()
                         .imageId(image.getId())
                         .url(gcsService.generateDownloadSignedUrl(image.getImageUrl()))
                         .build()).toList();
-        Journal partnerJournal = journalRepository.findVisibleDiary(couple.getPartnerOf(memberId).getId(), date)
+        Journal partnerJournal = journalRepository.findVisibleDiary(couple.getPartnerOf(memberId).getId(), date, List.of(Visibility.COUPLE))
                 .orElse(null);
-        List<JournalResponseDTO.ImageUrl> partnerJournalImageList = partnerJournal.getJournalImageList().stream()
+        List<JournalResponseDTO.ImageUrl> partnerJournalImageList = Optional.ofNullable(partnerJournal)
+                .map(Journal::getJournalImageList).orElse(List.of()).stream()
                 .map(image -> JournalResponseDTO.ImageUrl.builder()
                         .imageId(image.getId())
                         .url(gcsService.generateDownloadSignedUrl(image.getImageUrl()))

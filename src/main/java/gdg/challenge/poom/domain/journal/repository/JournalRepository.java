@@ -43,5 +43,9 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
             and j.journalDate = :date
             and j.visibility in :visibilities
     """)
-    Optional<Journal> findVisibleDiary(Long memberId, LocalDate date);
+    Optional<Journal> findVisibleDiary(
+            @Param("memberId") Long memberId,
+            @Param("date") LocalDate date,
+            @Param("visibilities") List<Visibility> visibilities
+    );
 }
