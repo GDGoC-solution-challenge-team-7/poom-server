@@ -4,12 +4,15 @@ CREATE TABLE alarm_setting (
     all_enabled               BOOLEAN     NOT NULL,
     chat_enabled              BOOLEAN     NOT NULL,
     chat_alarm_time           TIME        NOT NULL,
+    chat_next_send_at         DATETIME(6) NULL,
+    chat_last_send_at         DATETIME(6) NULL,
     shared_journal_enabled    BOOLEAN     NOT NULL,
     journal_reminder_enabled  BOOLEAN     NOT NULL,
     journal_reminder_time     TIME        NOT NULL,
-    -- 아래 두 컬럼은 ERD에는 없지만 Member의 기존 필드 이전용 (불필요하면 삭제)
-    next_send_at              DATETIME(6) NULL,
-    last_send_at              DATETIME(6) NULL,
+    journal_next_send_at      DATETIME(6) NULL,
+    journal_last_send_at      DATETIME(6) NULL,
+    created_at                DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),  -- BaseEntity에 맞게 조정
+    updated_at                DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),  -- BaseEntity에 맞게 조정
     member_id                 BIGINT      NOT NULL,
     PRIMARY KEY (alarm_setting_id),
     CONSTRAINT uk_alarm_setting_member UNIQUE (member_id),
@@ -23,21 +26,25 @@ INSERT INTO alarm_setting (
     all_enabled,
     chat_enabled,
     chat_alarm_time,
+    chat_next_send_at,
+    chat_last_send_at,
     shared_journal_enabled,
     journal_reminder_enabled,
     journal_reminder_time,
-    next_send_at,
-    last_send_at,
+    journal_next_send_at,
+    journal_last_send_at,
     member_id
 )
 SELECT
-    m.push_alarm,            -- pushAlarm      -> allEnabled
-    m.push_alarm,            -- 신규 항목: 전체 알림 값을 따라가도록 초기화
-    m.daily_alarm_time,                    -- chatAlarmTime
-    m.push_alarm,            -- 신규 항목: 전체 알림 값을 따라가도록 초기화
-    m.push_alarm,            -- 신규 항목: 전체 알림 값을 따라가도록 초기화
-    m.daily_alarm_time,      -- dailyAlarmTime -> journalReminderTime
-    m.next_send_at,
-    m.last_send_at,
+    m.push_alarm,            -- all_enabled
+    m.push_alarm,            -- chat_enabled (전체 알림 값 따라감)
+    m.daily_alarm_time,      -- chat_alarm_time
+    m.next_send_at,          -- chat_next_send_at
+    m.last_send_at,          -- chat_last_send_at
+    m.push_alarm,            -- shared_journal_enabled
+    m.push_alarm,            -- journal_reminder_enabled
+    m.daily_alarm_time,      -- journal_reminder_time
+    NULL,                    -- journal_next_send_at (신규)
+    NULL,                    -- journal_last_send_at (신규)
     m.member_id
 FROM member m;

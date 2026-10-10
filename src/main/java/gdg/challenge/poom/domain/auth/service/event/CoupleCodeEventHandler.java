@@ -3,6 +3,7 @@ package gdg.challenge.poom.domain.auth.service.event;
 import gdg.challenge.poom.domain.auth.dto.util.EventDTO;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
+import gdg.challenge.poom.domain.member.service.AlarmCommandService;
 import gdg.challenge.poom.domain.util.CoupleCodeGenerator;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CoupleCodeEventHandler {
     private final MemberRepository memberRepository;
     private final CoupleCodeGenerator coupleCodeGenerator;
+    private final AlarmCommandService alarmCommandService;
 
     @EventListener
     @Transactional
@@ -29,6 +31,7 @@ public class CoupleCodeEventHandler {
             code = coupleCodeGenerator.generate();
         } while (memberRepository.existsByCoupleCode(code));
 
+        alarmCommandService.createDefault(member);
         member.assignCoupleCode(code);
     }
 }

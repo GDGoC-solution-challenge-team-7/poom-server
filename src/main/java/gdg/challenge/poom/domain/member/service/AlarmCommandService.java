@@ -11,7 +11,6 @@ import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import gdg.challenge.poom.domain.member.repository.AlarmRepository;
 import gdg.challenge.poom.domain.member.repository.AlarmSettingRepository;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
-import gdg.challenge.poom.domain.util.TimeUtil;
 import gdg.challenge.poom.global.error.code.status.AlarmErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
 import gdg.challenge.poom.global.error.exception.handler.AlarmException;
@@ -19,11 +18,9 @@ import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -62,9 +59,7 @@ public class AlarmCommandService {
                 .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_SETTING_NOT_FOUND));
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-        LocalDateTime nextSendAt = TimeUtil.calculateNextSendAt(request.chatAlarmTime());
-        alarmSetting.updateNextSendAt(nextSendAt);
-        alarmSetting.updateAlarmSetting(request);
+        alarmSetting.updateAlarmSetting(request, LocalDateTime.now());
         return AlarmConverter.toAlarmSetting(alarmSetting, member.getDeviceToken());
     }
 
@@ -76,33 +71,72 @@ public class AlarmCommandService {
         return AlarmResponseDTO.UpdateAllAlarm.builder().allEnabled(alarmSetting.isAllEnabled()).build();
     }
 
-    public void dispatchDueAlarms(){
-        LocalDateTime now = LocalDateTime.now();
-        Pageable pageable = PageRequest.of(0, BATCH_SIZE);
-        List<Member> targetMembers = memberRepository.findDueTargets(now, pageable);
-        if (targetMembers.isEmpty()) return;
+    public AlarmSetting createDefault(Member member) {
+        AlarmSetting setting = AlarmSetting.builder()
+                .member(member)
+                .build();                              // 기본값(9시, enabled=true) 적용
 
-        for (Member target : targetMembers) sendAndUpdate(target);
+        setting.initSchedule(LocalDateTime.now());     // 첫 발송 시각 계산
+        return alarmSettingRepository.save(setting);
     }
 
-    private void sendAndUpdate(Member target) {
-        try {
-            String alarmTitle = target.getCharacterType().getKoName() + "와 오늘도 대화해 볼까요?";
-            String alarmContent = "오늘의 기분은 어떠신가요?\n" + target.getCharacterType().getKoName() + "와 함께 이야기해 볼까요?☺\uFE0F";
-            String alarmListVerContent = target.getCharacterType() + " is here. Shall we talk? ";
-            AlarmRequestDTO.SendAlarm sendAlarm = AlarmConverter.toSendAlarm(
-                    AlarmType.CHAT, alarmContent, alarmTitle, target.getCharacterType(), alarmListVerContent,  LocalDateTime.now()
-            );
+    public void dispatchDueAlarms(){
+        LocalDateTime now = LocalDateTime.now();
+        dispatchChat(now);
+        dispatchJournal(now);
+    }
 
-            // 1. 알림 발송
-            send(target.getId(), sendAlarm);
-            // 2. 다음 발송 시간 갱신 (다음날)
-            target.updateDailyAlarmDateLogic(LocalDate.now()
-                    .plusDays(1)
-                    .atTime(target.getDailyAlarmTime()), LocalDateTime.now());
-        } catch (Exception e) {
-            log.error("알람 전송 실패 memberId={}", target.getId(), e);
-            throw new AlarmException(AlarmErrorCode.FCM_SEND_FAIL);
+    private void dispatchChat(LocalDateTime now) {
+        List<AlarmSetting> alarmSettingList =
+                alarmSettingRepository.findDueChat(now, PageRequest.of(0, BATCH_SIZE));
+
+        for(AlarmSetting alarmSetting : alarmSettingList){
+            try {
+                Member member = alarmSetting.getMember();
+                String alarmTitle = member.getCharacterType().getKoName() + "와 오늘도 대화해 볼까요?";
+                String alarmContent = "오늘의 기분은 어떠신가요?\n" + member.getCharacterType().getKoName() + "와 함께 이야기해 볼까요?☺\uFE0F";
+                String alarmListVerContent = member.getCharacterType() + " is here. Shall we talk? ";
+                AlarmRequestDTO.SendAlarm sendAlarm = AlarmConverter.toSendAlarm(
+                        AlarmType.CHAT, alarmContent, alarmTitle, member.getCharacterType(), alarmListVerContent,  LocalDateTime.now()
+                );
+
+                // 1. 알림 발송
+                send(member.getId(), sendAlarm);
+            } catch (Exception e) {
+                log.error("알람 전송 실패 alarmSettingId={}", alarmSetting.getId(), e);
+                // throw 하지 않고 로그만: 한 명 실패가 다른 사람에게 영향을 주지 않게
+//            throw new AlarmException(AlarmErrorCode.FCM_SEND_FAIL);
+            } finally {
+                // 성공/실패 모두 다음 시각으로 넘겨서 한 건이 계속 앞자리를 막지 않게 함
+                alarmSetting.markChatSent(now);
+            }
+        }
+    }
+
+    private void dispatchJournal(LocalDateTime now) {
+        List<AlarmSetting> alarmSettingList =
+                alarmSettingRepository.findDueChat(now, PageRequest.of(0, BATCH_SIZE));
+
+        for(AlarmSetting alarmSetting : alarmSettingList){
+            try {
+                Member member = alarmSetting.getMember();
+                String alarmTitle = "오늘 하루는 어땠나요? 일기를 남겨보세요 📝";
+                String alarmContent = "일기 쓸 시간이에요";
+                String alarmListVerContent = "오늘 하루는 어땠나요? 일기를 남겨보세요 📝";
+                AlarmRequestDTO.SendAlarm sendAlarm = AlarmConverter.toSendAlarm(
+                        AlarmType.JOURNAL, alarmContent, alarmTitle, member.getCharacterType(), alarmListVerContent,  LocalDateTime.now()
+                );
+
+                // 1. 알림 발송
+                send(member.getId(), sendAlarm);
+            } catch (Exception e) {
+                log.error("알람 전송 실패 alarmSettingId={}", alarmSetting.getId(), e);
+                // throw 하지 않고 로그만: 한 명 실패가 다른 사람에게 영향을 주지 않게
+//            throw new AlarmException(AlarmErrorCode.FCM_SEND_FAIL);
+            } finally {
+                // 성공/실패 모두 다음 시각으로 넘겨서 한 건이 계속 앞자리를 막지 않게 함
+                alarmSetting.markJournalSent(now);
+            }
         }
     }
 

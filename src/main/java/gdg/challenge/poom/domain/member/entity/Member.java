@@ -91,6 +91,9 @@ public class Member extends BaseEntity {
     @Column(name = "couple_code", length = 6, unique = true)
     private String coupleCode;
 
+    @OneToOne(mappedBy = "member")
+    private AlarmSetting alarmSetting;
+
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> chatRoomList = new ArrayList<>();
@@ -127,11 +130,6 @@ public class Member extends BaseEntity {
     public void setChatRoomSetting(CharacterType characterType, ChatMode chatMode) {
         this.characterType = characterType;
         this.chatMode = chatMode;
-    }
-
-    public void updateDailyAlarmDateLogic(LocalDateTime nextSendAt, LocalDateTime lastSendAt) {
-        this.nextSendAt = nextSendAt;
-        this.lastSendAt = lastSendAt;
     }
 
     public void updateProfileImage(String profileImage){
