@@ -1,13 +1,19 @@
 package gdg.challenge.poom.global.error.exception;
 
+import gdg.challenge.poom.domain.journal.dto.request.enums.JournalAuthor;
 import gdg.challenge.poom.global.error.ApiResponse;
 import gdg.challenge.poom.global.error.code.BaseErrorCode;
 import gdg.challenge.poom.global.error.code.status.GeneralErrorCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,5 +71,35 @@ public class GeneralExceptionAdvice {
 
         // 에러 코드, 메시지와 함께 errors를 반환
         return ResponseEntity.status(code.getStatus()).body(errorResponse);
+    }
+
+    // 파라미터 누락 에러 예외 처리
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParam(MissingServletRequestParameterException e) {
+        String message = String.format("'%s' 파라미터는 필수입니다.", e.getParameterName());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.onFailure("COMMON400_2", message, null));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        Class<?> type = e.getRequiredType();
+        String message;
+
+        if (type == LocalDate.class) {
+            message = "날짜는 yyyy-MM-dd 형식이어야 합니다.";
+        } else if (type == YearMonth.class) {
+            message = "월은 yyyy-MM 형식이어야 합니다.";
+        } else if (type == JournalAuthor.class) {
+            message = "author는 me 또는 partner여야 합니다.";
+        } else {
+            message = String.format("'%s' 파라미터의 형식이 올바르지 않습니다.", e.getName());
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.onFailure("COMMON400_1", message, null));
     }
 }
