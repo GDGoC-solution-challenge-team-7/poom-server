@@ -44,7 +44,7 @@ SELECT
     m.push_alarm,            -- shared_journal_enabled
     m.push_alarm,            -- journal_reminder_enabled
     m.daily_alarm_time,      -- journal_reminder_time
-    NULL,                    -- journal_next_send_at (신규)
-    NULL,                    -- journal_last_send_at (신규)
+    m.daily_alarm_time,                    -- journal_next_send_at (신규)
+    m.last_send_at,                    -- journal_last_send_at (신규)
     m.member_id
 FROM member m;
