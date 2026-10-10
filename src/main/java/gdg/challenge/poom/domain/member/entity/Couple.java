@@ -62,9 +62,10 @@ public class Couple extends BaseEntity {
 
     // 연결 복구
     public void restore() {
-        if (coupleStatus != CoupleStatus.DISCONNECTED_GRACE_PERIOD
-                || LocalDateTime.now().isAfter(deleteScheduledAt)) {
-            throw new CoupleException(CoupleErrorCode.COUPLE_REJOIN_NOT_ALLOWED);
+        if (coupleStatus != CoupleStatus.DISCONNECTED_GRACE_PERIOD)
+            throw new CoupleException(CoupleErrorCode.NOT_IN_DISCONNECTED_GRACE_PERIOD);
+        if (LocalDateTime.now().isAfter(deleteScheduledAt)) {
+            throw new CoupleException(CoupleErrorCode.DISCONNECTED_GRACE_PERIOD_EXPIRED);
         }
 
         this.coupleStatus = CoupleStatus.CONNECTED;
