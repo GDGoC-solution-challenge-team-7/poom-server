@@ -67,7 +67,7 @@ public class AlarmController {
     }
 
     @Operation(summary = "알림 전체 ON/OFF 토글 API", description = "알림 설정을 업데이트하는 API")
-    @PatchMapping("/settings")
+    @PatchMapping("/settings/all")
     public ApiResponse<AlarmResponseDTO.UpdateAllAlarm> toggleAllAlarmSettings(
             @RequestBody @Valid AlarmRequestDTO.UpdateAllAlarm request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
