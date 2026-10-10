@@ -8,12 +8,24 @@ import gdg.challenge.poom.domain.journal.entity.Journal;
 import gdg.challenge.poom.domain.journal.entity.JournalImage;
 import gdg.challenge.poom.domain.journal.repository.JournalImageRepository;
 import gdg.challenge.poom.domain.journal.repository.JournalRepository;
+import gdg.challenge.poom.domain.member.converter.AlarmConverter;
+import gdg.challenge.poom.domain.member.dto.request.AlarmRequestDTO;
+import gdg.challenge.poom.domain.member.entity.AlarmSetting;
+import gdg.challenge.poom.domain.member.entity.Couple;
 import gdg.challenge.poom.domain.member.entity.Member;
+import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
+import gdg.challenge.poom.domain.member.repository.AlarmSettingRepository;
+import gdg.challenge.poom.domain.member.repository.CoupleRepository;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
+import gdg.challenge.poom.domain.member.service.AlarmCommandService;
 import gdg.challenge.poom.domain.member.service.GcsService;
 import gdg.challenge.poom.domain.util.ImageUrlValidator;
+import gdg.challenge.poom.global.error.code.status.AlarmErrorCode;
+import gdg.challenge.poom.global.error.code.status.CoupleErrorCode;
 import gdg.challenge.poom.global.error.code.status.JournalErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
+import gdg.challenge.poom.global.error.exception.handler.AlarmException;
+import gdg.challenge.poom.global.error.exception.handler.CoupleException;
 import gdg.challenge.poom.global.error.exception.handler.JournalException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +45,10 @@ public class JournalCommandService {
     private final JournalRepository journalRepository;
     private final JournalImageRepository journalImageRepository;
     private final MemberRepository memberRepository;
+    private final CoupleRepository coupleRepository;
+    private final AlarmSettingRepository alarmSettingRepository;
     private final GcsService gcsService;
+    private final AlarmCommandService alarmCommandService;
     private final ImageUrlValidator imageUrlValidator;
 
     public JournalResponseDTO.CreatedJournal createJournal(Long memberId, JournalRequestDTO.JournalRequest request){
@@ -48,6 +64,19 @@ public class JournalCommandService {
             List<JournalImage> journalImageList = JournalConverter.toJournalImage(request.imageUrls());
             journal.addJournalImage(journalImageList);
             journalImageRepository.saveAll(journalImageList);
+        }
+
+        Optional<Couple> coupleOptional = coupleRepository.getCoupleByMemberId(memberId);
+        if (coupleOptional.isPresent()) {       // 부부 연결 확인
+            Member partner = coupleOptional.get().getPartnerOf(memberId);
+            AlarmSetting alarmSetting = alarmSettingRepository.findByMemberId(partner.getId())
+                    .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_SETTING_NOT_FOUND));
+            // 상대방의 공유 일기 알림 여부가 true인 경우 알림 전송
+            if (alarmSetting.isSharedJournalEnabled()){
+                AlarmRequestDTO.SendAlarm sendAlarm = AlarmConverter.toSendAlarm(
+                        AlarmType.SHARED_JOURNAL, "", "알림 제목", null, "", journal.getCreatedAt());
+                alarmCommandService.send(partner.getId(), sendAlarm);
+            }
         }
         return JournalConverter.toCreatedJournal(journal.getJournalDate(), journal.getJournalEmotion());
     }

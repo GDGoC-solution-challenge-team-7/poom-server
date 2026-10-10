@@ -39,8 +39,6 @@ public record AlarmRequestDTO (){
 
     public record UpdateAlarmSetting(
             @NotNull
-            Boolean allEnabled,
-            @NotNull
             Boolean chatEnabled,
             @Schema(
                     type = "string",
