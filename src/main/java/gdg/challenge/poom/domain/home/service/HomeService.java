@@ -32,7 +32,8 @@ public class HomeService {
         long between;
         Mother mother = null;
 
-        if (userType == UserType.RAISING_CHILDREN){
+        if (userType == UserType.RAISING_CHILDREN
+                || userType == UserType.PREPARING_FOR_PREGNANCY){
             mother = MemberStatusUtil.calcMotherStatus(member);
             between = ChronoUnit.DAYS.between(today, member.getChildBirthDate());
         } else {

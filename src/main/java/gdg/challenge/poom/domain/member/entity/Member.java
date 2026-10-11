@@ -62,18 +62,6 @@ public class Member extends BaseEntity {
 
     private String deviceToken;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean pushAlarm = true;
-
-    @Builder.Default
-    private LocalTime dailyAlarmTime = LocalTime.of(9, 0);
-
-    private LocalDateTime nextSendAt;
-
-    @Builder.Default
-    private LocalDateTime lastSendAt = LocalDateTime.now();
-
     private Boolean hasGivenBirth;
 
     @Column(nullable = false)
@@ -91,7 +79,7 @@ public class Member extends BaseEntity {
     @Column(name = "couple_code", length = 6, unique = true)
     private String coupleCode;
 
-    @OneToOne(mappedBy = "member")
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     private AlarmSetting alarmSetting;
 
     @Builder.Default

@@ -1,7 +1,6 @@
 package gdg.challenge.poom.domain.auth.entity;
 
 import gdg.challenge.poom.domain.auth.entity.enums.WithdrawalReason;
-import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
