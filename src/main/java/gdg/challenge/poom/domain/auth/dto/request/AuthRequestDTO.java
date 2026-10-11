@@ -1,6 +1,7 @@
 package gdg.challenge.poom.domain.auth.dto.request;
 
 import gdg.challenge.poom.domain.auth.entity.enums.WithdrawalReason;
+import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import jakarta.validation.constraints.Email;
@@ -26,7 +27,8 @@ public record AuthRequestDTO() {
             @NotNull
             UserType userType,
             LocalDate childBirthDate,
-            Boolean hasGivenBirth
+            Boolean hasGivenBirth,
+            CharacterType characterType
     ){}
 
     public record WithdrawRequest(

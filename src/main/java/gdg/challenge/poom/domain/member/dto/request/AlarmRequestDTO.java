@@ -39,13 +39,24 @@ public record AlarmRequestDTO (){
 
     public record UpdateAlarmSetting(
             @NotNull
-            Boolean pushAlarm,
+            Boolean chatEnabled,
             @Schema(
                     type = "string",
                     example = "12:34:00",
                     description = "매일 알림 시간"
             )
             @JsonFormat(pattern = "HH:mm:ss") @NotNull
-            LocalTime dailyAlarmTime
+            LocalTime chatAlarmTime,
+            @NotNull
+            Boolean sharedJournalEnabled,
+            @NotNull
+            Boolean journalReminderEnabled,
+            @JsonFormat(pattern = "HH:mm:ss") @NotNull
+            LocalTime journalReminderTime
+    ){}
+
+    public record UpdateAllAlarm(
+            @NotNull
+            Boolean allEnabled
     ){}
 }

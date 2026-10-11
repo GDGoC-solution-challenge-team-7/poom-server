@@ -28,8 +28,8 @@ public class AuthConverter {
                 .gender(dto.gender())
                 .userType(dto.userType())
                 .childBirthDate(dto.childBirthDate())
-                .nextSendAt(TimeUtil.calculateNextSendAt(LocalTime.of(9, 0)))
                 .hasGivenBirth(dto.hasGivenBirth())
+                .characterType(dto.characterType())
                 .build();
     }
 
@@ -43,6 +43,7 @@ public class AuthConverter {
     public static WithdrawalReasonLog toWithdrawalReasonLog(WithdrawalReason reason, String detail){
         return WithdrawalReasonLog.builder()
                 .reason(reason)
+                .detail(detail)
                 .build();
     }
 }

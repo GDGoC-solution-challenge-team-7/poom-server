@@ -47,6 +47,7 @@ public class AuthController {
             @RequestBody @Valid AuthRequestDTO.TokenRequest tokenRequest,
             @Parameter(description = "소셜 로그인 플랫폼(대소문자 상관 없음), [kakao, google]", example = "kakao") @PathVariable String provider) {
         OAuth2ResponseDTO.Login login = authCommandService.socialLogin(tokenRequest.idToken(), provider);
+
         return ApiResponse.onSuccess(login);
     }
 

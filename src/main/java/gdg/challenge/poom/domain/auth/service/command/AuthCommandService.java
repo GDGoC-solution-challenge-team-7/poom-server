@@ -17,6 +17,7 @@ import gdg.challenge.poom.domain.auth.service.query.TokenQueryService;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.Social;
 import gdg.challenge.poom.domain.member.entity.enums.SocialType;
+import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.domain.member.repository.SocialRepository;
 import gdg.challenge.poom.domain.member.repository.WithdrawalReasonLogRepository;
@@ -198,6 +199,13 @@ public class AuthCommandService {
         if (memberRepository.existsByEmail(request.email())){
             throw new MemberException(MemberErrorCode.ALREADY_EXIST_EMAIL);
         }
+
+        // 임신 중이거나 출산했을 경우 childBirthDate 필수
+        if (request.userType() == UserType.RAISING_CHILDREN
+                || request.userType() == UserType.PREGNANT){
+            throw new MemberException(MemberErrorCode.CHILD_BIRTH_DATE_REQUIRED);
+        }
+
     }
 
     // 로그아웃

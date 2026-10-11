@@ -15,16 +15,16 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByEmail(String email);
     boolean existsByCoupleCode(String coupleCode);
 
-    @Query("""
-        SELECT m FROM Member m
-        WHERE m.pushAlarm = true
-          AND m.nextSendAt <= :now
-        ORDER BY m.nextSendAt ASC
-        """)
-    List<Member> findDueTargets(
-            @Param("now") LocalDateTime now,
-            Pageable pageable
-    );
+//    @Query("""
+//        SELECT m FROM Member m
+//        WHERE m.pushAlarm = true
+//          AND m.nextSendAt <= :now
+//        ORDER BY m.nextSendAt ASC
+//        """)
+//    List<Member> findDueTargets(
+//            @Param("now") LocalDateTime now,
+//            Pageable pageable
+//    );
 
     Optional<Member> findByCoupleCode(String coupleCode);
 }
