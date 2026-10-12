@@ -99,7 +99,7 @@ public class AuthCommandService {
 
             // jwt 발급해서 넘겨주기
             CustomUserDetails customUserDetails = new CustomUserDetails(memberOptional.get());
-            AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
+            AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails, social.getSocialType());
             redisStorageCommandService.addRefreshToken(member.getId(), loginToken.refreshToken());
             // response 형식에 맞춰서 주기
             return OAuthConverter.toLogin(userInfo.name(), userInfo.email(), false, social.getId(), loginToken.accessToken(), loginToken.refreshToken(), restored);
@@ -156,7 +156,7 @@ public class AuthCommandService {
 
                 // jwt 발급해서 넘겨주기
                 CustomUserDetails customUserDetails = new CustomUserDetails(memberOptional.get());
-                AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
+                AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails, social.getSocialType());
                 redisStorageCommandService.addRefreshToken(member.getId(), loginToken.refreshToken());
                 // response 형식에 맞춰서 주기
                 return OAuthConverter.toLogin(name, email, false, social.getId(), loginToken.accessToken(), loginToken.refreshToken(), restored);
@@ -186,7 +186,7 @@ public class AuthCommandService {
         Member member = memberRepository.save(AuthConverter.toMember(request));
         member.addSocial(social);
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
-        AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails);
+        AuthResponseDTO.TokenResult loginToken = tokenCommandService.createLoginToken(customUserDetails, social.getSocialType());
         redisStorageCommandService.addRefreshToken(member.getId(), loginToken.refreshToken());
 
         eventPublisher.publishEvent(new EventDTO.SignUpCompletedEvent(member.getId()));
@@ -201,21 +201,25 @@ public class AuthCommandService {
             throw new AuthException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
         Long memberId = getMemberId(refreshToken);
+        SocialType socialType = SocialType.from(getSocialType(refreshToken));
         String savedRefreshToken = redisStorageQueryService.getRefreshToken(memberId);
         // 기존에 있는 토큰 동일 여부
         if (savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
             throw new AuthException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
-
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
-        String accessToken = tokenCommandService.reissueAccessToken(customUserDetails);
+        String accessToken = tokenCommandService.reissueAccessToken(customUserDetails, socialType);
         return AuthConverter.toAccessTokenResult(member.getId(), accessToken);
     }
 
     private Long getMemberId(String token){
         return tokenQueryService.getMemberId(token);
+    }
+
+    private String getSocialType(String token){
+        return tokenQueryService.getSocialType(token);
     }
 
     private void validateSignUp(AuthRequestDTO.SignUp request){
