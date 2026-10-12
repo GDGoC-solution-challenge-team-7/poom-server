@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -34,4 +37,17 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query(value = "UPDATE users SET status = 'ACTIVE', deleted_at = NULL WHERE id = :id",
             nativeQuery = true)
     int restoreById(@Param("id") Long id);
+
+    // 유예 기간이 지난 soft delete 사용자 ID 조회 (@SQLRestriction 우회를 위해 native)
+    @Query(value = """
+            SELECT id FROM users
+            WHERE deleted_at IS NOT NULL
+              AND deleted_at < :threshold
+            """, nativeQuery = true)
+    List<Long> findExpiredDeletedUserIds(@Param("threshold") LocalDateTime threshold);
+
+    // 삭제 여부와 상관없이 ID 목록으로 hard delete
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "DELETE FROM users WHERE id IN (:ids)", nativeQuery = true)
+    int hardDeleteByIdIn(@Param("ids") Collection<Long> ids);
 }
