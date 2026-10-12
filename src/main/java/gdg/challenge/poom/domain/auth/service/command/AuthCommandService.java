@@ -22,6 +22,7 @@ import gdg.challenge.poom.domain.member.repository.CoupleRepository;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.domain.member.repository.SocialRepository;
 import gdg.challenge.poom.domain.member.repository.WithdrawalReasonLogRepository;
+import gdg.challenge.poom.domain.member.service.CoupleCommandService;
 import gdg.challenge.poom.domain.member.service.GcsService;
 import gdg.challenge.poom.domain.util.MemberFileCollector;
 import gdg.challenge.poom.global.error.code.status.AuthErrorCode;
@@ -62,6 +63,7 @@ public class AuthCommandService {
     private final CoupleRepository coupleRepository;
     private final TokenCommandService tokenCommandService;
     private final TokenQueryService tokenQueryService;
+    private final CoupleCommandService coupleCommandService;
     private final RedisStorageCommandService redisStorageCommandService;
     private final RedisStorageQueryService redisStorageQueryService;
     private final WithdrawalReasonLogRepository withdrawalReasonLogRepository;
@@ -259,6 +261,8 @@ public class AuthCommandService {
         redisStorageCommandService.addBlackList(accessToken);
 
         if (coupleRepository.existsByMemberId(memberId)){
+            // 부부 연결 유예 해제
+            coupleCommandService.deleteCoupleByPatch(memberId);
             member.softDelete();
         } else {
             socialRepository.deleteAllByMemberId(memberId); // Social 먼저
