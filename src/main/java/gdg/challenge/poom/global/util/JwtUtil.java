@@ -1,5 +1,6 @@
 package gdg.challenge.poom.global.util;
 
+import gdg.challenge.poom.domain.member.entity.enums.SocialType;
 import gdg.challenge.poom.global.data.JwtConfigData;
 import gdg.challenge.poom.global.security.constants.AuthenticationConstants;
 import gdg.challenge.poom.global.security.domain.CustomUserDetails;
@@ -31,12 +32,12 @@ public class JwtUtil {
         this.refreshExpiration = Duration.ofMillis(jwtConfigData.getTime().getRefreshToken());
     }
 
-    public String createAccessToken(CustomUserDetails details) {
-        return createToken(details, accessExpiration);
+    public String createAccessToken(CustomUserDetails details, SocialType socialType) {
+        return createToken(details, accessExpiration, socialType);
     }
 
-    public String createRefreshToken(CustomUserDetails details) {
-        return createToken(details, refreshExpiration);
+    public String createRefreshToken(CustomUserDetails details, SocialType socialType) {
+        return createToken(details, refreshExpiration, socialType);
     }
 
     public Long getMemberId(String token) {
@@ -61,12 +62,24 @@ public class JwtUtil {
         }
     }
 
-    private String createToken(CustomUserDetails detail, Duration expiration) {
+    public String getSocialType(String token) {
+        try {
+            return getClaims(token).getPayload().get("socialType", String.class);
+        } catch (ExpiredJwtException e) {
+//            throw new TokenException(TokenErrorCode.TOKEN_EXPIRED);
+            return null;
+        } catch (JwtException e) {
+            return null;
+        }
+    }
+
+    private String createToken(CustomUserDetails detail, Duration expiration, SocialType socialType) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(detail.getUsername())
                 .claim("id", detail.getMemberId())
                 .claim("role", detail.getRole())
+                .claim("socialType", socialType.name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(expiration)))
                 .signWith(secretKey)

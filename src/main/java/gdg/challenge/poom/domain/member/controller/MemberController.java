@@ -31,9 +31,10 @@ public class MemberController {
     @Operation(summary = "멤버 정보 조회 API", description = "멤버의 정보를 조회하는 API")
     @GetMapping
     public ApiResponse<MemberResponseDTO.MemberInfo> getMemberInfo(
+            HttpServletRequest request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
-        MemberResponseDTO.MemberInfo memberInfo = memberQueryService.getMemberInfo(customUserDetails.getMemberId());
+        MemberResponseDTO.MemberInfo memberInfo = memberQueryService.getMemberInfo(request, customUserDetails.getMemberId());
         return ApiResponse.onSuccess(memberInfo);
     }
 

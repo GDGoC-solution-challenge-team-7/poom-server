@@ -16,6 +16,10 @@ public class TokenQueryService {
         return jwtUtil.getMemberId(token);
     }
 
+    public String getSocialType(String token){
+        return jwtUtil.getSocialType(token);
+    }
+
     public Duration getAccessTokenExpiration() {
         return jwtUtil.getAccessExpiration();
     }

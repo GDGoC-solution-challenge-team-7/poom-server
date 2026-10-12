@@ -12,7 +12,7 @@ import java.util.List;
 public class MemberConverter {
 
     public static MemberResponseDTO.MemberInfo toMemberInfo(
-            Member member, String profileImageSignedUrl, SocialType socialType
+            Member member, String profileImageSignedUrl, String socialType
     ){
         return MemberResponseDTO.MemberInfo.builder()
                 .name(member.getName())

@@ -18,7 +18,7 @@ public record MemberResponseDTO() {
             Mother mother,
             LocalDate childBirthDate,
             String profileImageSignedUrl,
-            SocialType socialType
+            String socialType
     ){}
 
     // 업로드된 파일 응답
