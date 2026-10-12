@@ -1,0 +1,4 @@
+ALTER TABLE member
+    ADD COLUMN active_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    ADD COLUMN deleted_at TIMESTAMP(6) NULL;
+ALTER TABLE journal ADD COLUMN previous_visibility VARCHAR(20) NULL;

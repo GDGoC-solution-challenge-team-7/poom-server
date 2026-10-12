@@ -23,4 +23,10 @@ public record CoupleResponseDTO() {
         Long partnerId,
         CoupleStatus coupleStatus
     ){}
+
+    @Builder
+    public record DeletedCouple(
+            Long memberId,
+            Long partnerId
+    ){}
 }

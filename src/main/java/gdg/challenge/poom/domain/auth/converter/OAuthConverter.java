@@ -58,7 +58,7 @@ public class OAuthConverter {
     }
 
     public static OAuth2ResponseDTO.Login toLogin(String name,String email, boolean isFirst, Long socialId,
-                                                  String accessToken, String refreshToken) {
+                                                  String accessToken, String refreshToken, boolean restored) {
         return OAuth2ResponseDTO.Login.builder()
                 .name(name)
                 .email(email)
@@ -66,6 +66,7 @@ public class OAuthConverter {
                 .isFirst(isFirst)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .restored(restored)
                 .build();
     }
 }
