@@ -37,6 +37,14 @@ public interface CoupleRepository extends JpaRepository<Couple, Long> {
     boolean existsByMemberIdAndStatus(@Param("memberId") Long memberId,
                                       @Param("statuses") Collection<CoupleStatus> statuses);
 
+    @Query("""
+        select count(c) > 0
+        from Couple c
+        where c.memberA.id = :memberId or c.memberB.id = :memberId
+        """)
+    boolean existsByMemberId(@Param("memberId") Long memberId);
+
+
     // 실제 삭제 예정 시각이 지난 부부들 조회
     List<Couple> findByCoupleStatusAndDeleteScheduledAtBefore(
             CoupleStatus status, LocalDateTime now);

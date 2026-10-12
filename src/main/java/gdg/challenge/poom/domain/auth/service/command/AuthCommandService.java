@@ -18,6 +18,7 @@ import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.Social;
 import gdg.challenge.poom.domain.member.entity.enums.SocialType;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
+import gdg.challenge.poom.domain.member.repository.CoupleRepository;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
 import gdg.challenge.poom.domain.member.repository.SocialRepository;
 import gdg.challenge.poom.domain.member.repository.WithdrawalReasonLogRepository;
@@ -58,6 +59,7 @@ public class AuthCommandService {
     private final OAuth2UserLoaderFactory oAuth2UserLoaderFactory;
     private final SocialRepository socialRepository;
     private final MemberRepository memberRepository;
+    private final CoupleRepository coupleRepository;
     private final TokenCommandService tokenCommandService;
     private final TokenQueryService tokenQueryService;
     private final RedisStorageCommandService redisStorageCommandService;
@@ -258,7 +260,12 @@ public class AuthCommandService {
         redisStorageCommandService.addBlackList(refreshToken);
         redisStorageCommandService.addBlackList(accessToken);
 
-        memberRepository.delete(member);
+        if (coupleRepository.existsByMemberId(memberId)){
+            member.softDelete();
+        } else {
+            socialRepository.deleteAllByMemberId(memberId); // Social 먼저
+            memberRepository.delete(member);                // User 삭제
+        }
 
         TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {

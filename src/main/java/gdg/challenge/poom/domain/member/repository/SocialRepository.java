@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface SocialRepository extends JpaRepository<Social, Long> {
     Optional<Social> findByProviderIdAndSocialType(String providerId, SocialType socialType);
+
+    void deleteAllByMemberId(Long memberId);
 }
