@@ -229,7 +229,7 @@ public class AuthCommandService {
 
         // 임신 중이거나 출산했을 경우 childBirthDate 필수
         if (request.userType() == UserType.RAISING_CHILDREN
-                || request.userType() == UserType.PREGNANT){
+                || request.userType() == UserType.PREGNANT && request.childBirthDate() == null){
             throw new MemberException(MemberErrorCode.CHILD_BIRTH_DATE_REQUIRED);
         }
 
