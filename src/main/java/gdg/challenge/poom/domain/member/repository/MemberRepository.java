@@ -34,13 +34,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findIncludingDeletedById(@Param("memberId") Long memberId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = "UPDATE users SET status = 'ACTIVE', deleted_at = NULL WHERE id = :id",
+    @Query(value = "UPDATE member SET status = 'ACTIVE', deleted_at = NULL WHERE id = :id",
             nativeQuery = true)
     int restoreById(@Param("id") Long id);
 
     // 유예 기간이 지난 soft delete 사용자 ID 조회 (@SQLRestriction 우회를 위해 native)
     @Query(value = """
-            SELECT id FROM users
+            SELECT id FROM member
             WHERE deleted_at IS NOT NULL
               AND deleted_at < :threshold
             """, nativeQuery = true)

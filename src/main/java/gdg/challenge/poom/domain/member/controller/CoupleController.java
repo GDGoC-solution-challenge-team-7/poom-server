@@ -44,7 +44,7 @@ public class CoupleController {
     }
 
     @Operation(summary = "부부 영구 연결 해제", description = "부부 영구 연결 해제하는 API, 복구 불가")
-    @PatchMapping
+    @DeleteMapping
     public ApiResponse<CoupleResponseDTO.DeletedCouple> deleteConnection(@AuthenticationPrincipal CustomUserDetails customUserDetails){
         CoupleResponseDTO.DeletedCouple deletedCouple = coupleCommandService.deleteCouple(customUserDetails.getMemberId());
         return ApiResponse.onSuccess(deletedCouple);

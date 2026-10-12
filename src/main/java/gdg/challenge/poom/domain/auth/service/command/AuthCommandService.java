@@ -86,16 +86,14 @@ public class AuthCommandService {
                     socialRepository.save(OAuthConverter.toSocial(userInfo, member))
             );
 
-            boolean restored = true;
-            // 활성 사용자 - 이미 활성화되어있는 상태
-            if (member.getDeletedAt() == null){
-                restored = false;
+            boolean restored = false;    // 활성 사용자 - 이미 활성화되어있는 상태
+            if (member.getDeletedAt() != null) {
+                if (!member.isRestorable(30)) {
+                    throw new MemberException(MemberErrorCode.ACCOUNT_RECOVERY_PERIOD_EXPIRED);
+                }
+                memberRepository.restoreById(member.getId());  // soft delete된 사용자 - 비활성화였던 사용자 활성화
+                restored = true;
             }
-            // soft delete된 사용자 - 비활성화였던 사용자 활성화
-            if (!member.isRestorable(30)){
-                throw new MemberException(MemberErrorCode.ACCOUNT_RECOVERY_PERIOD_EXPIRED);
-            }
-            memberRepository.restoreById(member.getId());
 
             // jwt 발급해서 넘겨주기
             CustomUserDetails customUserDetails = new CustomUserDetails(memberOptional.get());
