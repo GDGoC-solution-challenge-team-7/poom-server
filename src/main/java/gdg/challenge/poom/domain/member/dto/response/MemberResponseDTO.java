@@ -1,8 +1,6 @@
 package gdg.challenge.poom.domain.member.dto.response;
 
-import gdg.challenge.poom.domain.member.entity.enums.Gender;
-import gdg.challenge.poom.domain.member.entity.enums.Mother;
-import gdg.challenge.poom.domain.member.entity.enums.UserType;
+import gdg.challenge.poom.domain.member.entity.enums.*;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -19,7 +17,8 @@ public record MemberResponseDTO() {
             UserType userType,
             Mother mother,
             LocalDate childBirthDate,
-            String profileImageSignedUrl
+            String profileImageSignedUrl,
+            String socialType
     ){}
 
     // 업로드된 파일 응답
@@ -36,4 +35,14 @@ public record MemberResponseDTO() {
             List<MemberResponseDTO.SignedUrlResponse> files
     ){}
 
+    @Builder
+    public record CoupleConnectionInfo(
+            Long coupleId,
+            Long memberId,
+            String memberNickname,
+            Long partnerId,
+            String partnerNickname,
+            CoupleStatus coupleStatus,
+            String coupleCode
+    ){}
 }
