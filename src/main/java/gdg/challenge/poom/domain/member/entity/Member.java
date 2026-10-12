@@ -5,16 +5,19 @@ import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.chat.entity.enums.ChatMode;
 import gdg.challenge.poom.domain.journal.entity.Journal;
 import gdg.challenge.poom.domain.member.dto.request.MemberRequestDTO;
+import gdg.challenge.poom.domain.member.entity.enums.ActiveStatus;
 import gdg.challenge.poom.domain.member.entity.enums.Gender;
 import gdg.challenge.poom.domain.member.entity.enums.Role;
 import gdg.challenge.poom.domain.member.entity.enums.UserType;
 import gdg.challenge.poom.global.common.BaseEntity;
+import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
+import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +26,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(name = "member", uniqueConstraints = {
         @UniqueConstraint(
                 name = "uk_member_couple_code",
@@ -79,6 +83,13 @@ public class Member extends BaseEntity {
     @Column(name = "couple_code", length = 6, unique = true)
     private String coupleCode;
 
+    @Column(nullable = false)
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private ActiveStatus activeStatus = ActiveStatus.ACTIVE;
+
+    private LocalDateTime deletedAt;
+
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     private AlarmSetting alarmSetting;
 
@@ -105,6 +116,27 @@ public class Member extends BaseEntity {
         this.gender = request.gender();
         this.userType = request.userType();
         this.childBirthDate = request.childBirthDate();
+    }
+
+    // 계정 비활성화
+    public void softDelete() {
+        this.activeStatus = ActiveStatus.INACTIVE;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    // 계정 복구
+    public void restore() {
+        //
+        if (this.deletedAt == null) {
+            throw new MemberException(MemberErrorCode.MEMBER_NOT_DELETED);
+        }
+        this.activeStatus = ActiveStatus.ACTIVE;
+        this.deletedAt = null;
+    }
+
+    public boolean isRestorable(int graceDays) {
+        return deletedAt != null
+                && deletedAt.plusDays(graceDays).isAfter(LocalDateTime.now());
     }
 
     public void assignCoupleCode(String coupleCode){

@@ -12,7 +12,8 @@ public record OAuth2ResponseDTO (){
             Long socialId,
             boolean isFirst,
             String accessToken,
-            String refreshToken
+            String refreshToken,
+            boolean restored
     ) {
 
     }
@@ -23,5 +24,11 @@ public record OAuth2ResponseDTO (){
             String email,
             String providerId,
             SocialType socialType
+    ){}
+
+    @Builder
+    public record LoginResult(
+            Long memberId,
+            boolean restored
     ){}
 }

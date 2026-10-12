@@ -1,13 +1,11 @@
 package gdg.challenge.poom.domain.member.repository;
 
 import gdg.challenge.poom.domain.member.entity.Member;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -27,4 +25,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 //    );
 
     Optional<Member> findByCoupleCode(String coupleCode);
+
+    // 삭제 여부 상관없이 조회 (@SQLRestriction 우회)
+    @Query(value = "SELECT * FROM member WHERE member_id = :memberId", nativeQuery = true)
+    Optional<Member> findIncludingDeletedById(@Param("memberId") Long memberId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "UPDATE users SET status = 'ACTIVE', deleted_at = NULL WHERE id = :id",
+            nativeQuery = true)
+    int restoreById(@Param("id") Long id);
 }
