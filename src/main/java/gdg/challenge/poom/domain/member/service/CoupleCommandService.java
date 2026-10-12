@@ -1,5 +1,7 @@
 package gdg.challenge.poom.domain.member.service;
 
+import gdg.challenge.poom.domain.journal.entity.enums.Visibility;
+import gdg.challenge.poom.domain.journal.repository.JournalRepository;
 import gdg.challenge.poom.domain.member.converter.CoupleConverter;
 import gdg.challenge.poom.domain.member.dto.request.CoupleRequestDTO;
 import gdg.challenge.poom.domain.member.dto.response.CoupleResponseDTO;
@@ -27,6 +29,7 @@ import java.util.List;
 public class CoupleCommandService {
     private final MemberRepository memberRepository;
     private final CoupleRepository coupleRepository;
+    private final JournalRepository journalRepository;
 
     // 코드 입력 후 연결
     public CoupleResponseDTO.CreatedCouple connectCouple(Long memberId, CoupleRequestDTO.CoupleCode request) {
@@ -53,16 +56,29 @@ public class CoupleCommandService {
     public void rejoinCouple(Long memberId) {
         Couple couple = coupleRepository.getCoupleByMemberId(memberId)
                 .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
+        Member partner = couple.getPartnerOf(memberId);
+        journalRepository.restoreVisibility(List.of(memberId, partner.getId()));
         couple.restore();
     }
 
     // 부부 연결 해제 - 유예 시간 30일, 30일 후 영구 삭제
-    public CoupleResponseDTO.ChangeStatusCouple deleteCouple(Long memberId) {
+    public CoupleResponseDTO.ChangeStatusCouple deleteCoupleByPatch(Long memberId) {
         Couple couple = coupleRepository.getCoupleByMemberId(memberId)
                 .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
-        couple.requestDisconnect();
         Member partner = couple.getPartnerOf(memberId);
+        journalRepository.backupAndMakePrivate(List.of(memberId, partner.getId()),Visibility.PRIVATE);
+        couple.requestDisconnect();
         return CoupleConverter.toChangeStatusCouple(partner.getId(), memberId, couple);
+    }
+
+    // 부부 연결 영구 해제
+    public CoupleResponseDTO.DeletedCouple deleteCouple(Long memberId) {
+        Couple couple = coupleRepository.getCoupleByMemberId(memberId)
+                .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
+        Member partner = couple.getPartnerOf(memberId);
+        journalRepository.makeAllPrivateAndClearBackup(List.of(memberId), Visibility.PRIVATE);
+        coupleRepository.delete(couple);
+        return CoupleConverter.toDeletedCouple(partner.getId(), memberId);
     }
 
     // 만료 시 부부 데이터 삭제
@@ -70,11 +86,7 @@ public class CoupleCommandService {
         List<Couple> expiredCouple = coupleRepository.findByCoupleStatusAndDeleteScheduledAtBefore(
                 CoupleStatus.DISCONNECTED_GRACE_PERIOD, LocalDateTime.now()
         );
-
-        for (Couple c : expiredCouple) {
-            // TODO: 연관 데이터부터 삭제 후 연결 삭제
-            coupleRepository.delete(c);
-        }
+        coupleRepository.deleteAll(expiredCouple);
     }
 
     private void validateCoupleConnect(Long memberId){

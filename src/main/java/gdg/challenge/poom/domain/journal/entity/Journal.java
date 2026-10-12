@@ -44,6 +44,9 @@ public class Journal extends BaseEntity {
     @Column(nullable = false)
     private Visibility visibility = Visibility.PRIVATE;
 
+    @Enumerated(EnumType.STRING)
+    private Visibility previousVisibility;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     @Setter

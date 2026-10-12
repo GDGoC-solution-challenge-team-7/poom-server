@@ -72,7 +72,7 @@ public class JournalQueryService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         Couple couple = coupleRepository.getCoupleByMemberId(memberId)
-                .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
+                .orElse(null);
 
         Journal myJournal = journalRepository.findByMemberIdAndJournalDate(memberId, date)
                 .orElse(null);
@@ -82,15 +82,18 @@ public class JournalQueryService {
                         .imageId(image.getId())
                         .url(gcsService.generateDownloadSignedUrl(image.getImageUrl()))
                         .build()).toList();
-        Journal partnerJournal = journalRepository.findVisibleDiary(couple.getPartnerOf(memberId).getId(), date, List.of(Visibility.COUPLE))
-                .orElse(null);
-        List<JournalResponseDTO.ImageUrl> partnerJournalImageList = Optional.ofNullable(partnerJournal)
-                .map(Journal::getJournalImageList).orElse(List.of()).stream()
-                .map(image -> JournalResponseDTO.ImageUrl.builder()
-                        .imageId(image.getId())
-                        .url(gcsService.generateDownloadSignedUrl(image.getImageUrl()))
-                        .build()).toList();
-        return JournalConverter.toJournalByDate(date, myJournal, myJournalImageList, partnerJournal, partnerJournalImageList);
+        if (couple != null) {
+            Journal partnerJournal = journalRepository.findVisibleDiary(couple.getPartnerOf(memberId).getId(), date, List.of(Visibility.COUPLE))
+                    .orElse(null);
+            List<JournalResponseDTO.ImageUrl> partnerJournalImageList = Optional.ofNullable(partnerJournal)
+                    .map(Journal::getJournalImageList).orElse(List.of()).stream()
+                    .map(image -> JournalResponseDTO.ImageUrl.builder()
+                            .imageId(image.getId())
+                            .url(gcsService.generateDownloadSignedUrl(image.getImageUrl()))
+                            .build()).toList();
+            return JournalConverter.toJournalByDate(date, myJournal, myJournalImageList, partnerJournal, partnerJournalImageList);
+        }
+        return JournalConverter.toJournalByDate(date, myJournal, myJournalImageList, null, null);
     }
 
     public JournalResponseDTO.JournalList getJournalByMonth(Long memberId, YearMonth month, JournalAuthor author){

@@ -32,4 +32,10 @@ public class CoupleConverter {
                 .build();
     }
 
+    public static CoupleResponseDTO.DeletedCouple toDeletedCouple(Long partnerId,Long memberId){
+        return CoupleResponseDTO.DeletedCouple.builder()
+                .memberId(memberId)
+                .partnerId(partnerId)
+                .build();
+    }
 }

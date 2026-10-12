@@ -36,8 +36,15 @@ public class CoupleController {
         return ApiResponse.onSuccess(null);
     }
 
-    @Operation(summary = "부부 연결 해제", description = "부부 연결 해제하는 API")
-    @DeleteMapping
+    @Operation(summary = "부부 연결 해제 - 30일 유예", description = "부부 연결 해제하는 API")
+    @PatchMapping
+    public ApiResponse<CoupleResponseDTO.ChangeStatusCouple> deleteConnectionByPatch(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+        CoupleResponseDTO.ChangeStatusCouple changeStatusCouple = coupleCommandService.deleteCouple(customUserDetails.getMemberId());
+        return ApiResponse.onSuccess(changeStatusCouple);
+    }
+
+    @Operation(summary = "부부 영구 연결 해제", description = "부부 영구 연결 해제하는 API, 복구 불가")
+    @PatchMapping
     public ApiResponse<CoupleResponseDTO.ChangeStatusCouple> deleteConnection(@AuthenticationPrincipal CustomUserDetails customUserDetails){
         CoupleResponseDTO.ChangeStatusCouple changeStatusCouple = coupleCommandService.deleteCouple(customUserDetails.getMemberId());
         return ApiResponse.onSuccess(changeStatusCouple);
