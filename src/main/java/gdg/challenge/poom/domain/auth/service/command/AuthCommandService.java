@@ -266,9 +266,12 @@ public class AuthCommandService {
 
         if (coupleRepository.existsByMemberId(memberId)){
             // 부부 연결 유예 해제
+            log.info("부부 연결 존재");
             coupleCommandService.deleteCoupleByPatch(memberId);
             member.softDelete();
         } else {
+            log.info("부부 연결 없음");
+//            coupleCommandService.deleteCouple(memberId);
             socialRepository.deleteAllByMemberId(memberId); // Social 먼저
             memberRepository.delete(member);                // User 삭제
         }
