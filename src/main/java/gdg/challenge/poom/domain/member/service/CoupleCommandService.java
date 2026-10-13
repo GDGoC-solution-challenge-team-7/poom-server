@@ -66,8 +66,8 @@ public class CoupleCommandService {
         Couple couple = coupleRepository.getCoupleByMemberId(memberId)
                 .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
         Member partner = couple.getPartnerOf(memberId);
-        journalRepository.backupAndMakePrivate(List.of(memberId, partner.getId()),Visibility.PRIVATE);
         couple.requestDisconnect();
+        journalRepository.backupAndMakePrivate(List.of(memberId, partner.getId()),Visibility.PRIVATE);
         return CoupleConverter.toChangeStatusCouple(partner.getId(), memberId, couple);
     }
 

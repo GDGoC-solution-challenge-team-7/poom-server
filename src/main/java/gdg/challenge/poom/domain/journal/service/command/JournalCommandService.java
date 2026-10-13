@@ -55,6 +55,10 @@ public class JournalCommandService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
+        if (journalRepository.existsByJournalDate(request.journalDate())){
+            throw new JournalException(JournalErrorCode.JOURNAL_ALREADY_EXISTS);
+        }
+
         Journal journal = JournalConverter.toJournal(request);
         member.addJournal(journal);
 
@@ -78,7 +82,7 @@ public class JournalCommandService {
                 alarmCommandService.send(partner.getId(), sendAlarm);
             }
         }
-        return JournalConverter.toCreatedJournal(journal.getJournalDate(), journal.getJournalEmotion());
+        return JournalConverter.toCreatedJournal(journal.getJournalDate(), journal.getJournalEmotion(), journal.getVisibility());
     }
 
     public void updateJournal(Long memberId, Long journalId, JournalRequestDTO.JournalRequest request){

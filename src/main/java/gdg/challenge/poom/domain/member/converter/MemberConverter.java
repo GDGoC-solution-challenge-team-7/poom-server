@@ -60,4 +60,12 @@ public class MemberConverter {
                 .build();
     }
 
+    public static MemberResponseDTO.CoupleConnectionInfo toCoupleConnectionInfo(Member member) {
+        return MemberResponseDTO.CoupleConnectionInfo.builder()
+                .memberId(member.getId())
+                .memberNickname(member.getName())
+                .coupleCode(member.getCoupleCode())
+                .build();
+    }
+
 }

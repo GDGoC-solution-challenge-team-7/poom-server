@@ -90,4 +90,6 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
            and j.previousVisibility is not null
         """)
     int restoreVisibility(@Param("memberIds") Collection<Long> memberIds);
+
+    boolean existsByJournalDate(LocalDate journalDate);
 }

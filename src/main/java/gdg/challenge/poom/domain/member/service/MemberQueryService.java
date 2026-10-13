@@ -47,6 +47,6 @@ public class MemberQueryService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         return coupleRepository.getCoupleByMemberId(memberId)
                 .map(c -> MemberConverter.toCoupleConnectionInfo(c, member))
-                .orElse(null);
+                .orElseGet(() -> MemberConverter.toCoupleConnectionInfo(member));
     }
 }

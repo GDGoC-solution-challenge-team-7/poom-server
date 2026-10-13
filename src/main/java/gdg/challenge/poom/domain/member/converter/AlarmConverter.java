@@ -41,6 +41,7 @@ public class AlarmConverter {
         String timeAgo = TimeUtil.toTimeAgo(alarm.getCreatedAt());
 
         return AlarmResponseDTO.Alarm.builder()
+                .title(alarm.getDescription())
                 .alarmType(alarm.getAlarmType())
                 .description(alarm.getDescription())
                 .characterType(alarm.getCharacterType())
