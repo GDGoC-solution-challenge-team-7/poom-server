@@ -31,10 +31,11 @@ public class JournalConverter {
                 ).toList();
     }
 
-    public static JournalResponseDTO.CreatedJournal toCreatedJournal(LocalDate journalDate, JournalEmotion journalEmotion){
+    public static JournalResponseDTO.CreatedJournal toCreatedJournal(LocalDate journalDate, JournalEmotion journalEmotion, Visibility visibility){
         return JournalResponseDTO.CreatedJournal.builder()
                 .journalDate(journalDate)
                 .journalEmotion(journalEmotion)
+                .visibility(visibility)
                 .build();
     }
 

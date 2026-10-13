@@ -78,7 +78,7 @@ public class JournalCommandService {
                 alarmCommandService.send(partner.getId(), sendAlarm);
             }
         }
-        return JournalConverter.toCreatedJournal(journal.getJournalDate(), journal.getJournalEmotion());
+        return JournalConverter.toCreatedJournal(journal.getJournalDate(), journal.getJournalEmotion(), journal.getVisibility());
     }
 
     public void updateJournal(Long memberId, Long journalId, JournalRequestDTO.JournalRequest request){
