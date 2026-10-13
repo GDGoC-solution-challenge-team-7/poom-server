@@ -3,13 +3,10 @@ package gdg.challenge.poom.domain.member.service;
 import gdg.challenge.poom.domain.auth.service.query.TokenQueryService;
 import gdg.challenge.poom.domain.member.converter.MemberConverter;
 import gdg.challenge.poom.domain.member.dto.response.MemberResponseDTO;
-import gdg.challenge.poom.domain.member.entity.Couple;
 import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.repository.CoupleRepository;
 import gdg.challenge.poom.domain.member.repository.MemberRepository;
-import gdg.challenge.poom.global.error.code.status.CoupleErrorCode;
 import gdg.challenge.poom.global.error.code.status.MemberErrorCode;
-import gdg.challenge.poom.global.error.exception.handler.CoupleException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import gdg.challenge.poom.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,11 +43,10 @@ public class MemberQueryService {
     }
 
     public MemberResponseDTO.CoupleConnectionInfo getCoupleConnectionInfo(Long memberId){
-        Couple couple = coupleRepository.getCoupleByMemberId(memberId)
-                .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-        return MemberConverter.toCoupleConnectionInfo(couple, member);
+        return coupleRepository.getCoupleByMemberId(memberId)
+                .map(c -> MemberConverter.toCoupleConnectionInfo(c, member))
+                .orElse(null);
     }
-
 }
