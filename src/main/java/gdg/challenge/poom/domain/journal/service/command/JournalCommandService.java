@@ -55,6 +55,10 @@ public class JournalCommandService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
+        if (journalRepository.existsByJournalDate(request.journalDate())){
+            throw new JournalException(JournalErrorCode.JOURNAL_ALREADY_EXISTS);
+        }
+
         Journal journal = JournalConverter.toJournal(request);
         member.addJournal(journal);
 
