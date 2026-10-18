@@ -134,7 +134,7 @@ public class Member extends BaseEntity {
         this.deletedAt = null;
     }
 
-    public boolean isRestorable(int graceDays) {
+    public boolean isNotRestorable(int graceDays) {
         return deletedAt != null
                 && deletedAt.plusDays(graceDays).isAfter(LocalDateTime.now());
     }

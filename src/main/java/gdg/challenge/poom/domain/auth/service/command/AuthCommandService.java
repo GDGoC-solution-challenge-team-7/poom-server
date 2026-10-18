@@ -90,7 +90,7 @@ public class AuthCommandService {
 
             boolean restored = false;    // 활성 사용자 - 이미 활성화되어있는 상태
             if (member.getDeletedAt() != null) {
-                if (!member.isRestorable(30)) {
+                if (member.isNotRestorable(30)) {
                     throw new MemberException(MemberErrorCode.ACCOUNT_RECOVERY_PERIOD_EXPIRED);
                 }
                 memberRepository.restoreById(member.getId());  // soft delete된 사용자 - 비활성화였던 사용자 활성화
@@ -149,7 +149,7 @@ public class AuthCommandService {
                     restored = false;
                 }
                 // soft delete된 사용자 - 비활성화였던 사용자 활성화
-                if (!member.isRestorable(30)){
+                if (member.isNotRestorable(30)){
                     throw new MemberException(MemberErrorCode.ACCOUNT_RECOVERY_PERIOD_EXPIRED);
                 }
                 memberRepository.restoreById(member.getId());
