@@ -34,7 +34,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findIncludingDeletedById(@Param("memberId") Long memberId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = "UPDATE member SET status = 'ACTIVE', deleted_at = NULL WHERE member_id = :id",
+    @Query(value = "UPDATE member SET active_tatus = 'ACTIVE', deleted_at = NULL WHERE member_id = :id",
             nativeQuery = true)
     int restoreById(@Param("id") Long id);
 
