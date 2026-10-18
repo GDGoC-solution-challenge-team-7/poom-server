@@ -167,6 +167,8 @@ public class AuthCommandService {
                 return OAuthConverter.toLogin(name, email, true, social.getId(), null, null, false);
             }
 
+        } catch (OAuthException | MemberException e) {
+            throw e;
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
