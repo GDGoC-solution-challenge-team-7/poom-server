@@ -37,12 +37,20 @@ public class JournalQueryService {
     private final GcsService gcsService;
 
     public JournalResponseDTO.JournalDetail getJournal(Long memberId, Long journalId){
-        Member member = memberRepository.findById(memberId)
+        memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         Journal journal = journalRepository.findById(journalId)
                 .orElseThrow(() -> new JournalException(JournalErrorCode.JOURNAL_NOT_FOUND));
 
-        if (journal.getMember().getId() != member.getId()){
+        boolean isOwner = journal.getMember().getId().equals(memberId);
+        // 본인 일기가 아니면, 부부로 연결된 상대방이 공개(COUPLE)한 일기인 경우에만 조회 허용
+        boolean isSharedByPartner = !isOwner
+                && coupleRepository.getCoupleByMemberId(memberId)
+                        .map(couple -> couple.getPartnerOf(memberId).getId().equals(journal.getMember().getId()))
+                        .orElse(false)
+                && journal.getVisibility() == Visibility.COUPLE;
+
+        if (!isOwner && !isSharedByPartner){
             throw new JournalException(JournalErrorCode.JOURNAL_ACCESS_DENIED);
         }
 
