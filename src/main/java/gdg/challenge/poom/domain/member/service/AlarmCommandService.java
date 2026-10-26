@@ -117,7 +117,7 @@ public class AlarmCommandService {
 
     private void dispatchJournal(LocalDateTime now) {
         List<AlarmSetting> alarmSettingList =
-                alarmSettingRepository.findDueChat(now, PageRequest.of(0, BATCH_SIZE));
+                alarmSettingRepository.findDueJournal(now, PageRequest.of(0, BATCH_SIZE));
 
         for(AlarmSetting alarmSetting : alarmSettingList){
             try {
