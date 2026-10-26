@@ -6,6 +6,8 @@ import gdg.challenge.poom.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -34,6 +36,12 @@ public class Alarm extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CharacterType characterType;
+
+    @Column(name = "journal_id")
+    private Long journalId;
+
+    @Column(name = "journal_date")
+    private LocalDate journalDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")

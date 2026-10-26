@@ -9,6 +9,7 @@ import gdg.challenge.poom.domain.member.entity.Member;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import gdg.challenge.poom.domain.util.TimeUtil;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -47,6 +48,8 @@ public class AlarmConverter {
                 .characterType(alarm.getCharacterType())
                 .alarmListVerContent(alarm.getAlarmListVerContent())
                 .timeAgo(timeAgo)
+                .journalId(alarm.getJournalId())
+                .journalDate(alarm.getJournalDate())
                 .build();
     }
 
@@ -58,6 +61,8 @@ public class AlarmConverter {
                 .alarmType(request.alarmType())
                 .characterType(request.characterType())
                 .alarmListVerContent(request.alarmListVerContent())
+                .journalId(request.journalId())
+                .journalDate(request.journalDate())
                 .member(member)
                 .build();
     }
@@ -67,6 +72,14 @@ public class AlarmConverter {
             AlarmType alarmType, String description, String title,
             CharacterType characterType, String alarmListVerContent,LocalDateTime createdAt
     ){
+        return toSendAlarm(alarmType, description, title, characterType, alarmListVerContent, createdAt, null, null);
+    }
+
+    public static AlarmRequestDTO.SendAlarm toSendAlarm(
+            AlarmType alarmType, String description, String title,
+            CharacterType characterType, String alarmListVerContent, LocalDateTime createdAt,
+            Long journalId, LocalDate journalDate
+    ){
         return AlarmRequestDTO.SendAlarm.builder()
                 .title(title)
                 .alarmType(alarmType)
@@ -74,6 +87,8 @@ public class AlarmConverter {
                 .characterType(characterType)
                 .alarmListVerContent(alarmListVerContent)
                 .createdAt(createdAt)
+                .journalId(journalId)
+                .journalDate(journalDate)
                 .build();
     }
 

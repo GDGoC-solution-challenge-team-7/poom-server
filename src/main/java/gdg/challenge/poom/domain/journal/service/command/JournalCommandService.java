@@ -81,7 +81,8 @@ public class JournalCommandService {
                 // 상대방의 공유 일기 알림 여부가 true인 경우 알림 전송
                 if (alarmSetting.isSharedJournalEnabled()){
                     AlarmRequestDTO.SendAlarm sendAlarm = AlarmConverter.toSendAlarm(
-                            AlarmType.SHARED_JOURNAL, "오늘 어떤 하루를 보냈는지 확인해 보세요.", "\uD83D\uDC8C 배우자의 일기가 도착했어요", member.getCharacterType(), "\uD83D\uDC8C 배우자의 일기가 도착했어요", journal.getCreatedAt());
+                            AlarmType.SHARED_JOURNAL, "오늘 어떤 하루를 보냈는지 확인해 보세요.", "\uD83D\uDC8C 배우자의 일기가 도착했어요", member.getCharacterType(), "\uD83D\uDC8C 배우자의 일기가 도착했어요", journal.getCreatedAt(),
+                            journal.getId(), journal.getJournalDate());
                     alarmCommandService.send(partner.getId(), sendAlarm);
                 }
             } catch (Exception e) {

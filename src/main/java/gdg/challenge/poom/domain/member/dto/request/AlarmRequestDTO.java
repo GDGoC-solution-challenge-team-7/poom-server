@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -26,7 +27,9 @@ public record AlarmRequestDTO (){
             @NotBlank
             String alarmListVerContent,
             @NotNull
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            Long journalId,
+            LocalDate journalDate
     ) {
 
     }
