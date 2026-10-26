@@ -29,6 +29,7 @@ import gdg.challenge.poom.global.error.exception.handler.CoupleException;
 import gdg.challenge.poom.global.error.exception.handler.JournalException;
 import gdg.challenge.poom.global.error.exception.handler.MemberException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -37,6 +38,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -72,14 +74,19 @@ public class JournalCommandService {
 
         Optional<Couple> coupleOptional = coupleRepository.getCoupleByMemberId(memberId);
         if (coupleOptional.isPresent()) {       // 부부 연결 확인
-            Member partner = coupleOptional.get().getPartnerOf(memberId);
-            AlarmSetting alarmSetting = alarmSettingRepository.findByMemberId(partner.getId())
-                    .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_SETTING_NOT_FOUND));
-            // 상대방의 공유 일기 알림 여부가 true인 경우 알림 전송
-            if (alarmSetting.isSharedJournalEnabled()){
-                AlarmRequestDTO.SendAlarm sendAlarm = AlarmConverter.toSendAlarm(
-                        AlarmType.SHARED_JOURNAL, "오늘 어떤 하루를 보냈는지 확인해 보세요.", "\uD83D\uDC8C 배우자의 일기가 도착했어요", member.getCharacterType(), "\uD83D\uDC8C 배우자의 일기가 도착했어요", journal.getCreatedAt());
-                alarmCommandService.send(partner.getId(), sendAlarm);
+            try {
+                Member partner = coupleOptional.get().getPartnerOf(memberId);
+                AlarmSetting alarmSetting = alarmSettingRepository.findByMemberId(partner.getId())
+                        .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_SETTING_NOT_FOUND));
+                // 상대방의 공유 일기 알림 여부가 true인 경우 알림 전송
+                if (alarmSetting.isSharedJournalEnabled()){
+                    AlarmRequestDTO.SendAlarm sendAlarm = AlarmConverter.toSendAlarm(
+                            AlarmType.SHARED_JOURNAL, "오늘 어떤 하루를 보냈는지 확인해 보세요.", "\uD83D\uDC8C 배우자의 일기가 도착했어요", member.getCharacterType(), "\uD83D\uDC8C 배우자의 일기가 도착했어요", journal.getCreatedAt());
+                    alarmCommandService.send(partner.getId(), sendAlarm);
+                }
+            } catch (Exception e) {
+                // 알림 전송 실패가 일기 작성 자체를 실패시키지 않도록 로그만 남김
+                log.error("공유 일기 알림 전송 실패 memberId={}", memberId, e);
             }
         }
         return JournalConverter.toCreatedJournal(journal.getJournalDate(), journal.getJournalEmotion(), journal.getVisibility());
