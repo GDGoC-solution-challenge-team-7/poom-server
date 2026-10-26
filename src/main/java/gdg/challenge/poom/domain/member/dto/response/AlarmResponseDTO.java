@@ -4,6 +4,7 @@ import gdg.challenge.poom.domain.chat.entity.enums.CharacterType;
 import gdg.challenge.poom.domain.member.entity.enums.AlarmType;
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -21,7 +22,9 @@ public record AlarmResponseDTO() {
             String description,
             CharacterType characterType,
             String alarmListVerContent,
-            String timeAgo
+            String timeAgo,
+            Long journalId,
+            LocalDate journalDate
     ){}
 
     @Builder

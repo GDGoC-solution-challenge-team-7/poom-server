@@ -52,6 +52,25 @@ public class CoupleCommandService {
         return CoupleConverter.toCreatedCouple(saved);
     }
 
+    // 코드 입력 전, 상대방 정보 미리 확인 (Couple 생성/상태 변경 없음)
+    @Transactional(readOnly = true)
+    public CoupleResponseDTO.PartnerPreview previewCouple(Long memberId, CoupleRequestDTO.CoupleCodePreview request) {
+        // codeOwner: 연결 코드 주인
+        Member codeOwner = memberRepository.findByCoupleCode(request.code())
+                .orElseThrow(() -> new CoupleException(CoupleErrorCode.MEMBER_NOT_FOUND_BY_CODE));
+
+        // 자신의 코드는 아닌지 확인
+        if (codeOwner.getId().equals(memberId)) {
+            throw new CoupleException(CoupleErrorCode.SAME_MEMBER_CONNECTION_NOT_ALLOWED);
+        }
+
+        // 두 사람 모두 연결 가능한 상태인지 확인
+        validateCoupleConnect(memberId);
+        validateCoupleConnect(codeOwner.getId());
+
+        return CoupleConverter.toPartnerPreview(codeOwner);
+    }
+
     // 부부 연결 복구
     public void rejoinCouple(Long memberId) {
         Couple couple = coupleRepository.getCoupleByMemberId(memberId)

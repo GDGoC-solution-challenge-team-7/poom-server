@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -36,6 +37,7 @@ public class AlarmCommandService {
     private final FCMAlarmSender fcmAlarmSender;
     private static final int BATCH_SIZE = 500;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(Long memberId, AlarmRequestDTO.SendAlarm request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -115,7 +117,7 @@ public class AlarmCommandService {
 
     private void dispatchJournal(LocalDateTime now) {
         List<AlarmSetting> alarmSettingList =
-                alarmSettingRepository.findDueChat(now, PageRequest.of(0, BATCH_SIZE));
+                alarmSettingRepository.findDueJournal(now, PageRequest.of(0, BATCH_SIZE));
 
         for(AlarmSetting alarmSetting : alarmSettingList){
             try {

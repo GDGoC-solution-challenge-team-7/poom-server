@@ -29,4 +29,9 @@ public record CoupleResponseDTO() {
             Long memberId,
             Long partnerId
     ){}
+
+    @Builder
+    public record PartnerPreview(
+            String partnerName
+    ){}
 }

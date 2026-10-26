@@ -38,4 +38,10 @@ public class CoupleConverter {
                 .partnerId(partnerId)
                 .build();
     }
+
+    public static CoupleResponseDTO.PartnerPreview toPartnerPreview(Member partner){
+        return CoupleResponseDTO.PartnerPreview.builder()
+                .partnerName(partner.getName())
+                .build();
+    }
 }

@@ -16,8 +16,7 @@ public interface AlarmSettingRepository extends JpaRepository<AlarmSetting, Long
     @Query("""
         select a from AlarmSetting a
         join fetch a.member
-        where a.allEnabled = true
-          and a.chatEnabled = true
+        where a.chatEnabled = true
           and a.chatNextSendAt <= :now
         order by a.chatNextSendAt
     """)
@@ -26,8 +25,7 @@ public interface AlarmSettingRepository extends JpaRepository<AlarmSetting, Long
     @Query("""
         select a from AlarmSetting a
         join fetch a.member
-        where a.allEnabled = true
-          and a.journalReminderEnabled = true
+        where a.journalReminderEnabled = true
           and a.journalNextSendAt <= :now
         order by a.journalNextSendAt
     """)
