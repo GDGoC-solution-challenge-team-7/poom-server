@@ -19,6 +19,16 @@ public class CoupleController {
 
     private final CoupleCommandService coupleCommandService;
 
+    @Operation(summary = "부부 연결 전 상대방 미리 확인", description = "연결 코드로 상대방 이름만 조회하는 API, Couple을 생성하거나 연결 상태를 변경하지 않음")
+    @PostMapping("/invitations/preview")
+    public ApiResponse<CoupleResponseDTO.PartnerPreview> preview(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestBody CoupleRequestDTO.CoupleCodePreview request
+    ){
+        CoupleResponseDTO.PartnerPreview partnerPreview = coupleCommandService.previewCouple(customUserDetails.getMemberId(), request);
+        return ApiResponse.onSuccess(partnerPreview);
+    }
+
     @Operation(summary = "코드 입력 후 부부 연결", description = "코드 입력을 통해 부부 연결하는 API")
     @PostMapping("/invitations/join")
     public ApiResponse<CoupleResponseDTO.CreatedCouple> join(
