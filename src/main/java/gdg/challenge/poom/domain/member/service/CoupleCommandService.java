@@ -76,8 +76,8 @@ public class CoupleCommandService {
         Couple couple = coupleRepository.getCoupleByMemberId(memberId)
                 .orElseThrow(() -> new CoupleException(CoupleErrorCode.COUPLE_NOT_FOUND_BY_MEMBER));
         Member partner = couple.getPartnerOf(memberId);
-        journalRepository.restoreVisibility(List.of(memberId, partner.getId()));
         couple.restore();
+        journalRepository.restoreVisibility(List.of(memberId, partner.getId()));
     }
 
     // 부부 연결 해제 - 유예 시간 30일, 30일 후 영구 삭제
