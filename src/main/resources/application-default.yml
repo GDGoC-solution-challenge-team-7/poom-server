@@ -68,3 +68,10 @@ cors:
     - PUT
     - PATCH
     - DELETE
+
+# 딥링크(Android App Link) 검증용. 실제 패키지명/서명 인증서 지문으로 교체 필요
+app-link:
+  android:
+    package-name: ${ANDROID_PACKAGE_NAME:}
+    sha256-cert-fingerprints:
+      - ${ANDROID_SHA256_CERT_FINGERPRINT:}
