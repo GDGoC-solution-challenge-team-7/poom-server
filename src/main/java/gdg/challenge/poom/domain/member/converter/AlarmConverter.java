@@ -19,6 +19,7 @@ public class AlarmConverter {
     public static AlarmResponseDTO.AlarmSetting toAlarmSetting(AlarmSetting alarmSetting, String deviceToken){
         return AlarmResponseDTO.AlarmSetting.builder()
                 .allEnabled(alarmSetting.isAllEnabled())
+                .chatEnabled(alarmSetting.isChatEnabled())
                 .chatAlarmTime(alarmSetting.getChatAlarmTime())
                 .sharedJournalEnabled(alarmSetting.isSharedJournalEnabled())
                 .journalReminderEnabled(alarmSetting.isJournalReminderEnabled())
