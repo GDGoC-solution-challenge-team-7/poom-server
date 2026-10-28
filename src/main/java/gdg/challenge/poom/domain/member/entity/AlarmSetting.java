@@ -87,9 +87,7 @@ public class AlarmSetting extends BaseEntity {
 
         this.journalReminderTime = request.journalReminderTime();
 
-        if (this.chatEnabled && this.sharedJournalEnabled && this.journalReminderEnabled) {
-            this.allEnabled = true;
-        }
+        this.allEnabled = this.chatEnabled && this.sharedJournalEnabled && this.journalReminderEnabled;
     }
 
     // ---------- 스케줄 계산 ----------
