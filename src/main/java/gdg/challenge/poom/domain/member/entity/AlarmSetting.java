@@ -85,16 +85,11 @@ public class AlarmSetting extends BaseEntity {
             this.journalNextSendAt = firstFireAt(this.journalReminderTime, now);
         }
 
-
         this.journalReminderTime = request.journalReminderTime();
-        syncAllEnabled();
-    }
 
-    // 개별 설정 변경 시 allEnabled 재계산 (발송 여부 판단에는 사용되지 않는 표시용 값)
-    private void syncAllEnabled() {
-        this.allEnabled = this.chatEnabled
-                && this.sharedJournalEnabled
-                && this.journalReminderEnabled;
+        if (this.chatEnabled && this.sharedJournalEnabled && this.journalReminderEnabled) {
+            this.allEnabled = true;
+        }
     }
 
     // ---------- 스케줄 계산 ----------
