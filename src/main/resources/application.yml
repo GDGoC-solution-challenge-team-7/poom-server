@@ -103,5 +103,4 @@ kakao:
 app-link:
   android:
     package-name: ${ANDROID_PACKAGE_NAME:}
-    sha256-cert-fingerprints:
-      - ${ANDROID_SHA256_CERT_FINGERPRINT:}
+    sha256-cert-fingerprints: ${ANDROID_SHA256_CERT_FINGERPRINT:}
